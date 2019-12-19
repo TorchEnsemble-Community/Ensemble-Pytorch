@@ -2,7 +2,7 @@ import sys
 sys.path.append('../')
 import torch
 from model.lenet5 import LeNet5
-from ensemble.averaging import Averaging
+from ensemble.votingclassifier import VotingClassifier
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 
@@ -28,7 +28,6 @@ if __name__ == "__main__":
     
     ensemble_args = {"output_dim": 10,
                      "n_estimators": 10,
-                     "objective": "classification",
                      "cuda": True,
                      "epochs": 100,
                      "log_interval": 100,
@@ -37,6 +36,6 @@ if __name__ == "__main__":
     
     learner_args = {}
     
-    model = Averaging(ensemble_args, LeNet5, learner_args)
+    model = VotingClassifier(ensemble_args, LeNet5, learner_args)
     model.fit(train_loader)
     model.evaluate(test_loader)
