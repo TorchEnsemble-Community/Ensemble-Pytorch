@@ -1,9 +1,9 @@
 ## Ensemble-Pytorch
-Implementation of ensemble methods using Pytorch. Some parallel ensemble methods can be accelerated by exploiting the differentiable property of base learners.
+Implementation of scikit-learn like ensemble methods using Pytorch.
 
 ### Supported methods
-* **VotingClassifier**
-* **BaggingClassifier**
+* **VotingClassifier**: [Completed]
+* **BaggingClassifier**: [Completed]
 * **GradientBoostingClassifier**
 * **StackingClassifier**
 * **VotingRegressor**

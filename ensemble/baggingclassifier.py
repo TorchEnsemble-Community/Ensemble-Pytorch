@@ -4,7 +4,7 @@ import torch.nn.functional as F
 from . basemodule import BaseModule
 
 
-class VotingClassifier(BaseModule):
+class BaggingClassifier(BaseModule):
     
     def forward(self, X):
         batch_size = X.size()[0]
@@ -21,19 +21,28 @@ class VotingClassifier(BaseModule):
             for batch_idx, (X_train, y_train) in enumerate(train_loader):
                 batch_size = X_train.size()[0]
                 X_train, y_train = X_train.to(self.device), y_train.to(self.device)
-                output = self.forward(X_train)
-                loss = criterion(output, y_train)
-        
+                loss = torch.tensor(0.).to(self.device)
+                
+                # In bagging, each base learner is fitted on one sampled batch of data
+                for learner in self.learners:
+                    sampled_mask = torch.randint(high=batch_size, size=(int(batch_size*0.632),), dtype=torch.int64)
+                    sampled_X_train = X_train[sampled_mask]
+                    sampled_y_train = y_train[sampled_mask]
+                    sampled_output = learner(sampled_X_train)
+                    loss += criterion(sampled_output, sampled_y_train)
+                    
                 self.optimizer.zero_grad()
                 loss.backward()
                 self.optimizer.step()
                 
                 # Print training status
                 if batch_idx % self.log_interval == 0:
-                    y_pred = F.softmax(output, dim=1).data.max(1)[1]
-                    correct = y_pred.eq(y_train.view(-1).data).sum()
-                    print("Epoch: {:d} | Batch: {:03d} | Loss: {:.5f} | Correct: {:d}/{:d}".format(
-                        epoch+1, batch_idx+1, loss, correct, batch_size))
+                    with torch.no_grad():
+                        output = F.softmax(self.forward(X_train), dim=1)
+                        y_pred = output.data.max(1)[1]
+                        correct = y_pred.eq(y_train.view(-1).data).sum()
+                        print("Epoch: {:d} | Batch: {:03d} | Loss: {:.5f} | Correct: {:d}/{:d}".format(
+                            epoch+1, batch_idx+1, loss, correct, batch_size))
     
     def evaluate(self, test_loader):
         self.eval()
