@@ -4,7 +4,7 @@ Implementation of scikit-learn like ensemble methods using Pytorch.
 ### Supported methods
 * **VotingClassifier**: [Completed]
 * **BaggingClassifier**: [Completed]
-* **GradientBoostingClassifier**
+* **GradientBoostingClassifier**: [Completed]
 * **StackingClassifier**
 * **VotingRegressor**
 * **BaggingRegressor**
