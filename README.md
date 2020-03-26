@@ -1,36 +1,49 @@
 ## Ensemble-Pytorch
 Implementation of scikit-learn like ensemble methods using Pytorch.
 
-### Supported methods
+### Methods
 * **VotingClassifier**: [Completed]
 * **BaggingClassifier**: [Completed]
 * **GradientBoostingClassifier**: [Completed]
 * **StackingClassifier**
-* **VotingRegressor**
+<!-- * **VotingRegressor**
 * **BaggingRegressor**
 * **GradientBoostingRegressor**
-* **StackingRegressor**
+* **StackingRegressor** -->
 
 ### How to use
 ```python
-''' Please see examples in ./script for detailed introduction '''
+''' 
+  Please see examples in ./script for details 
+'''
 
-# Import base learner class and ensmeble method class
+# Base learner, ensmeble method
 from base_learner_module import base_learner
 from ensemble.method_module import ensemble_method
 
-# Define arguments for ensemble method (e.g., n_estimator) and base learner, separately
+# Load train/test loader
+train_loader = DataLoader(...)
+test_loader = DataLoader(...)
+
+# Arguments for ensemble method (e.g., n_estimator) and base learner
 ensemble_args = {}
 base_learner_args = {}
 
-# Initialize model
-model = VotingClassifier(ensemble_args, base_learner, base_learner_args)
-
-# Training and Evaluating
+# Train/Evaluate
+model = ensemble_method(ensemble_args, base_learner, base_learner_args)
 model.fit(train_loader)
 model.evaluate(test_loader)
 ```
 
-### Experiments
+### Experiment
+* The table below presents the performance of different ensemble methods on CIFAR-10 dataset
+* Each of them uses 10 modern version of LeNet-5 (i.e., with RELU activation, Dropout) as base learners
+* Results can be reproduced by running ``./scripts/cifar_cnn_demo.py``
 
-### Package dependency
+| Model Name | Testing Accuracy | Improvement in % |
+| ------ | ------ | ------ |
+| **Single LeNet-5 (Baseline)** | 72.89% | - |
+| **VotingClassifier** | 78.25% | + 5.36% |
+| **BaggingClassifier** | 77.32% | + 4.43% |
+| **GradientBoostingClassifier** | TBA | TBA |
+| **StackingClassifier** | TBA | TBA |

@@ -7,9 +7,9 @@ class LeNet5(nn.Module):
     def __init__(self, args):
         super(LeNet5, self).__init__()
         self.args = args
-        self.conv1 = nn.Conv2d(1, 6, 5, padding=2)
+        self.conv1 = nn.Conv2d(3, 6, 5, padding=2)
         self.conv2 = nn.Conv2d(6, 16, 5)
-        self.fc1 = nn.Linear(400, 120)
+        self.fc1 = nn.Linear(576, 120)
         self.fc2 = nn.Linear(120, 84)
         self.fc3 = nn.Linear(84, self.args["output_dim"])
            
