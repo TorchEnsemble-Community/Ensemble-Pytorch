@@ -34,5 +34,4 @@ class BaseModule(nn.Module):
         return self.__repr__()
     
     def predict(self, X):
-        self.eval()
         return self.forward(X)

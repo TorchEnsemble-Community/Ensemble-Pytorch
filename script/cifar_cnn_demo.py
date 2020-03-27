@@ -35,7 +35,7 @@ if __name__ == "__main__":
     ensemble_args = {"output_dim": 10,
                      "n_estimators": 10,
                      "cuda": True,
-                     "epochs": 1,
+                     "epochs": 100,
                      "log_interval": 100,
                      "lr": 1e-3,
                      "weight_decay": 5e-4,

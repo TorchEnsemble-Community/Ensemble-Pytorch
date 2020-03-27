@@ -42,8 +42,8 @@ model.evaluate(test_loader)
 
 | Model Name | Testing Accuracy | Improvement in % |
 | ------ | ------ | ------ |
-| **Single LeNet-5 (Baseline)** | 72.89% | - |
-| **VotingClassifier** | 78.25% | + 5.36% |
-| **BaggingClassifier** | 77.32% | + 4.43% |
-| **GradientBoostingClassifier** | TBA | TBA |
-| **StackingClassifier** | TBA | TBA |
+| **Single LeNet-5 (Baseline)** | 72.89 % | - |
+| **VotingClassifier (10)** | 78.25 % | + 5.36 % |
+| **BaggingClassifier (10)** | 77.32 % | + 4.43 % |
+| **GradientBoostingClassifier (10)** | 80.96 % | + 8.07 % |
+| **StackingClassifier (10)** | TBA | TBA |
