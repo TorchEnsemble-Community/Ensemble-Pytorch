@@ -40,10 +40,11 @@ model.evaluate(test_loader)
 * Each of them uses 10 modern version of LeNet-5 (i.e., with RELU activation, Dropout) as base learners
 * Results can be reproduced by running ``./scripts/cifar_cnn_demo.py``
 
-| Model Name | Testing Accuracy | Improvement in % |
-| ------ | ------ | ------ |
-| **Single LeNet-5 (Baseline)** | 72.89 % | - |
-| **VotingClassifier (10)** | 78.25 % | + 5.36 % |
-| **BaggingClassifier (10)** | 77.32 % | + 4.43 % |
-| **GradientBoostingClassifier (10)** | 80.96 % | + 8.07 % |
-| **StackingClassifier (10)** | TBA | TBA |
+| Model Name | Params (MB) | Testing Acc (%) | Improvement (%) |
+| ------ | ------ | ------  | ------ |
+| **Single LeNet-5 (Baseline)** | 0.07 | 72.89 | - |
+| **Single AlexNet** | 2.47 | 77.22 | + 4.33 |
+| **VotingClassifier (10)** | 3.17 | 78.25 | + 5.36 |
+| **BaggingClassifier (10)** | 3.17 | 77.32 | + 4.43 |
+| **GradientBoostingClassifier (10)** | 3.17 | 80.96 | + 8.07 |
+| **StackingClassifier (10)** | TBA | TBA | TBA |
