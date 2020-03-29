@@ -5,7 +5,6 @@ from model.lenet5 import LeNet5
 from ensemble.votingclassifier import VotingClassifier
 from ensemble.baggingclassifier import BaggingClassifier
 from ensemble.gradientboostingclassifier import GradientBoostingClassifier
-from torchsummary import summary
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 
@@ -46,7 +45,5 @@ if __name__ == "__main__":
     
     model = GradientBoostingClassifier(ensemble_args, LeNet5, learner_args)
     
-    summary(model, (3, 32, 32))
-    
-    # model.fit(train_loader)
-    # model.evaluate(test_loader)
+    model.fit(train_loader)
+    model.evaluate(test_loader)
