@@ -1,15 +1,11 @@
 ## Ensemble-Pytorch
-Implementation of scikit-learn like ensemble methods using Pytorch.
+Implementation of scikit-learn like ensemble methods in Pytorch.
 
 ### Methods
 * **VotingClassifier**: [Completed]
 * **BaggingClassifier**: [Completed]
 * **GradientBoostingClassifier**: [Completed]
-* **StackingClassifier**
-<!-- * **VotingRegressor**
-* **BaggingRegressor**
-* **GradientBoostingRegressor**
-* **StackingRegressor** -->
+* **DeepStackingClassifier** [3]
 
 ### How to use
 ```python
@@ -37,7 +33,7 @@ model.evaluate(test_loader)
 
 ### Experiment
 * The table below presents the performance of different ensemble methods on CIFAR-10 dataset
-* Each of them uses 10 modern version of LeNet-5 (i.e., with RELU activation, Dropout) as base learners
+* Each of them uses 10 LeNet-5 model (with RELU activation and Dropout) as base learners
 * Results can be reproduced by running ``./scripts/cifar_cnn_demo.py``
 
 | Model Name | Params (MB) | Testing Acc (%) | Improvement (%) |
@@ -47,4 +43,9 @@ model.evaluate(test_loader)
 | **VotingClassifier (10)** | 3.17 | 78.25 | + 5.36 |
 | **BaggingClassifier (10)** | 3.17 | 77.32 | + 4.43 |
 | **GradientBoostingClassifier (10)** | 3.17 | 80.96 | + 8.07 |
-| **StackingClassifier (10)** | TBA | TBA | TBA |
+| **DeepStackingClassifier (10)** | TBA | TBA | TBA |
+
+### Reference
+1. Zhou, Zhi-Hua. "Ensemble methods: foundations and algorithms." CRC press (2012).
+2. Friedman, Jerome H. "Greedy function approximation: a gradient boosting machine." Annals of statistics (2001): 1189-1232.
+3. Deng Li, Dong Yu, and John Platt. "Scalable stacking and learning for building deep architectures." IEEE International conference on acoustics, speech and signal processing (2012).

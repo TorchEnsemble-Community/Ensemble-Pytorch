@@ -15,6 +15,7 @@ class GradientBoostingClassifier(BaseModule):
         self.output_dim = args["output_dim"]
         self.log_interval = args["log_interval"]
         self.n_estimators = args["n_estimators"]
+        self.shrinkage_rate = args["shrinkage_rate"]
         self.device = torch.device("cuda" if args["cuda"] else "cpu")
         
         # Initialize base estimators
@@ -26,12 +27,12 @@ class GradientBoostingClassifier(BaseModule):
         batch_size = X.size()[0]
         y_pred = torch.zeros(batch_size, self.output_dim).to(self.device)
         for learner in self.learners:
-            y_pred += self.args["shrinkage_rate"] * learner(X)
+            y_pred += self.shrinkage_rate * learner(X)
         return y_pred
     
     def _onehot_coding(self, y):
         y = y.view(-1)
-        y_onehot = torch.FloatTensor(y.size()[0], self.args["output_dim"]).to(self.device)
+        y_onehot = torch.FloatTensor(y.size()[0], self.output_dim).to(self.device)
         y_onehot.data.zero_()
         y_onehot.scatter_(1, y.view(-1, 1), 1)
         return y_onehot
@@ -44,22 +45,21 @@ class GradientBoostingClassifier(BaseModule):
             return y_onehot - F.softmax(output, dim=1)
         else:
             for idx in range(learner_idx):
-                output += self.args["shrinkage_rate"] * self.learners[idx](X)
+                output += self.shrinkage_rate * self.learners[idx](X)
             return y_onehot - F.softmax(output, dim=1)
     
     def fit(self, train_loader):
         self.train()
         criterion = nn.MSELoss(reduction="sum")
         
-        # In Gradient Boosting, base learners are fitted sequentially
+        # Base learners are fitted sequentially
         for learner_idx, learner in enumerate(self.learners):
             
-            # Initialize independent optimizer for each base learner to avoid unexpected dependencies
+            # Independent optimizer for each base learner to avoid unexpected dependencies
             learner_optimizer = torch.optim.Adam(learner.parameters(),
                                                  lr=self.args["lr"],
                                                  weight_decay=self.args["weight_decay"])
             
-            # Fit each base learner in Gradient Boosting
             for epoch in range(self.epochs):
                 for batch_idx, (X_train, y_train) in enumerate(train_loader):
                     X_train, y_train = X_train.to(self.device), y_train.to(self.device)
