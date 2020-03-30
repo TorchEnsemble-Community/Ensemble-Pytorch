@@ -37,7 +37,7 @@ class GradientBoostingClassifier(BaseModule):
         y_onehot.scatter_(1, y.view(-1, 1), 1)
         return y_onehot
     
-    """ Compute pseudo residual for classification in Gradient Boosting """
+    # TODO: Store the output of fitted base learners to avoid repeated data forwarding
     def _pseudo_residual(self, X, y, learner_idx):
         y_onehot = self._onehot_coding(y)
         output = torch.zeros_like(y_onehot).to(self.device)
@@ -56,9 +56,7 @@ class GradientBoostingClassifier(BaseModule):
         for learner_idx, learner in enumerate(self.learners):
             
             # Independent optimizer for each base learner to avoid unexpected dependencies
-            learner_optimizer = torch.optim.Adam(learner.parameters(),
-                                                 lr=self.args["lr"],
-                                                 weight_decay=self.args["weight_decay"])
+            learner_optimizer = torch.optim.Adam(learner.parameters(), lr=self.args["lr"], weight_decay=self.args["weight_decay"])
             
             for epoch in range(self.epochs):
                 for batch_idx, (X_train, y_train) in enumerate(train_loader):
