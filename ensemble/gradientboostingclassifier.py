@@ -56,7 +56,9 @@ class GradientBoostingClassifier(BaseModule):
         for learner_idx, learner in enumerate(self.learners):
             
             # Independent optimizer for each base learner to avoid unexpected dependencies
-            learner_optimizer = torch.optim.Adam(learner.parameters(), lr=self.args["lr"], weight_decay=self.args["weight_decay"])
+            learner_optimizer = torch.optim.Adam(learner.parameters(),
+                                                 lr=self.args["lr"],
+                                                 weight_decay=self.args["weight_decay"])
             
             for epoch in range(self.epochs):
                 for batch_idx, (X_train, y_train) in enumerate(train_loader):

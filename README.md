@@ -5,7 +5,6 @@ Implementation of scikit-learn like ensemble methods in Pytorch.
 * **VotingClassifier**: [Completed]
 * **BaggingClassifier**: [Completed]
 * **GradientBoostingClassifier**: [Completed]
-* **DeepStackingClassifier** [3]
 
 ### How to use
 ```python
@@ -43,9 +42,7 @@ model.evaluate(test_loader)
 | **VotingClassifier (10)** | 3.17 | 78.25 | + 5.36 |
 | **BaggingClassifier (10)** | 3.17 | 77.32 | + 4.43 |
 | **GradientBoostingClassifier (10)** | 3.17 | 80.96 | + 8.07 |
-| **DeepStackingClassifier (10)** | TBA | TBA | TBA |
 
 ### Reference
 1. Zhou, Zhi-Hua. "Ensemble methods: foundations and algorithms." CRC press (2012).
 2. Friedman, Jerome H. "Greedy function approximation: a gradient boosting machine." Annals of statistics (2001): 1189-1232.
-3. Deng Li, Dong Yu, and John Platt. "Scalable stacking and learning for building deep architectures." IEEE International conference on acoustics, speech and signal processing (2012).
