@@ -40,7 +40,7 @@ model.evaluate(test_loader)
 | **Single LeNet-5 (Baseline)** | 0.07 | 72.89 | - |
 | **Single AlexNet** | 2.47 | 77.22 | + 4.33 |
 | **VotingClassifier (10)** | 3.17 | 78.25 | + 5.36 |
-| **BaggingClassifier (10)** | 3.17 | 77.32 | + 4.43 |
+| **BaggingClassifier (10)** | 3.17 | 77.86 | + 4.97 |
 | **GradientBoostingClassifier (10)** | 3.17 | 80.96 | + 8.07 |
 
 ### Reference

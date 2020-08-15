@@ -25,7 +25,7 @@ class BaggingClassifier(BaseModule):
                 
                 # In bagging, each base learner is fitted on one sampled batch of data
                 for learner in self.learners:
-                    sampled_mask = torch.randint(high=batch_size, size=(int(batch_size*0.632),), dtype=torch.int64)
+                    sampled_mask = torch.randint(high=batch_size, size=(int(batch_size),), dtype=torch.int64)
                     sampled_X_train = X_train[sampled_mask]
                     sampled_y_train = y_train[sampled_mask]
                     sampled_output = learner(sampled_X_train)
