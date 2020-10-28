@@ -25,7 +25,7 @@ def display_records(records):
 if __name__ == '__main__':
     
     # Hyper-parameters
-    n_estimators = 1
+    n_estimators = 10
     output_dim = 10
     lr = 1e-3
     weight_decay = 5e-4
