@@ -1,48 +1,75 @@
-## Ensemble-Pytorch
+# Ensemble-Pytorch
 Implementation of scikit-learn like ensemble methods in Pytorch.
 
-### Methods
-* **VotingClassifier**: [Completed]
-* **BaggingClassifier**: [Completed]
-* **GradientBoostingClassifier**: [Completed]
+## Method list
+* **FusionClassifier** / **FusionRegressor**
+* **VotingClassifier** / **VotingRegressor**
+* **BaggingClassifier** / **BaggingRegressor**
+* **GradientBoostingClassifier** / **GradientBoostingRegressor**
 
-### How to use
+## Minimal example on how to use
 ```python
-''' 
-  Please see examples in ./script for details 
-'''
+"""
+  - Please see scripts in `script` for details on how to use
+  - Please see implementations in `ensemble` for details on ensemble methods
+"""
 
-# Base learner, ensmeble method
-from base_learner_module import base_learner
-from ensemble.method_module import ensemble_method
+import base_estimator                               # import base estimator
+from ensemble.method_module import ensemble_method  # import ensemble method
 
-# Load train/test loader
+model = ensemble_method(estimator=base_estimator,   # type of base estimator
+                        n_estimators=10,            # number of base estimators
+                        output_dim=output_dim,      # e.g., the number of classes for classification
+                        lr=learning_rate,           # learning rate of the optimizer
+                        weight_decay=weight_decay,  # weight decay of model parameters
+                        epochs=epochs)              # number of training epochs
+
+# Load data
 train_loader = DataLoader(...)
 test_loader = DataLoader(...)
 
-# Arguments for ensemble method (e.g., n_estimator) and base learner
-ensemble_args = {}
-base_learner_args = {}
-
-# Train/Evaluate
-model = ensemble_method(ensemble_args, base_learner, base_learner_args)
+# Train
 model.fit(train_loader)
-model.evaluate(test_loader)
-```
 
-### Experiment
-* The table below presents the performance of different ensemble methods on CIFAR-10 dataset
-* Each of them uses 10 LeNet-5 model (with RELU activation and Dropout) as base learners
-* Results can be reproduced by running ``./scripts/cifar_cnn_demo.py``
+# Evaluate
+model.predict(test_loader)
+```
+* * *
+## Experiment results
+
+* **Classification on CIFAR-10**
+  * The table below presents the classification accuracy of different ensemble classifiers on the testing data of **CIFAR-10**
+  * Each classifier uses **10** LeNet-5 model (with RELU activation and Dropout) as the base estimators
+  * Each base estimator is trained over **100** epochs, with batch size **128**, learning rate **1e-3**, and weight decay **5e-4**
+  * Experiment results can be reproduced by running `./script/classification_cifar10_cnn.py`
 
 | Model Name | Params (MB) | Testing Acc (%) | Improvement (%) |
 | ------ | ------ | ------  | ------ |
-| **Single LeNet-5 (Baseline)** | 0.07 | 72.89 | - |
-| **Single AlexNet** | 2.47 | 77.22 | + 4.33 |
-| **VotingClassifier (10)** | 3.17 | 78.25 | + 5.36 |
-| **BaggingClassifier (10)** | 3.17 | 77.86 | + 4.97 |
-| **GradientBoostingClassifier (10)** | 3.17 | 80.96 | + 8.07 |
+| **Single LeNet-5** | 0.32 | 73.04 | - |
+| **FusionClassifier** | 3.17 | 78.75 | + 5.71 |
+| **VotingClassifier** | 3.17 | 80.08 | + 7.04 |
+| **BaggingClassifier** | 3.17 | 78.75 | + 5.71 |
+| **GradientBoostingClassifier** | 3.17 | 80.82 | + 7.78 |
 
-### Reference
-1. Zhou, Zhi-Hua. "Ensemble methods: foundations and algorithms." CRC press (2012).
-2. Friedman, Jerome H. "Greedy function approximation: a gradient boosting machine." Annals of statistics (2001): 1189-1232.
+* **Regression on YearPredictionMSD**
+  * The table below presents the mean squared error (MSE) of different ensemble regressors on the testing data of **YearPredictionMSD**
+  * Each regressor uses **10** multi-layered perceptron (MLP) model (with RELU activation and Dropout) as the base estimators, and the network architecture is fixed as `Input-128-128-Output`
+  * Each base estimator is trained over **50** epochs, with batch size **256**, learning rate **1e-3**, and weight decay **5e-4**
+  * Experiment results can be reproduced by running `./script/regression_YearPredictionMSD_mlp.py`
+
+| Model Name | Params (MB) | Testing MSE | Improvement |
+| ------ | ------ | ------  | ------ |
+| **Single MLP** | 0.11 | 0.83 | - |
+| **FusionClassifier** | 1.08 | 0.73 | - 0.10 |
+| **VotingClassifier** | 1.08 | 0.69 | - 0.14 |
+| **BaggingClassifier** | 1.08 | 0.70 | - 0.13 |
+| **GradientBoostingClassifier** | 1.08 | 0.71 | - 0.12 |
+
+## Package dependencies
+* pytorch
+* scikit-learn
+* torchvision
+
+## Reference
+* Zhou, Zhi-Hua. "Ensemble methods: foundations and algorithms." CRC press (2012).
+* Friedman, Jerome H. "Greedy function approximation: a gradient boosting machine." Annals of statistics (2001).
