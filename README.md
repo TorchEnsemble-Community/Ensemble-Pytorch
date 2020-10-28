@@ -34,7 +34,7 @@ model.fit(train_loader)
 # Evaluate
 model.predict(test_loader)
 ```
-* * *
+
 ## Experiment results
 
 * **Classification on CIFAR-10**
@@ -60,10 +60,10 @@ model.predict(test_loader)
 | Model Name | Params (MB) | Testing MSE | Improvement |
 | ------ | ------ | ------  | ------ |
 | **Single MLP** | 0.11 | 0.83 | - |
-| **FusionClassifier** | 1.08 | 0.73 | - 0.10 |
-| **VotingClassifier** | 1.08 | 0.69 | - 0.14 |
-| **BaggingClassifier** | 1.08 | 0.70 | - 0.13 |
-| **GradientBoostingClassifier** | 1.08 | 0.71 | - 0.12 |
+| **FusionRegressor** | 1.08 | 0.73 | - 0.10 |
+| **VotingRegressor** | 1.08 | 0.69 | - 0.14 |
+| **BaggingRegressor** | 1.08 | 0.70 | - 0.13 |
+| **GradientBoostingRegressor** | 1.08 | 0.71 | - 0.12 |
 
 ## Package dependencies
 * pytorch
