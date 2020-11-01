@@ -7,18 +7,20 @@ class BaseModule(abc.ABC, nn.Module):
     """
       Base class for ensemble methods.
       
-      Warning: This class cannot be used directly. Use derived classes instead.
+      WARNING: This class cannot be used directly. 
+      Use the derived classes instead.
     """
     
     def __init__(self, 
                  estimator, 
                  n_estimators, 
                  output_dim, 
-                 lr, 
+                 lr,
                  weight_decay, 
                  epochs, 
                  cuda=True, 
-                 log_interval=100):
+                 log_interval=100,
+                 n_jobs=1):
         """
         Parameters
         ----------
@@ -26,31 +28,35 @@ class BaseModule(abc.ABC, nn.Module):
             The base estimator class inherited from `torch.nn.Module`. Examples
             are available in the folder named `model`.
         n_estimators : int
-            The number of base estimators in the ensemble model. With more base 
-            estimators added, the performance of the entire ensemble model is 
-            expected to improve.
+            The number of base estimators in the ensemble model.
         output_dim : int
             The output dimension of the model. For instance, for multi-class
             classification problem with K classes, it is set to `K`. For 
             univariate regression problem, it is set to `1`.
         lr : float
-            The learning rate of the optimizer.
+            The learning rate of the parameter optimizer.
         weight_decay : float
-            The weight decay of model parameters.
+            The weight decay of the parameter optimizer.
         epochs : int
             The number of training epochs.
         cuda : bool, default=True
             When set to `True`, use GPU to train and evaluate the model. When 
-            set to `False`, the model is trained using CPU.
+            set to `False`, the model is trained and evaluated using CPU.
         log_interval : int, default=100
             The number of batches to wait before printing the training status,
-            including information such as current batch, current epoch, current 
+            including information on the current batch, current epoch, current 
             training loss, and many more.
+        n_jobs : int, default=1
+            The number of workers for training the ensemble model. This argument
+            is used for parallel ensemble methods such as voting and bagging.
+            Setting it to an integer larger than `1` enables many base 
+            estimators to be jointly trained. However, training many base 
+            estimators at the same time may run out of the memory.
         
         Attributes
         ----------
-        estimators_ : nn.ModuleList()
-            A list that stores all base estimators.
+        estimators_ : nn.ModuleList
+            A container that stores all base estimators.
         
         """
         super(BaseModule, self).__init__()
@@ -64,6 +70,7 @@ class BaseModule(abc.ABC, nn.Module):
         self.epochs = epochs
         
         self.log_interval = log_interval
+        self.n_jobs = n_jobs
         self.device = torch.device('cuda' if cuda else 'cpu')
         
         # Initialize base estimators
@@ -72,10 +79,9 @@ class BaseModule(abc.ABC, nn.Module):
             self.estimators_.append(
                 estimator(output_dim=output_dim).to(self.device))
         
-        # Initialize a global optimizer
+        # A global optimizer
         self.optimizer = torch.optim.Adam(self.parameters(), 
-                                          lr=lr, 
-                                          weight_decay=weight_decay)
+                                          lr=lr, weight_decay=weight_decay)
     
     def __str__(self):
         msg = '==============================\n'
@@ -100,7 +106,7 @@ class BaseModule(abc.ABC, nn.Module):
             raise ValueError(msg.format(self.n_estimators))
         
         if not self.output_dim > 0:
-            msg = 'The output dimension = {} should not be strictly positive.'
+            msg = 'The output dimension = {} should be strictly positive.'
             raise ValueError(msg.format(self.output_dim))
         
         if not self.lr > 0:
@@ -116,12 +122,12 @@ class BaseModule(abc.ABC, nn.Module):
             msg = ('The number of training epochs = {} should be strictly'
                    ' positive.')
             raise ValueError(msg.format(self.epochs))
-     
+    
     @abc.abstractmethod
     def forward(self, X):
         """ Implementation on the data forwarding in the ensemble model. Notice
-            that the input `X` should be a batch of data instead of a standalone
-            data loader that contains many batches.
+            that the input `X` should be a data batch instead of a standalone
+            data loader that contains all data batches.
         """
     
     @abc.abstractmethod

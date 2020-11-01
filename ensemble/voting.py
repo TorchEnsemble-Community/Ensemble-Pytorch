@@ -4,10 +4,50 @@
   estimators.
 """
 
+import copy
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from joblib import Parallel, delayed
+
 from . _base import BaseModule
+
+
+# TODO: Memory optimization by registering read-only objects into shared memory.
+def _parallel_fit(epoch, estimator_idx, 
+                  estimator, data_loader, criterion, lr, weight_decay, 
+                  device, log_interval):
+    """ Private function used to fit base estimators in parallel.
+    """
+    
+    optimizer = torch.optim.Adam(estimator.parameters(), 
+                                 lr=lr, weight_decay=weight_decay)
+    
+    for batch_idx, (X_train, y_train) in enumerate(data_loader):
+        
+        batch_size = X_train.size()[0]
+        X_train, y_train = (X_train.to(device), 
+                            y_train.to(device))
+        
+        output = estimator(X_train)
+        loss = criterion(output, y_train)
+
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+        
+        # Print training status
+        if batch_idx % log_interval == 0:
+            y_pred = F.softmax(output, dim=1).data.max(1)[1]
+            correct = y_pred.eq(y_train.view(-1).data).sum()
+            
+            msg = ('Estimator: {:03d} | Epoch: {:03d} |' 
+                   ' Batch: {:03d} | Loss: {:.5f} | Correct:'
+                   ' {:d}/{:d}')
+            print(msg.format(estimator_idx, epoch, batch_idx, loss, 
+                             correct, batch_size))
+    
+    return estimator
 
 
 class VotingClassifier(BaseModule):
@@ -16,7 +56,7 @@ class VotingClassifier(BaseModule):
         batch_size = X.size()[0]
         y_pred_proba = torch.zeros(batch_size, self.output_dim).to(self.device)
         
-        # Average over the class distributions predicted from all base estimators
+        # Average over the class distributions from all base estimators.
         for estimator in self.estimators_:
             y_pred_proba += F.softmax(estimator(X), dim=1)
         y_pred_proba /= self.n_estimators
@@ -29,39 +69,19 @@ class VotingClassifier(BaseModule):
         self._validate_parameters()
         criterion = nn.CrossEntropyLoss()
         
-        # TODO: Parallelization
-        for est_idx, estimator in enumerate(self.estimators_):
-            
-            # Initialize an independent optimizer for each base estimator to 
-            # avoid unexpected dependencies.
-            estimator_optimizer = torch.optim.Adam(estimator.parameters(),
-                                                   lr=self.lr,
-                                                   weight_decay=self.weight_decay)
+        # Create a pool of workers for repeated calls to the joblib.Parallel
+        with Parallel(n_jobs=self.n_jobs) as parallel:
             
             for epoch in range(self.epochs):
-                for batch_idx, (X_train, y_train) in enumerate(train_loader):
                 
-                    batch_size = X_train.size()[0]
-                    X_train, y_train = (X_train.to(self.device), 
-                                        y_train.to(self.device))
-                    
-                    output = estimator(X_train)
-                    loss = criterion(output, y_train)
-            
-                    estimator_optimizer.zero_grad()
-                    loss.backward()
-                    estimator_optimizer.step()
-                    
-                    # Print training status
-                    if batch_idx % self.log_interval == 0:
-                        y_pred = F.softmax(output, dim=1).data.max(1)[1]
-                        correct = y_pred.eq(y_train.view(-1).data).sum()
-                        
-                        msg = ('Estimator: {:03d} | Epoch: {:03d} |' 
-                               ' Batch: {:03d} | Loss: {:.5f} | Correct:'
-                               ' {:d}/{:d}')
-                        print(msg.format(est_idx, epoch, batch_idx, loss, 
-                                         correct, batch_size))
+                rets = parallel(delayed(_parallel_fit)(
+                    epoch, idx, estimator, train_loader, criterion, 
+                    self.lr, self.weight_decay, self.device, self.log_interval)
+                    for idx, estimator in enumerate(self.estimators_))
+                
+                # Update the base estimator container
+                for i in range(self.n_estimators):
+                    self.estimators_[i] = copy.deepcopy(rets[i])
     
     def predict(self, test_loader):
         
@@ -98,32 +118,19 @@ class VotingRegressor(BaseModule):
         self._validate_parameters()
         criterion = nn.MSELoss()
         
-        for est_idx, estimator in enumerate(self.estimators_):
-            
-            # Initialize an independent optimizer for each base estimator to 
-            # avoid unexpected dependencies.
-            estimator_optimizer = torch.optim.Adam(estimator.parameters(),
-                                                   lr=self.lr,
-                                                   weight_decay=self.weight_decay)
+        # Create a pool of workers for repeated calls to the joblib.Parallel
+        with Parallel(n_jobs=self.n_jobs) as parallel:
             
             for epoch in range(self.epochs):
-                for batch_idx, (X_train, y_train) in enumerate(train_loader):
-
-                    X_train, y_train = (X_train.to(self.device), 
-                                        y_train.to(self.device))
-                    
-                    output = estimator(X_train)
-                    loss = criterion(output, y_train)
-            
-                    estimator_optimizer.zero_grad()
-                    loss.backward()
-                    estimator_optimizer.step()
-                    
-                    # Print training status
-                    if batch_idx % self.log_interval == 0:
-                        msg = ('Estimator: {:03d} | Epoch: {:03d} |'
-                               ' Batch: {:03d} | Loss: {:.5f}')
-                        print(msg.format(est_idx, epoch, batch_idx, loss))
+                
+                rets = parallel(delayed(_parallel_fit)(
+                    epoch, idx, estimator, train_loader, criterion, 
+                    self.lr, self.weight_decay, self.device, self.log_interval)
+                    for idx, estimator in enumerate(self.estimators_))
+                
+                # Update the base estimator container
+                for i in range(self.n_estimators):
+                    self.estimators_[i] = copy.deepcopy(rets[i])
     
     def predict(self, test_loader):
         
