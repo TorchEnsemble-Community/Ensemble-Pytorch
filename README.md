@@ -7,15 +7,25 @@ Implementation of scikit-learn like ensemble methods in Pytorch.
 * **BaggingClassifier** / **BaggingRegressor**
 * **GradientBoostingClassifier** / **GradientBoostingRegressor**
 
+## Installation
+
+Installing Ensemble-Pytorch package is simple. Just clone this repo and run the setup.
+
+```
+$ git clone https://github.com/AaronX121/Ensemble-Pytorch.git
+$ cd Ensemble-Pytorch
+$ python setup.py install
+```
+
 ## Minimal example on how to use
 ```python
 """
-  - Please see scripts in `script` for details on how to use
-  - Please see implementations in `ensemble` for details on ensemble methods
+  - Please see scripts in `examples` for details on how to use
+  - Please see implementations in `torchensemble` for details on ensemble methods
 """
 
 import base_estimator                               # import base estimator
-from ensemble.method_module import ensemble_method  # import ensemble method
+from torchensemble.method import ensemble_method    # import ensemble method
 
 model = ensemble_method(estimator=base_estimator,   # type of base estimator
                         n_estimators=10,            # number of base estimators
@@ -35,13 +45,13 @@ model.fit(train_loader)
 model.predict(test_loader)
 ```
 
-## Experiment results
+## Benchmarks
 
 * **Classification on CIFAR-10**
   * The table below presents the classification accuracy of different ensemble classifiers on the testing data of **CIFAR-10**
   * Each classifier uses **10** LeNet-5 model (with RELU activation and Dropout) as the base estimators
   * Each base estimator is trained over **100** epochs, with batch size **128**, learning rate **1e-3**, and weight decay **5e-4**
-  * Experiment results can be reproduced by running `./script/classification_cifar10_cnn.py`
+  * Experiment results can be reproduced by running `./examples/classification_cifar10_cnn.py`
 
 | Model Name | Params (MB) | Testing Acc (%) | Improvement (%) |
 | ------ | ------ | ------  | ------ |
@@ -55,7 +65,7 @@ model.predict(test_loader)
   * The table below presents the mean squared error (MSE) of different ensemble regressors on the testing data of **YearPredictionMSD**
   * Each regressor uses **10** multi-layered perceptron (MLP) model (with RELU activation and Dropout) as the base estimators, and the network architecture is fixed as `Input-128-128-Output`
   * Each base estimator is trained over **50** epochs, with batch size **256**, learning rate **1e-3**, and weight decay **5e-4**
-  * Experiment results can be reproduced by running `./script/regression_YearPredictionMSD_mlp.py`
+  * Experiment results can be reproduced by running `./examples/regression_YearPredictionMSD_mlp.py`
 
 | Model Name | Params (MB) | Testing MSE | Improvement |
 | ------ | ------ | ------  | ------ |
@@ -66,10 +76,7 @@ model.predict(test_loader)
 | **GradientBoostingRegressor** | 1.08 | 0.71 | - 0.12 |
 
 ## Package dependencies
+* joblib
 * pytorch
-* scikit-learn
 * torchvision
-
-## Reference
-* Zhou, Zhi-Hua. "Ensemble methods: foundations and algorithms." CRC press (2012).
-* Friedman, Jerome H. "Greedy function approximation: a gradient boosting machine." Annals of statistics (2001).
+* scikit-learn

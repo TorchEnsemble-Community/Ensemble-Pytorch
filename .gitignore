@@ -1,2 +1,6 @@
 *.pyc
 *.swp
+
+build
+dist/
+Ensemble_PyTorch.egg-info

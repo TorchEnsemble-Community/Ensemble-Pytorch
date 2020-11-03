@@ -10,7 +10,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from joblib import Parallel, delayed
 
-from . _base import BaseModule
+from ._base import BaseModule
 
 
 # TODO: Memory optimization by registering read-only objects into shared memory.

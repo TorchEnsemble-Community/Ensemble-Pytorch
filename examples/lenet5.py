@@ -4,14 +4,14 @@ import torch.nn.functional as F
 
 class LeNet5(nn.Module):
     
-    def __init__(self, output_dim=10):
+    def __init__(self):
         super(LeNet5, self).__init__()
         
         self.conv1 = nn.Conv2d(3, 6, 5, padding=2)
         self.conv2 = nn.Conv2d(6, 16, 5)
         self.fc1 = nn.Linear(576, 120)
         self.fc2 = nn.Linear(120, 84)
-        self.fc3 = nn.Linear(84, output_dim)
+        self.fc3 = nn.Linear(84, 10)
     
     def forward(self, X):
         

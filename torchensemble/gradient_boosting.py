@@ -8,7 +8,8 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from . _base import BaseModule
+
+from ._base import BaseModule
 
 
 class GradientBoostingClassifier(BaseModule):

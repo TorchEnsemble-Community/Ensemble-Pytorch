@@ -1,3 +1,5 @@
+""" Example on classification using CIFAR-10. """
+
 import sys
 sys.path.append('../')
 
@@ -6,11 +8,11 @@ import torch
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 
-from model.lenet5 import LeNet5
-from ensemble.fusion import FusionClassifier
-from ensemble.voting import VotingClassifier
-from ensemble.bagging import BaggingClassifier
-from ensemble.gradient_boosting import GradientBoostingClassifier
+from lenet5 import LeNet5
+from torchensemble.fusion import FusionClassifier
+from torchensemble.voting import VotingClassifier
+from torchensemble.bagging import BaggingClassifier
+from torchensemble.gradient_boosting import GradientBoostingClassifier
 
 
 def display_records(records):
@@ -79,11 +81,12 @@ if __name__ == '__main__':
     
     # VotingClassifier
     model = VotingClassifier(estimator=LeNet5,
-                              n_estimators=n_estimators,
-                              output_dim=output_dim,
-                              lr=lr,
-                              weight_decay=weight_decay,
-                              epochs=epochs)
+                             n_estimators=n_estimators,
+                             output_dim=output_dim,
+                             lr=lr,
+                             weight_decay=weight_decay,
+                             epochs=epochs,
+                             n_jobs=1)
     
     tic = time.time()
     model.fit(train_loader)
@@ -125,11 +128,11 @@ if __name__ == '__main__':
     
     # GradientBoostingClassifier
     model = GradientBoostingClassifier(estimator=LeNet5,
-                                        n_estimators=n_estimators,
-                                        output_dim=output_dim,
-                                        lr=lr,
-                                        weight_decay=weight_decay,
-                                        epochs=epochs)
+                                       n_estimators=n_estimators,
+                                       output_dim=output_dim,
+                                       lr=lr,
+                                       weight_decay=weight_decay,
+                                       epochs=epochs)
     
     tic = time.time()
     model.fit(train_loader)
@@ -146,4 +149,5 @@ if __name__ == '__main__':
                     evaluating_time, 
                     testing_acc))
 
+    # Print results on different ensemble methods
     display_records(records)

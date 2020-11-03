@@ -76,8 +76,7 @@ class BaseModule(abc.ABC, nn.Module):
         # Initialize base estimators
         self.estimators_ = nn.ModuleList()
         for _ in range(self.n_estimators):
-            self.estimators_.append(
-                estimator(output_dim=output_dim).to(self.device))
+            self.estimators_.append(estimator().to(self.device))
         
         # A global optimizer
         self.optimizer = torch.optim.Adam(self.parameters(), 

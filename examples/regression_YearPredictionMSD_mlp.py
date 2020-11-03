@@ -1,29 +1,40 @@
+""" Example on univariate regression using YearPredictionMSD. """
+
 import sys
 sys.path.append('../')
 
 import time
 import torch
+import numbers
 from sklearn.preprocessing import scale
 from sklearn.datasets import load_svmlight_file
 from torch.utils.data import TensorDataset, DataLoader
 
-from model.mlp import MLP
-from ensemble.fusion import FusionRegressor
-from ensemble.voting import VotingRegressor
-from ensemble.bagging import BaggingRegressor
-from ensemble.gradient_boosting import GradientBoostingRegressor
+from mlp import MLP
+from torchensemble.fusion import FusionRegressor
+from torchensemble.voting import VotingRegressor
+from torchensemble.bagging import BaggingRegressor
+from torchensemble.gradient_boosting import GradientBoostingRegressor
 
 
 def load_data(batch_size):
-    
+
     # The dataset can be downloaded from: 
     #   https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/regression.html#YearPredictionMSD
     
-    train = load_svmlight_file('../../Dataset/LIBSVM/YearPredictionMSD.bz2')
-    test = load_svmlight_file('../../Dataset/LIBSVM/YearPredictionMSD.t.bz2')
+    if not isinstance(batch_size, numbers.Integral):
+        msg = '`batch_size` should be an integer, but got {} instead.'
+        raise ValueError(msg.format(batch_size))
+        
+    train_path = '../../Dataset/LIBSVM/YearPredictionMSD.bz2'
+    test_path = '../../Dataset/LIBSVM/YearPredictionMSD.t.bz2'
+
+    train = load_svmlight_file(train_path)
+    test = load_svmlight_file(test_path)
 
     X_train, X_test = (torch.FloatTensor(train[0].toarray()), 
                        torch.FloatTensor(test[0].toarray()))
+    
     y_train, y_test = (torch.FloatTensor(scale(train[1]).reshape(-1, 1)), 
                        torch.FloatTensor(scale(test[1]).reshape(-1, 1)))
     
@@ -111,11 +122,11 @@ if __name__ == '__main__':
 
     # BaggingRegressor
     model = BaggingRegressor(estimator=MLP,
-                              n_estimators=n_estimators,
-                              output_dim=output_dim,
-                              lr=lr,
-                              weight_decay=weight_decay,
-                              epochs=epochs)
+                             n_estimators=n_estimators,
+                             output_dim=output_dim,
+                             lr=lr,
+                             weight_decay=weight_decay,
+                             epochs=epochs)
     
     tic = time.time()
     model.fit(train_loader)
@@ -155,4 +166,5 @@ if __name__ == '__main__':
                     evaluating_time, 
                     testing_mse))
 
+    # Print results on different ensemble methods
     display_records(records)

@@ -1,14 +1,15 @@
 """ 
   In fusion-based ensemble methods, the predictions from all base estimators are
-  first aggregated as a fusion output. After then, the training loss is computed
-  based on the fusion output and the ground-truth. Training signals are then
-  back-propagated to all base estimators simultaneously.
+  first aggregated as an average output. After then, the training loss is 
+  computed based on the average output and the ground-truth. The training loss 
+  is then back-propagated to all base estimators simultaneously.
 """
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from . _base import BaseModule
+
+from ._base import BaseModule
 
 
 class FusionClassifier(BaseModule):
@@ -18,7 +19,7 @@ class FusionClassifier(BaseModule):
         y_pred = torch.zeros(batch_size, self.output_dim).to(self.device)
         
         # Notice that the output of `FusionClassifier` is different from that of
-        # `VotingClassifier` in that the normalization of softmax is conducted 
+        # `VotingClassifier` in that the softmax normalization is conducted 
         # **after** taking the average of predictions from all base estimators.
         for estimator in self.estimators_:
             y_pred += estimator(X)
@@ -65,6 +66,7 @@ class FusionClassifier(BaseModule):
             X_test, y_test = X_test.to(self.device), y_test.to(self.device)
             output = F.softmax(self.forward(X_test), dim=1)
             y_pred = output.data.max(1)[1]
+            
             correct += y_pred.eq(y_test.view(-1).data).sum()
         
         accuracy = 100. * float(correct) / len(test_loader.dataset)
@@ -78,7 +80,6 @@ class FusionRegressor(BaseModule):
         batch_size = X.size()[0]
         y_pred = torch.zeros(batch_size, self.output_dim).to(self.device)
         
-        # Average over predictions from all base estimators
         for estimator in self.estimators_:
             y_pred += estimator(X)
         y_pred /= self.n_estimators
