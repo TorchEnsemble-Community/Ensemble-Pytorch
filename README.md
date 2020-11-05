@@ -14,6 +14,7 @@ Installing Ensemble-Pytorch package is simple. Just clone this repo and run the 
 ```
 $ git clone https://github.com/AaronX121/Ensemble-Pytorch.git
 $ cd Ensemble-Pytorch
+$ pip install -r requirements.txt
 $ python setup.py install
 ```
 
