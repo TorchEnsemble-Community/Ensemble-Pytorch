@@ -1,16 +1,14 @@
 """ Example on univariate regression using YearPredictionMSD. """
 
-import sys
-sys.path.append('../')
-
 import time
 import torch
 import numbers
+import torch.nn as nn
+from torch.nn import functional as F
 from sklearn.preprocessing import scale
 from sklearn.datasets import load_svmlight_file
 from torch.utils.data import TensorDataset, DataLoader
 
-from mlp import MLP
 from torchensemble.fusion import FusionRegressor
 from torchensemble.voting import VotingRegressor
 from torchensemble.bagging import BaggingRegressor
@@ -28,7 +26,7 @@ def load_data(batch_size):
         
     train_path = '../../Dataset/LIBSVM/YearPredictionMSD.bz2'
     test_path = '../../Dataset/LIBSVM/YearPredictionMSD.t.bz2'
-
+    
     train = load_svmlight_file(train_path)
     test = load_svmlight_file(test_path)
 
@@ -47,6 +45,7 @@ def load_data(batch_size):
     
     return train_loader, test_loader
 
+
 def display_records(records):
     msg = ('{:<28} | Testing MSE: {:.2f} | Training Time: {:.2f} s |'
            ' Evaluating Time: {:.2f} s')
@@ -54,6 +53,26 @@ def display_records(records):
     print('\n')
     for method, training_time, evaluating_time, mse in records:
         print(msg.format(method, mse, training_time, evaluating_time))
+
+
+class MLP(nn.Module):
+    
+    def __init__(self):
+        super(MLP, self).__init__()
+        
+        self.linear1 = nn.Linear(90, 128)
+        self.linear2 = nn.Linear(128, 128)
+        self.linear3 = nn.Linear(128, 1)
+
+    def forward(self, X):
+        X = X.view(X.size()[0], -1)
+        
+        output = F.relu(self.linear1(X))
+        output = F.dropout(output)
+        output = F.relu(self.linear2(output))
+        output = self.linear3(output)
+        
+        return output
 
 
 if __name__ == '__main__':
