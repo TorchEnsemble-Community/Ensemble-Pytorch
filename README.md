@@ -1,15 +1,9 @@
 # Ensemble-Pytorch
 Implementation of scikit-learn like ensemble methods in Pytorch.
 
-## Method list
-* **FusionClassifier** / **FusionRegressor**
-* **VotingClassifier** / **VotingRegressor**
-* **BaggingClassifier** / **BaggingRegressor**
-* **GradientBoostingClassifier** / **GradientBoostingRegressor**
-
 ## Installation
 
-Installing Ensemble-Pytorch package is simple. Just clone this repo and run the setup.
+Installing Ensemble-Pytorch package is simple. Just clone this repo and run `setup.py`.
 
 ```
 $ git clone https://github.com/AaronX121/Ensemble-Pytorch.git
@@ -45,6 +39,16 @@ model.fit(train_loader)
 # Evaluate
 model.predict(test_loader)
 ```
+
+## Method list
+* **FusionClassifier** / **FusionRegressor**
+  * In `Fusion`, the output from all base estimators is first aggregated as an average output. After then, a loss is computed based on the average output and the ground-truth. Next, all base estimators are jointly trained using back-propagation.
+* **VotingClassifier** / **VotingRegressor**
+  * In `Voting`, each base estimator is independently trained. The majority voting is adopted for classification, and the average over predictions from all base estimators is adopted for regression.
+* **BaggingClassifier** / **BaggingRegressor**
+  * The training stage of `Bagging` is similar to that of `Voting`. In addition, sampling with replacement is adopted when training each base estimator to encourage the diversity.
+* **GradientBoostingClassifier** / **GradientBoostingRegressor**
+  * In `GradientBoosting`, the learning target of a newly-added base estimator is to fit toward the negative gradient of the output from base estimators previously fitted with respect to the loss function and the ground-truth, using lease square regression.
 
 ## Benchmarks
 
