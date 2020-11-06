@@ -3,4 +3,4 @@
 
 build
 dist/
-Ensemble_PyTorch.egg-info
+torchensemble.egg-info
