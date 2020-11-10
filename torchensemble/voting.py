@@ -16,7 +16,7 @@ from ._base import BaseModule
 # TODO: Memory optimization by registering read-only objects into shared memory.
 def _parallel_fit(epoch, estimator_idx, 
                   estimator, data_loader, criterion, lr, weight_decay, 
-                  device, log_interval):
+                  device, log_interval, is_classification=True):
     """ Private function used to fit base estimators in parallel.
     """
     
@@ -38,14 +38,20 @@ def _parallel_fit(epoch, estimator_idx,
         
         # Print training status
         if batch_idx % log_interval == 0:
-            y_pred = F.softmax(output, dim=1).data.max(1)[1]
-            correct = y_pred.eq(y_train.view(-1).data).sum()
             
-            msg = ('Estimator: {:03d} | Epoch: {:03d} |' 
-                   ' Batch: {:03d} | Loss: {:.5f} | Correct:'
-                   ' {:d}/{:d}')
-            print(msg.format(estimator_idx, epoch, batch_idx, loss, 
-                             correct, batch_size))
+            if is_classification:
+                y_pred = output.data.max(1)[1]
+                correct = y_pred.eq(y_train.view(-1).data).sum()
+                
+                msg = ('Estimator: {:03d} | Epoch: {:03d} |' 
+                       ' Batch: {:03d} | Loss: {:.5f} | Correct:'
+                       ' {:d}/{:d}')
+                print(msg.format(estimator_idx, epoch, batch_idx, loss, 
+                                 correct, batch_size))
+            else:
+                msg = ('Estimator: {:03d} | Epoch: {:03d} |' 
+                       ' Batch: {:03d} | Loss: {:.5f}')
+                print(msg.format(estimator_idx, epoch, batch_idx, loss))
     
     return estimator
 
@@ -125,7 +131,8 @@ class VotingRegressor(BaseModule):
                 
                 rets = parallel(delayed(_parallel_fit)(
                     epoch, idx, estimator, train_loader, criterion, 
-                    self.lr, self.weight_decay, self.device, self.log_interval)
+                    self.lr, self.weight_decay, self.device, 
+                    self.log_interval, False)
                     for idx, estimator in enumerate(self.estimators_))
                 
                 # Update the base estimator container
