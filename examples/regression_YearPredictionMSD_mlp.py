@@ -1,4 +1,6 @@
 """ Example on univariate regression using YearPredictionMSD. """
+import sys
+sys.path.append('../')
 
 import time
 import torch
@@ -23,7 +25,8 @@ def load_data(batch_size):
     if not isinstance(batch_size, numbers.Integral):
         msg = '`batch_size` should be an integer, but got {} instead.'
         raise ValueError(msg.format(batch_size))
-        
+    
+    # MODIFY THE PATH IF YOU WANT
     train_path = '../../Dataset/LIBSVM/YearPredictionMSD.bz2'
     test_path = '../../Dataset/LIBSVM/YearPredictionMSD.t.bz2'
     
@@ -122,7 +125,8 @@ if __name__ == '__main__':
                             output_dim=output_dim,
                             lr=lr,
                             weight_decay=weight_decay,
-                            epochs=epochs)
+                            epochs=epochs,
+                            n_jobs=1)
     
     tic = time.time()
     model.fit(train_loader)
@@ -145,7 +149,8 @@ if __name__ == '__main__':
                              output_dim=output_dim,
                              lr=lr,
                              weight_decay=weight_decay,
-                             epochs=epochs)
+                             epochs=epochs,
+                             n_jobs=1)
     
     tic = time.time()
     model.fit(train_loader)

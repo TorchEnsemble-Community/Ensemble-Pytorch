@@ -1,4 +1,6 @@
 """ Example on classification using CIFAR-10. """
+import sys
+sys.path.append('../')
 
 import time
 import torch
@@ -115,12 +117,12 @@ if __name__ == '__main__':
     
     # VotingClassifier
     model = VotingClassifier(estimator=LeNet5,
-                             n_estimators=n_estimators,
-                             output_dim=output_dim,
-                             lr=lr,
-                             weight_decay=weight_decay,
-                             epochs=epochs,
-                             n_jobs=1)
+                              n_estimators=n_estimators,
+                              output_dim=output_dim,
+                              lr=lr,
+                              weight_decay=weight_decay,
+                              epochs=epochs,
+                              n_jobs=1)
     
     tic = time.time()
     model.fit(train_loader)
@@ -143,7 +145,8 @@ if __name__ == '__main__':
                               output_dim=output_dim,
                               lr=lr,
                               weight_decay=weight_decay,
-                              epochs=epochs)
+                              epochs=epochs,
+                              n_jobs=1)
     
     tic = time.time()
     model.fit(train_loader)
