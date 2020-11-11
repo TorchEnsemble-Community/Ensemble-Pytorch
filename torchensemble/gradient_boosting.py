@@ -34,16 +34,15 @@ class GradientBoostingClassifier(BaseModule):
         # Base estimators
         self.estimators_ = nn.ModuleList()
         for _ in range(self.n_estimators):
-            self.estimators_.append(
-                estimator(output_dim=output_dim).to(self.device))
+            self.estimators_.append(estimator().to(self.device))
     
     def forward(self, X):
         batch_size = X.size()[0]
         y_pred = torch.zeros(batch_size, self.output_dim).to(self.device)
         
         # The output of `GradientBoostingClassifier` is the summation of output
-        # from all base estimators, with each of them multipled by the shrinkage 
-        # rate.
+        # from all base estimators, with each of them multiplied by the
+        # shrinkage rate.
         for estimator in self.estimators_:
             y_pred += self.shrinkage_rate * estimator(X)
         
@@ -189,8 +188,7 @@ class GradientBoostingRegressor(BaseModule):
         # Base estimators
         self.estimators_ = nn.ModuleList()
         for _ in range(self.n_estimators):
-            self.estimators_.append(
-                estimator(output_dim=output_dim).to(self.device))
+            self.estimators_.append(estimator().to(self.device))
     
     def forward(self, X):
         batch_size = X.size()[0]
