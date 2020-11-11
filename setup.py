@@ -48,6 +48,7 @@ class CleanCommand(Clean):
                 if dirname == '__pycache__':
                     shutil.rmtree(os.path.join(dirpath, dirname))
 
+
 cmdclass.update({'clean': CleanCommand})
 
 
@@ -55,7 +56,7 @@ setup(
     name='torchensemble',
     version='1.0.0',
     author='AaronX121',
-    
+
     description=('Implementations of scikit-learn like ensemble methods in'
                  ' Pytorch'),
     long_description=long_description,
@@ -74,7 +75,7 @@ setup(
         'Operating System :: Unix',
         'Operating System :: MacOS'],
     keywords='Ensemble Learning',
-    
+
     packages=find_packages(),
     cmdclass=cmdclass,
     install_requires=install_requires,
