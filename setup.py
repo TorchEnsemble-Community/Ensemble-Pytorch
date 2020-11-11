@@ -53,7 +53,7 @@ cmdclass.update({'clean': CleanCommand})
 
 setup(
     name='torchensemble',
-    version='0.0.1',
+    version='1.0.0',
     author='AaronX121',
     
     description=('Implementations of scikit-learn like ensemble methods in'

@@ -81,7 +81,7 @@ if __name__ == '__main__':
                                       transforms.ToTensor(),
                                       transforms.Normalize((0.4914, 0.4822, 0.4465), 
                                                            (0.2023, 0.1994, 0.2010))])
-    
+
     train_loader = DataLoader(datasets.CIFAR10(
         data_dir, train=True, download=True, transform=transformer), 
         batch_size=batch_size, shuffle=True)
@@ -94,11 +94,11 @@ if __name__ == '__main__':
     
     # FusionClassifier
     model = FusionClassifier(estimator=LeNet5,
-                              n_estimators=n_estimators,
-                              output_dim=output_dim,
-                              lr=lr,
-                              weight_decay=weight_decay,
-                              epochs=epochs)
+                             n_estimators=n_estimators,
+                             output_dim=output_dim,
+                             lr=lr,
+                             weight_decay=weight_decay,
+                             epochs=epochs)
     
     tic = time.time()
     model.fit(train_loader)
@@ -117,12 +117,12 @@ if __name__ == '__main__':
     
     # VotingClassifier
     model = VotingClassifier(estimator=LeNet5,
-                              n_estimators=n_estimators,
-                              output_dim=output_dim,
-                              lr=lr,
-                              weight_decay=weight_decay,
-                              epochs=epochs,
-                              n_jobs=1)
+                             n_estimators=n_estimators,
+                             output_dim=output_dim,
+                             lr=lr,
+                             weight_decay=weight_decay,
+                             epochs=epochs,
+                             n_jobs=1)
     
     tic = time.time()
     model.fit(train_loader)
@@ -169,7 +169,8 @@ if __name__ == '__main__':
                                        output_dim=output_dim,
                                        lr=lr,
                                        weight_decay=weight_decay,
-                                       epochs=epochs)
+                                       epochs=epochs,
+                                       shrinkage_rate=1.)
     
     tic = time.time()
     model.fit(train_loader)

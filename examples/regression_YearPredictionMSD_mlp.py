@@ -33,6 +33,7 @@ def load_data(batch_size):
     train = load_svmlight_file(train_path)
     test = load_svmlight_file(test_path)
 
+    # Numpy array -> Tensor
     X_train, X_test = (torch.FloatTensor(train[0].toarray()), 
                        torch.FloatTensor(test[0].toarray()))
     
@@ -173,7 +174,8 @@ if __name__ == '__main__':
                                       output_dim=output_dim,
                                       lr=lr,
                                       weight_decay=weight_decay,
-                                      epochs=epochs)
+                                      epochs=epochs,
+                                      shrinkage_rate=1.)
     
     tic = time.time()
     model.fit(train_loader)

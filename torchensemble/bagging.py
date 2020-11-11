@@ -54,9 +54,9 @@ def _parallel_fit(epoch, estimator_idx,
                 
                 msg = ('Estimator: {:03d} | Epoch: {:03d} |' 
                        ' Batch: {:03d} | Loss: {:.5f} | Correct:'
-                       ' {:d}/{:d}')
+                       ' {:03d}/{:03d}')
                 print(msg.format(estimator_idx, epoch, batch_idx, loss, 
-                                 correct, batch_size))
+                                 correct, sampling_X_train.size()[0]))
             else:
                 msg = ('Estimator: {:03d} | Epoch: {:03d} |' 
                        ' Batch: {:03d} | Loss: {:.5f}')

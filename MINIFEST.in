@@ -1,0 +1,4 @@
+include MANIFEST.in
+
+# exclude from sdist
+exclude examples
