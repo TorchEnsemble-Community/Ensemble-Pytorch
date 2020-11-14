@@ -1,7 +1,7 @@
 """
   In fusion-based ensemble methods, the predictions from all base estimators
   are first aggregated as an average output. After then, the training loss is
-  computed based on the average output and the ground-truth. The training loss
+  computed based on this average output and the ground-truth. The training loss
   is then back-propagated to all base estimators simultaneously.
 """
 

@@ -17,7 +17,8 @@ from ._base import BaseModule
 def _parallel_fit(epoch, estimator_idx,
                   estimator, data_loader, criterion, lr, weight_decay,
                   device, log_interval, is_classification=True):
-    """ Private function used to fit base estimators in parallel.
+    """
+    Private function used to fit base estimators in parallel.
     """
 
     optimizer = torch.optim.Adam(estimator.parameters(),
@@ -62,7 +63,7 @@ class VotingClassifier(BaseModule):
         batch_size = X.size()[0]
         y_pred_proba = torch.zeros(batch_size, self.output_dim).to(self.device)
 
-        # Average over the class distributions from all base estimators.
+        # Average over class probabilities from all base estimators.
         for estimator in self.estimators_:
             y_pred_proba += F.softmax(estimator(X), dim=1)
         y_pred_proba /= self.n_estimators

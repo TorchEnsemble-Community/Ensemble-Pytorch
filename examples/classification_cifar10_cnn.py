@@ -1,5 +1,7 @@
 """ Example on classification using CIFAR-10. """
 import sys
+sys.path.append("../")
+
 import time
 import torch
 import torch.nn as nn
@@ -11,8 +13,6 @@ from torchensemble.fusion import FusionClassifier
 from torchensemble.voting import VotingClassifier
 from torchensemble.bagging import BaggingClassifier
 from torchensemble.gradient_boosting import GradientBoostingClassifier
-
-sys.path.append("../")
 
 
 def display_records(records):

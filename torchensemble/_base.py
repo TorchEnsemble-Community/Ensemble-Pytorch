@@ -25,8 +25,7 @@ class BaseModule(abc.ABC, nn.Module):
         Parameters
         ----------
         estimator : torch.nn.Module
-            The base estimator class inherited from `torch.nn.Module`. Examples
-            are available in the folder named `model`.
+            The class of base estimator inherited from `torch.nn.Module`.
         n_estimators : int
             The number of base estimators in the ensemble model.
         output_dim : int
@@ -124,17 +123,20 @@ class BaseModule(abc.ABC, nn.Module):
 
     @abc.abstractmethod
     def forward(self, X):
-        """ Implementation on the data forwarding in the ensemble model. Notice
-            that the input `X` should be a data batch instead of a standalone
-            data loader that contains all data batches.
+        """
+        Implementation on the data forwarding in the ensemble model. Notice
+        that the input `X` should be a data batch instead of a standalone
+        data loader that contains all data batches.
         """
 
     @abc.abstractmethod
     def fit(self, train_loader):
-        """ Implementation on the training stage of the ensemble model.
+        """
+        Implementation on the training stage of the ensemble model.
         """
 
     @abc.abstractmethod
     def predict(self, test_loader):
-        """ Implementation on the evaluating stage of the ensemble model.
+        """
+        Implementation on the evaluating stage of the ensemble model.
         """

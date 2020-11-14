@@ -1,5 +1,7 @@
 """ Example on univariate regression using YearPredictionMSD. """
 import sys
+sys.path.append("../")
+
 import time
 import torch
 import numbers
@@ -13,8 +15,6 @@ from torchensemble.fusion import FusionRegressor
 from torchensemble.voting import VotingRegressor
 from torchensemble.bagging import BaggingRegressor
 from torchensemble.gradient_boosting import GradientBoostingRegressor
-
-sys.path.append("../")
 
 
 def load_data(batch_size):

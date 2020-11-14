@@ -17,7 +17,8 @@ from ._base import BaseModule
 def _parallel_fit(epoch, estimator_idx,
                   estimator, data_loader, criterion, lr, weight_decay,
                   device, log_interval, is_classification=True):
-    """ Private function used to fit base estimators in parallel.
+    """
+    Private function used to fit base estimators in parallel.
     """
     optimizer = torch.optim.Adam(estimator.parameters(),
                                  lr=lr, weight_decay=weight_decay)
