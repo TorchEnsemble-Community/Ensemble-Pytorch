@@ -9,7 +9,7 @@ Implementation of scikit-learn like ensemble methods in Pytorch.
 * **BaggingClassifier** / **BaggingRegressor**
   * The training stage of `Bagging` is similar to that of `Voting`. In addition, sampling with replacement is adopted when training each base estimator to introduce more diversity.
 * **GradientBoostingClassifier** / **GradientBoostingRegressor**
-  * In `GradientBoosting`, the learning target of a newly-added base estimator is to fit toward the negative gradient of the output from base estimators previously fitted with respect to the loss function and the ground-truth, using lease square regression.
+  * In `GradientBoosting`, the learning target of a newly-added base estimator is to fit toward the negative gradient of the output from base estimators previously fitted with respect to the loss function and the ground-truth, using least square regression.
 
 ## Installation
 
@@ -85,7 +85,7 @@ model.predict(test_loader)
 | **GradientBoostingRegressor** | 1.08 | 0.71 | - 0.12 |
 
 ## Package dependencies
-* joblib
-* pytorch
-* torchvision
-* scikit-learn
+* joblib>=0.11
+* scikit-learn>=0.23.0
+* torch>=0.4.1
+* torchvision>=0.2.2
