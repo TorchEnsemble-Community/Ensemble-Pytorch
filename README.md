@@ -89,3 +89,14 @@ model.predict(test_loader)
 * scikit-learn>=0.23.0
 * torch>=0.4.1
 * torchvision>=0.2.2
+
+### TODO
+I have listed some things planing to do in the next, and I would be very happy to have someone join me to make this lib better.
+
+* Add `StackingClassifier` and `StackingRegressor`.
+* Add `SoftGradientBoostingClassifier` and `SoftGradientBoostingRegressor`.
+* Add more training options such as the type of optimizer.
+* Add more callbacks to `predict`.
+* Add PyTest scripts.
+* Upload to PyPI.
+* Build the documentation.
