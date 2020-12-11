@@ -1,19 +1,12 @@
-# Read the Docs configuration file
-# See https://docs.readthedocs.io/en/stable/config-file/v2.html for details
-
 version: 2
-
-# We need to build torchensemble before building the docs because otherwise
-# Sphinx cannot read the docstrings from files.
+formats: all
+sphinx:
+  configuration: docs/conf.py
+  fail_on_warning: true
 python:
   version: 3.7
   install:
-    # install build requirements
     - requirements: requirements.txt
-    - method: setuptools
-      path: .
-    # install doc requirements
     - requirements: docs/requirements.txt
-
-sphinx:
-  configuration: docs/conf.py
+    - path: .
+  
