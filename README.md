@@ -1,6 +1,13 @@
 # Ensemble-Pytorch
 Implementation of scikit-learn like ensemble methods in Pytorch.
 
+## News
+* Apart from installing from source, now you can easily install Ensemble-PyTorch with:
+```
+pip install -i https://test.pypi.org/simple/ torchensemble==0.1.0
+```
+* A pre-released documentation is available at https://ensemble-pytorch.readthedocs.io/en/latest/.
+
 ## Methods
 * **FusionClassifier** / **FusionRegressor**
   * In `Fusion`, the output from all base estimators is first aggregated as an average output. After then, a loss is computed based on the average output and the ground-truth. Next, all base estimators are jointly trained with back-propagation.
