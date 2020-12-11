@@ -12,7 +12,7 @@ import torch.nn.functional as F
 from ._base import BaseModule
 
 
-class BaseGradientBossting(BaseModule):
+class BaseGradientBoosting(BaseModule):
 
     def __init__(self, estimator, n_estimators, output_dim,
                  lr, weight_decay, epochs,
@@ -118,7 +118,7 @@ class BaseGradientBossting(BaseModule):
                         print(msg.format(est_idx, epoch, batch_idx, loss))
 
 
-class GradientBoostingClassifier(BaseGradientBossting):
+class GradientBoostingClassifier(BaseGradientBoosting):
 
     def _onehot_coding(self, y):
         """ Convert the class label to a one-hot encoded vector. """
@@ -173,7 +173,7 @@ class GradientBoostingClassifier(BaseGradientBossting):
         return accuracy
 
 
-class GradientBoostingRegressor(BaseGradientBossting):
+class GradientBoostingRegressor(BaseGradientBoosting):
 
     def _pseudo_residual(self, X, y, est_idx):
         output = torch.zeros_like(y).to(self.device)
