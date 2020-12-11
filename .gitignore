@@ -1,7 +1,9 @@
 *.pyc
 *.swp
 
-.idea
-build
+.idea/
+.vscode/
+build/
+_build/
 dist/
 torchensemble.egg-info
