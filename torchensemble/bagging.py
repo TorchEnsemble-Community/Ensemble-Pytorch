@@ -68,6 +68,20 @@ def _parallel_fit(epoch, estimator_idx,
 class BaggingClassifier(BaseModule):
 
     def forward(self, X):
+        """
+        Implementation on the data forwarding process in FusionClassifier.
+
+        Parameters
+        ----------
+        X : tensor
+            Input tensor. Internally, the model will check whether ``X`` is
+            compatible with the base estimator.
+
+        Returns
+        -------
+        proba : tensor
+            The predicted probability distribution.
+        """
         batch_size = X.size()[0]
         y_pred_proba = torch.zeros(batch_size, self.output_dim).to(self.device)
 
@@ -79,7 +93,14 @@ class BaggingClassifier(BaseModule):
         return y_pred_proba
 
     def fit(self, train_loader):
+        """
+        Implementation on the training stage of BaggingClassifier.
 
+        Parameters
+        ----------
+        train_loader : torch.utils.data.DataLoader
+            A :mod:`DataLoader` container that contains the training data.
+        """
         self.train()
         self._validate_parameters()
         criterion = nn.CrossEntropyLoss()
@@ -99,7 +120,19 @@ class BaggingClassifier(BaseModule):
                     self.estimators_[i] = copy.deepcopy(rets[i])
 
     def predict(self, test_loader):
+        """
+        Implementation on the evaluating stage of BaggingClassifier.
 
+        Parameters
+        ----------
+        test_loader : torch.utils.data.DataLoader
+            A :mod:`DataLoader` container that contains the testing data.
+        
+        Returns
+        -------
+        accuracy : float
+            The testing accuracy of the fitted model on the ``test_loader``.
+        """
         self.eval()
         correct = 0.
 
@@ -117,6 +150,20 @@ class BaggingClassifier(BaseModule):
 class BaggingRegressor(BaseModule):
 
     def forward(self, X):
+        """
+        Implementation on the data forwarding process in BaggingRegressor.
+
+        Parameters
+        ----------
+        X : tensor
+            Input tensor. Internally, the model will check whether ``X`` is
+            compatible with the base estimator.
+
+        Returns
+        -------
+        pred : tensor
+            The predicted values.
+        """
         batch_size = X.size()[0]
         y_pred = torch.zeros(batch_size, self.output_dim).to(self.device)
 
@@ -128,7 +175,14 @@ class BaggingRegressor(BaseModule):
         return y_pred
 
     def fit(self, train_loader):
+        """
+        Implementation on the training stage of BaggingRegressor.
 
+        Parameters
+        ----------
+        train_loader : torch.utils.data.DataLoader
+            A :mod:`DataLoader` container that contains the training data.
+        """
         self.train()
         self._validate_parameters()
         criterion = nn.MSELoss()
@@ -149,7 +203,20 @@ class BaggingRegressor(BaseModule):
                     self.estimators_[i] = copy.deepcopy(rets[i])
 
     def predict(self, test_loader):
+        """
+        Implementation on the evaluating stage of BaggingRegressor.
 
+        Parameters
+        ----------
+        test_loader : torch.utils.data.DataLoader
+            A :mod:`DataLoader` container that contains the testing data.
+        
+        Returns
+        -------
+        mse : float
+            The testing mean squared error of the fitted model on the
+            ``test_loader``.
+        """
         self.eval()
         mse = 0.
         criterion = nn.MSELoss()

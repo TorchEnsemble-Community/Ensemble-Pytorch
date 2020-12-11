@@ -14,9 +14,48 @@ from ._base import BaseModule
 
 class BaseGradientBoosting(BaseModule):
 
-    def __init__(self, estimator, n_estimators, output_dim,
-                 lr, weight_decay, epochs,
-                 shrinkage_rate=1., cuda=True, log_interval=100):
+    def __init__(self,
+                 estimator,
+                 n_estimators,
+                 output_dim,
+                 lr=1e-3,
+                 weight_decay=5e-4,
+                 epochs=100,
+                 shrinkage_rate=1.,
+                 cuda=True,
+                 log_interval=100):
+        """
+        Parameters
+        ----------
+        estimator : torch.nn.Module
+            The class of base estimator inherited from ``torch.nn.Module``.
+        n_estimators : int
+            The number of base estimators.
+        output_dim : int
+            The output dimension of the model. For instance, for multi-class
+            classification problem with K classes, it is set to ``K``. For
+            univariate regression problem, it is set to ``1``.
+        lr : float, default=1e-3
+            The learning rate of the parameter optimizer.
+        weight_decay : float, default=5e-4
+            The weight decay of the parameter optimizer.
+        epochs : int, default=100
+            The number of training epochs.
+        shrinkage_rate : float, default=1
+            The learning rate of each base estimator in gradient boosting.
+        cuda : bool, default=True
+            When set to `True`, use GPU to train and evaluate the model. When
+            set to `False`, the model is trained and evaluated using CPU.
+        log_interval : int, default=100
+            The number of batches to wait before printing the training status,
+            including information on the current batch, current epoch, current
+            training loss, and many more.
+
+        Attributes
+        ----------
+        estimators_ : torch.nn.ModuleList
+            An internal container that stores all base estimators.
+        """
         super(BaseModule, self).__init__()
 
         self.estimator = estimator
@@ -67,6 +106,22 @@ class BaseGradientBoosting(BaseModule):
             raise ValueError(msg.format(self.shrinkage_rate))
 
     def forward(self, X):
+        """
+        Implementation on the data forwarding process in Gradient Boosting
+        based methods.
+
+        Parameters
+        ----------
+        X : tensor
+            Input tensor. Internally, the model will check whether ``X`` is
+            compatible with the base estimator.
+
+        Returns
+        -------
+        proba : tensor
+            The predicted probability distribution (classification) or
+            values (regression).
+        """
         batch_size = X.size()[0]
         y_pred = torch.zeros(batch_size, self.output_dim).to(self.device)
 
@@ -79,7 +134,15 @@ class BaseGradientBoosting(BaseModule):
         return y_pred
 
     def fit(self, train_loader):
+        """
+        Implementation on the training stage of Gradient Boosting based
+        methods.
 
+        Parameters
+        ----------
+        train_loader : torch.utils.data.DataLoader
+            A :mod:`DataLoader` container that contains the training data.
+        """
         self.train()
         self._validate_parameters()
         criterion = nn.MSELoss(reduction='sum')
@@ -156,7 +219,19 @@ class GradientBoostingClassifier(BaseGradientBoosting):
             return y_onehot - F.softmax(output, dim=1)
 
     def predict(self, test_loader):
+        """
+        Implementation on the evaluating stage of GradientBoostingClassifier.
 
+        Parameters
+        ----------
+        test_loader : torch.utils.data.DataLoader
+            A :mod:`DataLoader` container that contains the testing data.
+        
+        Returns
+        -------
+        accuracy : float
+            The testing accuracy of the fitted model on the ``test_loader``.
+        """
         self.eval()
         correct = 0.
 
@@ -189,7 +264,20 @@ class GradientBoostingRegressor(BaseGradientBoosting):
             return y - output
 
     def predict(self, test_loader):
+        """
+        Implementation on the evaluating stage of GradientBoostingRegressor.
 
+        Parameters
+        ----------
+        test_loader : torch.utils.data.DataLoader
+            A :mod:`DataLoader` container that contains the testing data.
+
+        Returns
+        -------
+        mse : float
+            The testing mean squared error of the fitted model on the
+            ``test_loader``.
+        """
         self.eval()
         mse = 0.
         criterion = nn.MSELoss()

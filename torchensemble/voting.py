@@ -20,7 +20,6 @@ def _parallel_fit(epoch, estimator_idx,
     """
     Private function used to fit base estimators in parallel.
     """
-
     optimizer = torch.optim.Adam(estimator.parameters(),
                                  lr=lr, weight_decay=weight_decay)
 
@@ -60,6 +59,20 @@ def _parallel_fit(epoch, estimator_idx,
 class VotingClassifier(BaseModule):
 
     def forward(self, X):
+        """
+        Implementation on the data forwarding process in VotingClassifier.
+
+        Parameters
+        ----------
+        X : tensor
+            Input tensor. Internally, the model will check whether ``X`` is
+            compatible with the base estimator.
+
+        Returns
+        -------
+        proba : tensor
+            The predicted probability distribution.
+        """
         batch_size = X.size()[0]
         y_pred_proba = torch.zeros(batch_size, self.output_dim).to(self.device)
 
@@ -71,7 +84,14 @@ class VotingClassifier(BaseModule):
         return y_pred_proba
 
     def fit(self, train_loader):
+        """
+        Implementation on the training stage of VotingClassifier.
 
+        Parameters
+        ----------
+        train_loader : torch.utils.data.DataLoader
+            A :mod:`DataLoader` container that contains the training data.
+        """
         self.train()
         self._validate_parameters()
         criterion = nn.CrossEntropyLoss()
@@ -91,7 +111,19 @@ class VotingClassifier(BaseModule):
                     self.estimators_[i] = copy.deepcopy(rets[i])
 
     def predict(self, test_loader):
+        """
+        Implementation on the evaluating stage of VotingClassifier.
 
+        Parameters
+        ----------
+        test_loader : torch.utils.data.DataLoader
+            A :mod:`DataLoader` container that contains the testing data.
+        
+        Returns
+        -------
+        accuracy : float
+            The testing accuracy of the fitted model on the ``test_loader``.
+        """
         self.eval()
         correct = 0.
 
@@ -109,6 +141,20 @@ class VotingClassifier(BaseModule):
 class VotingRegressor(BaseModule):
 
     def forward(self, X):
+        """
+        Implementation on the data forwarding process in VotingRegressor.
+
+        Parameters
+        ----------
+        X : tensor
+            Input tensor. Internally, the model will check whether ``X`` is
+            compatible with the base estimator.
+
+        Returns
+        -------
+        pred : tensor
+            The predicted values.
+        """
         batch_size = X.size()[0]
         y_pred = torch.zeros(batch_size, self.output_dim).to(self.device)
 
@@ -120,7 +166,14 @@ class VotingRegressor(BaseModule):
         return y_pred
 
     def fit(self, train_loader):
+        """
+        Implementation on the training stage of VotingRegressor.
 
+        Parameters
+        ----------
+        train_loader : torch.utils.data.DataLoader
+            A :mod:`DataLoader` container that contains the training data.
+        """
         self.train()
         self._validate_parameters()
         criterion = nn.MSELoss()
@@ -141,7 +194,20 @@ class VotingRegressor(BaseModule):
                     self.estimators_[i] = copy.deepcopy(rets[i])
 
     def predict(self, test_loader):
+        """
+        Implementation on the evaluating stage of VotingRegressor.
 
+        Parameters
+        ----------
+        test_loader : torch.utils.data.DataLoader
+            A :mod:`DataLoader` container that contains the testing data.
+        
+        Returns
+        -------
+        mse : float
+            The testing mean squared error of the fitted model on the
+            ``test_loader``.
+        """
         self.eval()
         mse = 0.
         criterion = nn.MSELoss()

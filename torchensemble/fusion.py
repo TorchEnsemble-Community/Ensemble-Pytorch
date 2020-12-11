@@ -13,8 +13,23 @@ from ._base import BaseModule
 
 
 class FusionClassifier(BaseModule):
+    """Implementation of the FusionClassifier."""
 
     def forward(self, X):
+        """
+        Implementation on the data forwarding process in FusionClassifier.
+
+        Parameters
+        ----------
+        X : tensor
+            Input tensor. Internally, the model will check whether ``X`` is
+            compatible with the base estimator.
+
+        Returns
+        -------
+        proba : tensor
+            The predicted probability distribution.
+        """
         batch_size = X.size()[0]
         y_pred = torch.zeros(batch_size, self.output_dim).to(self.device)
 
@@ -28,7 +43,14 @@ class FusionClassifier(BaseModule):
         return y_pred
 
     def fit(self, train_loader):
+        """
+        Implementation on the training stage of FusionClassifier.
 
+        Parameters
+        ----------
+        train_loader : torch.utils.data.DataLoader
+            A :mod:`DataLoader` container that contains the training data.
+        """
         self.train()
         self._validate_parameters()
         criterion = nn.CrossEntropyLoss()  # for classification
@@ -58,7 +80,19 @@ class FusionClassifier(BaseModule):
                                      correct, batch_size))
 
     def predict(self, test_loader):
+        """
+        Implementation on the evaluating stage of FusionClassifier.
 
+        Parameters
+        ----------
+        test_loader : torch.utils.data.DataLoader
+            A :mod:`DataLoader` container that contains the testing data.
+        
+        Returns
+        -------
+        accuracy : float
+            The testing accuracy of the fitted model on the ``test_loader``.
+        """
         self.eval()
         correct = 0.
 
@@ -75,19 +109,41 @@ class FusionClassifier(BaseModule):
 
 
 class FusionRegressor(BaseModule):
+    """Implementation of the FusionRegressor."""
 
     def forward(self, X):
+        """
+        Implementation on the data forwarding process in FusionRegressor.
+
+        Parameters
+        ----------
+        X : tensor
+            Input tensor. Internally, the model will check whether ``X`` is
+            compatible with the base estimator.
+
+        Returns
+        -------
+        pred : tensor
+            The predicted values.
+        """
         batch_size = X.size()[0]
-        y_pred = torch.zeros(batch_size, self.output_dim).to(self.device)
+        pred = torch.zeros(batch_size, self.output_dim).to(self.device)
 
         for estimator in self.estimators_:
-            y_pred += estimator(X)
-        y_pred /= self.n_estimators
+            pred += estimator(X)
+        pred /= self.n_estimators
 
-        return y_pred
+        return pred
 
     def fit(self, train_loader):
+        """
+        Implementation on the training stage of FusionRegressor.
 
+        Parameters
+        ----------
+        train_loader : torch.utils.data.DataLoader
+            A :mod:`DataLoader` container that contains the training data.
+        """
         self.train()
         self._validate_parameters()
         criterion = nn.MSELoss()  # for regression
@@ -111,7 +167,20 @@ class FusionRegressor(BaseModule):
                     print(msg.format(epoch, batch_idx, loss))
 
     def predict(self, test_loader):
+        """
+        Implementation on the evaluating stage of FusionClassifier.
 
+        Parameters
+        ----------
+        test_loader : torch.utils.data.DataLoader
+            A :mod:`DataLoader` container that contains the testing data.
+        
+        Returns
+        -------
+        mse : float
+            The testing mean squared error of the fitted model on the
+            ``test_loader``.
+        """
         self.eval()
         mse = 0.
         criterion = nn.MSELoss()

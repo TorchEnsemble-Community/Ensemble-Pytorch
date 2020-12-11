@@ -4,59 +4,58 @@ import torch.nn as nn
 
 
 class BaseModule(abc.ABC, nn.Module):
-    """
-      Base class for ensemble methods.
+    """Base class for ensemble methods.
 
-      WARNING: This class cannot be used directly.
-      Use the derived classes instead.
+    WARNING: This class cannot be used directly.
+    Use the derived classes instead.
     """
 
     def __init__(self,
                  estimator,
                  n_estimators,
                  output_dim,
-                 lr,
-                 weight_decay,
-                 epochs,
+                 lr=1e-3,
+                 weight_decay=5e-4,
+                 epochs=100,
                  cuda=True,
                  log_interval=100,
-                 n_jobs=1):
+                 n_jobs=None):
         """
         Parameters
         ----------
         estimator : torch.nn.Module
-            The class of base estimator inherited from `torch.nn.Module`.
+            The class of base estimator inherited from ``torch.nn.Module``.
         n_estimators : int
-            The number of base estimators in the ensemble model.
+            The number of base estimators.
         output_dim : int
             The output dimension of the model. For instance, for multi-class
-            classification problem with K classes, it is set to `K`. For
-            univariate regression problem, it is set to `1`.
-        lr : float
+            classification problem with K classes, it is set to ``K``. For
+            univariate regression problem, it is set to ``1``.
+        lr : float, default=1e-3
             The learning rate of the parameter optimizer.
-        weight_decay : float
+        weight_decay : float, default=5e-4
             The weight decay of the parameter optimizer.
-        epochs : int
+        epochs : int, default=100
             The number of training epochs.
         cuda : bool, default=True
-            When set to `True`, use GPU to train and evaluate the model. When
-            set to `False`, the model is trained and evaluated using CPU.
+            When set to ``True``, use GPU to train and evaluate the model. When
+            set to ``False``, the model is trained and evaluated using CPU.
         log_interval : int, default=100
             The number of batches to wait before printing the training status,
             including information on the current batch, current epoch, current
             training loss, and many more.
-        n_jobs : int, default=1
+        n_jobs : int, default=None
             The number of workers for training the ensemble model. This
-            argument is used for parallel ensemble methods such as voting and
-            bagging. Setting it to an integer larger than `1` enables many base
-            estimators to be jointly trained. However, training many base
-            estimators at the same time may run out of the memory.
+            argument is used for parallel ensemble methods such as
+            :mod:`voting` and :mod:`bagging`. Setting it to an integer larger
+            than ``1`` enables many base estimators to be jointly trained.
+            However, training too many base estimators at the same time may run
+            out of the memory.
 
         Attributes
         ----------
-        estimators_ : nn.ModuleList
-            A container that stores all base estimators.
-
+        estimators_ : torch.nn.ModuleList
+            An internal container that stores all base estimators.
         """
         super(BaseModule, self).__init__()
 
