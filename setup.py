@@ -7,8 +7,8 @@ from os import path
 
 here = path.abspath(path.dirname(__file__))
 
-# Get the long description from README.md
-with open(path.join(here, 'README.md'), encoding='utf-8') as f:
+# Get the long description from README.rst
+with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
     long_description = f.read()
 
 # get the dependencies and installs
@@ -54,28 +54,33 @@ cmdclass.update({'clean': CleanCommand})
 
 setup(
     name='torchensemble',
-    version='1.0.0',
-    author='AaronX121',
-
+    maintainer='Yi-Xuan Xu',
+    maintainer_email='xuyx@lamda.nju.edu.cn',
     description=('Implementations of scikit-learn like ensemble methods in'
                  ' Pytorch'),
-    long_description=long_description,
-    long_description_content_type='text/markdown',
+    license='BSD 3-Clause',
     url='https://github.com/AaronX121/Ensemble-Pytorch',
+    project_urls={
+        'Bug Tracker': 'https://github.com/AaronX121/Ensemble-Pytorch/issues',
+        'Documentation': 'https://ensemble-pytorch.readthedocs.io/en/latest/',
+        'Source Code': 'https://github.com/AaronX121/Ensemble-Pytorch'},
+    version='0.0.1',
+    long_description=long_description,
     classifiers=[
         'Intended Audience :: Science/Research',
         'Intended Audience :: Developers',
-        'License :: OSI Approved',
-        'Programming Language :: C',
-        'Programming Language :: Python',
         'Topic :: Software Development',
         'Topic :: Scientific/Engineering',
+        'Development Status :: 4 - Beta',
         'Operating System :: Microsoft :: Windows',
         'Operating System :: POSIX',
         'Operating System :: Unix',
-        'Operating System :: MacOS'],
-    keywords='Ensemble Learning',
-
+        'Operating System :: MacOS',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8'],
+    keywords=['PyTorch', 'Ensemble Learning'],
     packages=find_packages(),
     cmdclass=cmdclass,
     install_requires=install_requires,
