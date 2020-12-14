@@ -12,7 +12,7 @@
 #
 import os
 import sys
-sys.path.insert(0, os.path.abspath('../torchensemble/'))
+sys.path.insert(0, os.path.abspath('..'))
 
 
 # -- Project information -----------------------------------------------------
@@ -25,7 +25,6 @@ master_doc = 'index'
 
 
 # -- General configuration ---------------------------------------------------
-
 autodoc_mock_imports = ["joblib",
                         "scikit-learn",
                         "torch",
@@ -41,6 +40,8 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx.ext.napoleon',
 ]
+
+autoapi_dirs = ['../torcensemble']
 
 # Napoleon settings
 napoleon_google_docstring = False
