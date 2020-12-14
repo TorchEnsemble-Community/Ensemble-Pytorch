@@ -6,6 +6,12 @@
 Welcome to Ensemble-PyTorch's documentation!
 ============================================
 
+
+.. image:: https://readthedocs.org/projects/ensemble-pytorch/badge/?version=latest
+   :target: https://ensemble-pytorch.readthedocs.io/en/latest/?badge=latest
+   :alt: Documentation Status
+
+
 **Ensemble-PyTorch** provides easy-to-use APIs on improving the performance of your PyTorch models using ensemble methods.
 
 To get started, please refer to `Quick Start <./quick_start.html>`__. You can also check `Tutorial <./tutorial.html>`__, which contains an example presenting the entire workflow on boosting the performance of your CNN model with Ensemble-PyTorch. To learn more about different ensmeble methods, please refer to `Introduction <./introduction.html>`__.
