@@ -1,6 +1,6 @@
 .. image:: https://readthedocs.org/projects/ensemble-pytorch/badge/?version=latest
-:target: https://ensemble-pytorch.readthedocs.io/en/latest/?badge=latest
-:alt: Documentation Status
+   :target: https://ensemble-pytorch.readthedocs.io/en/latest/?badge=latest
+   :alt: Documentation Status
 
 Ensemble-Pytorch
 ================
