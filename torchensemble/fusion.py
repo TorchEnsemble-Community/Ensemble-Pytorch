@@ -10,39 +10,51 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from ._base import BaseModule
+from . import utils
 
 
 class FusionClassifier(BaseModule):
     """Implementation of the FusionClassifier."""
 
+    def _forward(self, X):
+        """
+        Implementation on the internal data forwarding in FusionClassifier.
+        """
+        batch_size = X.size()[0]
+        proba = torch.zeros(batch_size, self.n_outputs).to(self.device)
+
+        # Take the average over predictions from all base estimators.
+        for estimator in self.estimators_:
+            proba += estimator(X) / self.n_estimators
+
+        return proba
+
     def forward(self, X):
         """
-        Implementation on the data forwarding process in FusionClassifier.
+        Implementation on the data forwarding in FusionClassifier.
 
         Parameters
         ----------
         X : tensor
-            Input tensor. Internally, the model will check whether ``X`` is
-            compatible with the base estimator.
+            Input batch of data, which should be a valid input data batch for
+            base estimators.
 
         Returns
         -------
-        proba : tensor
-            The predicted probability distribution.
+        proba : tensor of shape (batch_size, n_classes)
+            The predicted class distribution.
         """
-        batch_size = X.size()[0]
-        y_pred = torch.zeros(batch_size, self.output_dim).to(self.device)
+        proba = self._forward(X)
 
-        # Notice that the output of `FusionClassifier` is different from that
-        # of `VotingClassifier` in that the softmax normalization is conducted
-        # **after** taking the average of predictions from all base estimators.
-        for estimator in self.estimators_:
-            y_pred += estimator(X)
-        y_pred /= self.n_estimators
+        return F.softmax(proba, dim=1)
 
-        return y_pred
-
-    def fit(self, train_loader):
+    def fit(self,
+            train_loader,
+            lr=1e-3,
+            weight_decay=5e-4,
+            epochs=100,
+            optimizer="Adam",
+            log_interval=100):
         """
         Implementation on the training stage of FusionClassifier.
 
@@ -50,32 +62,49 @@ class FusionClassifier(BaseModule):
         ----------
         train_loader : torch.utils.data.DataLoader
             A :mod:`DataLoader` container that contains the training data.
+        lr : float, default=1e-3
+            The learning rate of the parameter optimizer.
+        weight_decay : float, default=5e-4
+            The weight decay of the parameter optimizer.
+        epochs : int, default=100
+            The number of training epochs.
+        optimizer : {"SGD", "Adam", "RMSprop"}, default="Adam"
+            The type of parameter optimizer.
+        log_interval : int, default=100
+            The number of batches to wait before printting the training status.
         """
+        
+        # Instantiate base estimators and set attributes
+        for _ in range(self.n_estimators):
+            self.estimators_.append(self._make_estimator())
+        self.n_outputs = self._decide_n_outputs(train_loader, True)
+        optimizer = utils.set_optimizer(self, optimizer, lr, weight_decay)
+
         self.train()
-        self._validate_parameters()
-        criterion = nn.CrossEntropyLoss()  # for classification
+        self._validate_parameters(lr, weight_decay, epochs, log_interval)
+        criterion = nn.CrossEntropyLoss()
 
-        for epoch in range(self.epochs):
-            for batch_idx, (X_train, y_train) in enumerate(train_loader):
+        # Training loop
+        for epoch in range(epochs):
+            for batch_idx, (data, target) in enumerate(train_loader):
 
-                batch_size = X_train.size()[0]
-                X_train, y_train = (X_train.to(self.device),
-                                    y_train.to(self.device))
+                batch_size = data.size()[0]
+                data, target = data.to(self.device), target.to(self.device)
 
-                output = self.forward(X_train)
-                loss = criterion(output, y_train)
+                output = self._forward(data)
+                loss = criterion(output, target)
 
-                self.optimizer.zero_grad()
+                optimizer.zero_grad()
                 loss.backward()
-                self.optimizer.step()
+                optimizer.step()
 
                 # Print training status
-                if batch_idx % self.log_interval == 0:
-                    y_pred = F.softmax(output, dim=1).data.max(1)[1]
-                    correct = y_pred.eq(y_train.view(-1).data).sum()
+                if batch_idx % log_interval == 0:
+                    pred = output.data.max(1)[1]
+                    correct = pred.eq(target.view(-1).data).sum()
 
-                    msg = ('Epoch: {:03d} | Batch: {:03d} | Loss: {:.5f} |'
-                           ' Correct: {:d}/{:d}')
+                    msg = ("Epoch: {:03d} | Batch: {:03d} | Loss: {:.5f} |"
+                           " Correct: {:d}/{:d}")
                     print(msg.format(epoch, batch_idx, loss,
                                      correct, batch_size))
 
@@ -87,7 +116,7 @@ class FusionClassifier(BaseModule):
         ----------
         test_loader : torch.utils.data.DataLoader
             A :mod:`DataLoader` container that contains the testing data.
-        
+
         Returns
         -------
         accuracy : float
@@ -96,12 +125,11 @@ class FusionClassifier(BaseModule):
         self.eval()
         correct = 0.
 
-        for batch_idx, (X_test, y_test) in enumerate(test_loader):
-            X_test, y_test = X_test.to(self.device), y_test.to(self.device)
-            output = F.softmax(self.forward(X_test), dim=1)
-            y_pred = output.data.max(1)[1]
-
-            correct += y_pred.eq(y_test.view(-1).data).sum()
+        for batch_idx, (data, target) in enumerate(test_loader):
+            data, target = data.to(self.device), target.to(self.device)
+            output = self.forward(data)
+            pred = output.data.max(1)[1]
+            correct += pred.eq(target.view(-1).data).sum()
 
         accuracy = 100. * float(correct) / len(test_loader.dataset)
 
@@ -123,19 +151,25 @@ class FusionRegressor(BaseModule):
 
         Returns
         -------
-        pred : tensor
+        pred : tensor of shape (batch_size, n_outputs)
             The predicted values.
         """
         batch_size = X.size()[0]
-        pred = torch.zeros(batch_size, self.output_dim).to(self.device)
+        pred = torch.zeros(batch_size, self.n_outputs).to(self.device)
 
+        # Take the average over predictions from all base estimators.
         for estimator in self.estimators_:
-            pred += estimator(X)
-        pred /= self.n_estimators
+            pred += estimator(X) / self.n_estimators
 
         return pred
 
-    def fit(self, train_loader):
+    def fit(self,
+            train_loader,
+            lr=1e-3,
+            weight_decay=5e-4,
+            epochs=100,
+            optimizer="Adam",
+            log_interval=100):
         """
         Implementation on the training stage of FusionRegressor.
 
@@ -143,32 +177,48 @@ class FusionRegressor(BaseModule):
         ----------
         train_loader : torch.utils.data.DataLoader
             A :mod:`DataLoader` container that contains the training data.
+        lr : float, default=1e-3
+            The learning rate of the parameter optimizer.
+        weight_decay : float, default=5e-4
+            The weight decay of the parameter optimizer.
+        epochs : int, default=100
+            The number of training epochs.
+        optimizer : {"SGD", "Adam", "RMSprop"}, default="Adam"
+            The type of parameter optimizer.
+        log_interval : int, default=100
+            The number of batches to wait before printting the training status.
         """
+        # Instantiate base estimators and set attributes
+        for _ in range(self.n_estimators):
+            self.estimators_.append(self._make_estimator())
+        self.n_outputs = self._decide_n_outputs(train_loader, True)
+        optimizer = utils.set_optimizer(self, optimizer, lr, weight_decay)
+
         self.train()
-        self._validate_parameters()
-        criterion = nn.MSELoss()  # for regression
+        self._validate_parameters(lr, weight_decay, epochs, log_interval)
+        criterion = nn.MSELoss()
 
-        for epoch in range(self.epochs):
-            for batch_idx, (X_train, y_train) in enumerate(train_loader):
+        # Training loop
+        for epoch in range(epochs):
+            for batch_idx, (data, target) in enumerate(train_loader):
 
-                X_train, y_train = (X_train.to(self.device),
-                                    y_train.to(self.device))
+                data, target = data.to(self.device), target.to(self.device)
 
-                output = self.forward(X_train)
-                loss = criterion(output, y_train)
+                output = self.forward(data)
+                loss = criterion(output, target)
 
-                self.optimizer.zero_grad()
+                optimizer.zero_grad()
                 loss.backward()
-                self.optimizer.step()
+                optimizer.step()
 
                 # Print training status
-                if batch_idx % self.log_interval == 0:
+                if batch_idx % log_interval == 0:
                     msg = 'Epoch: {:03d} | Batch: {:03d} | Loss: {:.5f}'
                     print(msg.format(epoch, batch_idx, loss))
 
     def predict(self, test_loader):
         """
-        Implementation on the evaluating stage of FusionClassifier.
+        Implementation on the evaluating stage of FusionRegressor.
 
         Parameters
         ----------
@@ -185,10 +235,10 @@ class FusionRegressor(BaseModule):
         mse = 0.
         criterion = nn.MSELoss()
 
-        for batch_idx, (X_test, y_test) in enumerate(test_loader):
-            X_test, y_test = X_test.to(self.device), y_test.to(self.device)
-            output = self.forward(X_test)
+        for batch_idx, (data, target) in enumerate(test_loader):
+            data, target = data.to(self.device), target.to(self.device)
+            output = self.forward(data)
 
-            mse += criterion(output, y_test)
+            mse += criterion(output, target)
 
         return mse / len(test_loader)

@@ -9,16 +9,11 @@ class BaseModule(abc.ABC, nn.Module):
     WARNING: This class cannot be used directly.
     Use the derived classes instead.
     """
-
     def __init__(self,
                  estimator,
                  n_estimators,
-                 output_dim,
-                 lr=1e-3,
-                 weight_decay=5e-4,
-                 epochs=100,
+                 estimator_args=None,
                  cuda=True,
-                 log_interval=100,
                  n_jobs=None):
         """
         Parameters
@@ -26,31 +21,18 @@ class BaseModule(abc.ABC, nn.Module):
         estimator : torch.nn.Module
             The class of base estimator inherited from ``torch.nn.Module``.
         n_estimators : int
-            The number of base estimators.
-        output_dim : int
-            The output dimension of the model. For instance, for multi-class
-            classification problem with K classes, it is set to ``K``. For
-            univariate regression problem, it is set to ``1``.
-        lr : float, default=1e-3
-            The learning rate of the parameter optimizer.
-        weight_decay : float, default=5e-4
-            The weight decay of the parameter optimizer.
-        epochs : int, default=100
-            The number of training epochs.
+            The number of base estimators in the ensemble.
+        estimator_args : dict, default=None
+            The dictionary of parameters used to instantiate base estimators.
         cuda : bool, default=True
-            When set to ``True``, use GPU to train and evaluate the model. When
-            set to ``False``, the model is trained and evaluated using CPU.
-        log_interval : int, default=100
-            The number of batches to wait before printing the training status,
-            including information on the current batch, current epoch, current
-            training loss, and many more.
+            - If ``True``, use GPU to train and evaluate the ensemble.
+            - If ``False``, use CPU to train and evaluate the ensemble.
         n_jobs : int, default=None
-            The number of workers for training the ensemble model. This
+            The number of workers for training the ensemble. This
             argument is used for parallel ensemble methods such as
             :mod:`voting` and :mod:`bagging`. Setting it to an integer larger
-            than ``1`` enables many base estimators to be jointly trained.
-            However, training too many base estimators at the same time may run
-            out of the memory.
+            than ``1`` enables more than one base estimators to be jointly
+            trained.
 
         Attributes
         ----------
@@ -59,83 +41,100 @@ class BaseModule(abc.ABC, nn.Module):
         """
         super(BaseModule, self).__init__()
 
-        self.estimator = estimator
+        self.base_estimator_ = estimator
         self.n_estimators = n_estimators
-        self.output_dim = output_dim
-
-        self.lr = lr
-        self.weight_decay = weight_decay
-        self.epochs = epochs
-
-        self.log_interval = log_interval
+        self.estimator_args = estimator_args
+        self.device = torch.device("cuda" if cuda else "cpu")
         self.n_jobs = n_jobs
-        self.device = torch.device('cuda' if cuda else 'cpu')
 
-        # Initialize base estimators
-        self.estimators_ = nn.ModuleList()
-        for _ in range(self.n_estimators):
-            self.estimators_.append(estimator().to(self.device))
+        self.estimators_ = nn.ModuleList()  # internal container
 
-        # A global optimizer
-        self.optimizer = torch.optim.Adam(self.parameters(),
-                                          lr=lr, weight_decay=weight_decay)
+    def __len__(self):
+        """Return the number of base estimators in the ensemble."""
+        return len(self.estimators_)
 
-    def __str__(self):
-        msg = '==============================\n'
-        msg += '{:<20}: {}\n'.format('Base Estimator',
-                                     self.estimator.__name__)
-        msg += '{:<20}: {}\n'.format('n_estimators', self.n_estimators)
-        msg += '{:<20}: {:.5f}\n'.format('Learning Rate', self.lr)
-        msg += '{:<20}: {:.5f}\n'.format('Weight Decay', self.weight_decay)
-        msg += '{:<20}: {}\n'.format('n_epochs', self.epochs)
-        msg += '==============================\n'
+    def __getitem__(self, index):
+        """Return the index"th base estimator in the ensemble."""
+        return self.estimators_[index]
 
-        return msg
+    def __iter__(self):
+        """Return iterator over base estimators in the ensemble."""
+        return iter(self.estimators_)
 
-    def __repr__(self):
-        return self.__str__()
+    def _decide_n_outputs(self, train_loader, is_classification):
+        """Decide the number of outputs according to the train_loader."""
+        n_outputs = None
+        # For Classification: n_outputs = # classes
+        if is_classification:
+            if hasattr(train_loader.dataset, "classes"):
+                n_outputs = len(train_loader.dataset.classes)
+            # Infer from the dataloader
+            else:
+                labels = []
+                for _, (_, target) in enumerate(train_loader):
+                    labels.append(target)
+                labels = torch.unique(torch.cat(labels))
+                n_outputs = labels.size()[0]
+        # For Regression: n_outputs = # target dimensions
+        else:
+            for _, (_, target) in enumerate(train_loader):
+                n_outputs = target.size()[1]
+                break
+        return n_outputs
 
-    def _validate_parameters(self):
+    def _make_estimator(self):
+        """Make and configure a copy of the `base_estimator_`."""
+        if self.estimator_args is None:
+            estimator = self.base_estimator_()
+        else:
+            estimator = self.base_estimator_(**self.estimator_args)
+        return estimator.to(self.device)
 
-        if not self.n_estimators > 0:
-            msg = ('The number of base estimators = {} should be strictly'
-                   ' positive.')
-            raise ValueError(msg.format(self.n_estimators))
+    def _validate_parameters(self, lr, weight_decay, epochs, log_interval):
+        """Validate hyper-parameters on training the ensemble."""
 
-        if not self.output_dim > 0:
-            msg = 'The output dimension = {} should be strictly positive.'
-            raise ValueError(msg.format(self.output_dim))
+        if not lr > 0:
+            msg = ("The learning rate of optimizer = {} should be strictly"
+                   " positive.")
+            raise ValueError(msg.format(lr))
 
-        if not self.lr > 0:
-            msg = ('The learning rate of optimizer = {} should be strictly'
-                   ' positive.')
-            raise ValueError(msg.format(self.lr))
+        if not weight_decay >= 0:
+            msg = "The weight decay of optimizer = {} should not be negative."
+            raise ValueError(msg.format(weight_decay))
 
-        if not self.weight_decay >= 0:
-            msg = 'The weight decay of parameters = {} should not be negative.'
-            raise ValueError(msg.format(self.weight_decay))
-
-        if not self.epochs > 0:
-            msg = ('The number of training epochs = {} should be strictly'
-                   ' positive.')
-            raise ValueError(msg.format(self.epochs))
+        if not epochs > 0:
+            msg = ("The number of training epochs = {} should be strictly"
+                   " positive.")
+            raise ValueError(msg.format(epochs))
+        
+        if not log_interval > 0:
+            msg = ("The number of batches to wait before printting the"
+                   " training status should be strictly positive, but got {}"
+                   " instead.")
+            raise ValueError(msg.format(log_interval))
 
     @abc.abstractmethod
     def forward(self, X):
         """
-        Implementation on the data forwarding in the ensemble model. Notice
-        that the input `X` should be a data batch instead of a standalone
+        Implementation on the data forwarding in the ensemble. Notice
+        that the input ``X`` should be a data batch instead of a standalone
         data loader that contains all data batches.
         """
 
     @abc.abstractmethod
-    def fit(self, train_loader):
+    def fit(self,
+            train_loader,
+            lr=1e-3,
+            weight_decay=5e-4,
+            epochs=100,
+            optimizer="Adam",
+            log_interval=100):
         """
-        Implementation on the training stage of the ensemble model.
+        Implementation on the training stage of the ensemble.
         """
 
     @abc.abstractmethod
     def predict(self, test_loader):
         """
-        Implementation on the evaluating stage of the ensemble model.
+        Implementation on the evaluating stage of the ensemble.
         """

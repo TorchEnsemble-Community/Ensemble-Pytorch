@@ -3,9 +3,6 @@ Parameters
 
 This page gives the API reference of ``torchensemble``, please also refer to `Introduction <./introduction.html>`__ for details.
 
-.. warning::
-    The input argument ``output_dim`` in all classes below will be removed in a latter version.
-
 Fusion
 ------
 
