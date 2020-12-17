@@ -27,8 +27,8 @@ def load_data(batch_size):
         raise ValueError(msg.format(batch_size))
 
     # MODIFY THE PATH IF YOU WANT
-    train_path = "../../Dataset/LIBSVM/YearPredictionMSD.bz2"
-    test_path = "../../Dataset/LIBSVM/YearPredictionMSD.t.bz2"
+    train_path = "../../Dataset/LIBSVM/yearpredictionmsd_training"
+    test_path = "../../Dataset/LIBSVM/yearpredictionmsd_testing"
 
     train = load_svmlight_file(train_path)
     test = load_svmlight_file(test_path)
@@ -106,14 +106,12 @@ if __name__ == "__main__":
     model = FusionRegressor(
         estimator=MLP,
         n_estimators=n_estimators,
-        output_dim=output_dim,
-        lr=lr,
-        weight_decay=weight_decay,
-        epochs=epochs,
+        cuda=False,
+        n_jobs=1,
     )
 
     tic = time.time()
-    model.fit(train_loader)
+    model.fit(train_loader, lr, weight_decay, epochs, "Adam")
     toc = time.time()
     training_time = toc - tic
 
@@ -129,15 +127,12 @@ if __name__ == "__main__":
     model = VotingRegressor(
         estimator=MLP,
         n_estimators=n_estimators,
-        output_dim=output_dim,
-        lr=lr,
-        weight_decay=weight_decay,
-        epochs=epochs,
+        cuda=False,
         n_jobs=1,
     )
 
     tic = time.time()
-    model.fit(train_loader)
+    model.fit(train_loader, lr, weight_decay, epochs, "Adam")
     toc = time.time()
     training_time = toc - tic
 
@@ -153,15 +148,12 @@ if __name__ == "__main__":
     model = BaggingRegressor(
         estimator=MLP,
         n_estimators=n_estimators,
-        output_dim=output_dim,
-        lr=lr,
-        weight_decay=weight_decay,
-        epochs=epochs,
+        cuda=False,
         n_jobs=1,
     )
 
     tic = time.time()
-    model.fit(train_loader)
+    model.fit(train_loader, lr, weight_decay, epochs, "Adam")
     toc = time.time()
     training_time = toc - tic
 
@@ -177,15 +169,11 @@ if __name__ == "__main__":
     model = GradientBoostingRegressor(
         estimator=MLP,
         n_estimators=n_estimators,
-        output_dim=output_dim,
-        lr=lr,
-        weight_decay=weight_decay,
-        epochs=epochs,
-        shrinkage_rate=1.0,
+        cuda=False
     )
 
     tic = time.time()
-    model.fit(train_loader)
+    model.fit(train_loader, lr, weight_decay, epochs, "Adam")
     toc = time.time()
     training_time = toc - tic
 

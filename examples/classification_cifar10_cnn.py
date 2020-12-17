@@ -1,6 +1,4 @@
-""" Example on classification using CIFAR-10. """
-import sys
-sys.path.append("../")
+"""Example on classification using CIFAR-10."""
 
 import time
 import torch
@@ -65,7 +63,6 @@ if __name__ == "__main__":
 
     # Hyper-parameters
     n_estimators = 10
-    output_dim = 10
     lr = 1e-3
     weight_decay = 5e-4
     epochs = 100
@@ -115,14 +112,12 @@ if __name__ == "__main__":
     model = FusionClassifier(
         estimator=LeNet5,
         n_estimators=n_estimators,
-        output_dim=output_dim,
-        lr=lr,
-        weight_decay=weight_decay,
-        epochs=epochs,
+        cuda=True,
+        n_jobs=1
     )
 
     tic = time.time()
-    model.fit(train_loader)
+    model.fit(train_loader, lr, weight_decay, epochs, "Adam")
     toc = time.time()
     training_time = toc - tic
 
@@ -138,15 +133,12 @@ if __name__ == "__main__":
     model = VotingClassifier(
         estimator=LeNet5,
         n_estimators=n_estimators,
-        output_dim=output_dim,
-        lr=lr,
-        weight_decay=weight_decay,
-        epochs=epochs,
-        n_jobs=1,
+        cuda=True,
+        n_jobs=1
     )
 
     tic = time.time()
-    model.fit(train_loader)
+    model.fit(train_loader, lr, weight_decay, epochs, "Adam")
     toc = time.time()
     training_time = toc - tic
 
@@ -162,15 +154,12 @@ if __name__ == "__main__":
     model = BaggingClassifier(
         estimator=LeNet5,
         n_estimators=n_estimators,
-        output_dim=output_dim,
-        lr=lr,
-        weight_decay=weight_decay,
-        epochs=epochs,
-        n_jobs=1,
+        cuda=True,
+        n_jobs=1
     )
 
     tic = time.time()
-    model.fit(train_loader)
+    model.fit(train_loader, lr, weight_decay, epochs, "Adam")
     toc = time.time()
     training_time = toc - tic
 
@@ -186,15 +175,11 @@ if __name__ == "__main__":
     model = GradientBoostingClassifier(
         estimator=LeNet5,
         n_estimators=n_estimators,
-        output_dim=output_dim,
-        lr=lr,
-        weight_decay=weight_decay,
-        epochs=epochs,
-        shrinkage_rate=1.0,
+        cuda=True
     )
 
     tic = time.time()
-    model.fit(train_loader)
+    model.fit(train_loader, lr, weight_decay, epochs, "Adam")
     toc = time.time()
     training_time = toc - tic
 

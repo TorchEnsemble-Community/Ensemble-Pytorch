@@ -1,6 +1,8 @@
-.. image:: https://readthedocs.org/projects/ensemble-pytorch/badge/?version=latest
-   :target: https://ensemble-pytorch.readthedocs.io/en/latest/?badge=latest
-   :alt: Documentation Status
+|readthedocs|_
+
+.. |readthedocs| image:: https://readthedocs.org/projects/ensemble-pytorch/badge/?version=latest
+.. _readthedocs: https://ensemble-pytorch.readthedocs.io/en/latest/?badge=latest
+
 
 Ensemble-Pytorch
 ================
@@ -9,13 +11,6 @@ Implementation of scikit-learn like ensemble methods in Pytorch.
 
 News
 ----
-
--  Apart from installing from source, now you can easily install
-   Ensemble-PyTorch with:
-
-   ::
-
-       pip install -i https://test.pypi.org/simple/ torchensemble
 
 -  A pre-released documentation is available at
    https://ensemble-pytorch.readthedocs.io/en/latest/.
@@ -68,23 +63,20 @@ Minimal example on how to use
 
     from torchensemble import ensemble_method           # import ensemble method (e.g., VotingClassifier)
 
-    # Define the base estimator
-    base_estimator = torch.nn.Module(...)               # class of base estimaotr (e.g., CNN)
-
     # Define the ensemble model
-    model = ensemble_method(estimator=base_estimator,   # base estimator
-                            n_estimators=10,            # number of base estimators
-                            output_dim=output_dim,      # e.g., the number of classes for classification
-                            lr=learning_rate,           # learning rate of the optimizer
-                            weight_decay=weight_decay,  # weight decay of model parameters
-                            epochs=epochs)              # number of training epochs
+    model = ensemble_method(estimator=base_estimator,   # class of your base estimator
+                            n_estimators=10)            # number of base estimators              
 
     # Load data
     train_loader = DataLoader(...)
     test_loader = DataLoader(...)
 
     # Train
-    model.fit(train_loader)
+    model.fit(train_loader,                             # training data
+              lr=learning_rate,                         # learning rate of the optimizer
+              weight_decay=weight_decay,                # weight decay of model parameters
+              epochs=epochs,                            # number of training epochs
+              optimizer="Adam")                         # type of parameter optimizer
 
     # Evaluate
     model.predict(test_loader)
@@ -158,9 +150,5 @@ happy to have someone join me to make this lib better.
 -  Add ``StackingClassifier`` and ``StackingRegressor``.
 -  Add ``SoftGradientBoostingClassifier`` and
    ``SoftGradientBoostingRegressor``.
--  Add more training options such as the type of optimizer.
 -  Add more callbacks to ``predict``.
 -  Add PyTest scripts.
--  Upload to PyPI.
--  Build the documentation.
-
