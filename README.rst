@@ -1,4 +1,7 @@
-|readthedocs|_
+|github|_ |readthedocs|_
+
+.. |github| image:: https://github.com/AaronX121/Ensemble-Pytorch/workflows/Python%20package/badge.svg
+.. _github: https://github.com/AaronX121/Ensemble-Pytorch/workflows/Python%20package/badge.svg
 
 .. |readthedocs| image:: https://readthedocs.org/projects/ensemble-pytorch/badge/?version=latest
 .. _readthedocs: https://ensemble-pytorch.readthedocs.io/en/latest/?badge=latest
