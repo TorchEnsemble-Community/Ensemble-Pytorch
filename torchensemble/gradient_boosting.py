@@ -107,7 +107,8 @@ class BaseGradientBoosting(BaseModule):
         # Instantiate base estimators and set attributes
         for _ in range(self.n_estimators):
             self.estimators_.append(self._make_estimator())
-        self.n_outputs = self._decide_n_outputs(train_loader, True)
+        self.n_outputs = self._decide_n_outputs(train_loader,
+                                                self.is_classification)
 
         self.train()
         self._validate_parameters(lr, weight_decay, epochs, log_interval)
@@ -118,10 +119,10 @@ class BaseGradientBoosting(BaseModule):
 
             # Initialize an independent optimizer for each base estimator to
             # avoid unexpected dependencies.
-            optimizer = utils.set_optimizer(estimator,
-                                            optimizer,
-                                            lr,
-                                            weight_decay)
+            learner_optimizer = utils.set_optimizer(estimator,
+                                                    optimizer,
+                                                    lr,
+                                                    weight_decay)
 
             # Training loop
             for epoch in range(epochs):
@@ -135,9 +136,9 @@ class BaseGradientBoosting(BaseModule):
                     output = estimator(data)
                     loss = criterion(output, residual)
 
-                    optimizer.zero_grad()
+                    learner_optimizer.zero_grad()
                     loss.backward()
-                    optimizer.step()
+                    learner_optimizer.step()
 
                     # Print training status
                     if batch_idx % log_interval == 0:
@@ -147,6 +148,20 @@ class BaseGradientBoosting(BaseModule):
 
 
 class GradientBoostingClassifier(BaseGradientBoosting):
+
+    def __init__(self,
+                 estimator,
+                 n_estimators,
+                 estimator_args=None,
+                 shrinkage_rate=1.,
+                 cuda=True):
+        super().__init__(estimator=estimator,
+                         n_estimators=n_estimators,
+                         estimator_args=estimator_args,
+                         shrinkage_rate=shrinkage_rate,
+                         cuda=cuda)
+        
+        self.is_classification = True
 
     def _onehot_coding(self, target):
         """Convert the class label to a one-hot encoded vector."""
@@ -232,6 +247,20 @@ class GradientBoostingClassifier(BaseGradientBoosting):
 
 
 class GradientBoostingRegressor(BaseGradientBoosting):
+
+    def __init__(self,
+                 estimator,
+                 n_estimators,
+                 estimator_args=None,
+                 shrinkage_rate=1.,
+                 cuda=True):
+        super().__init__(estimator=estimator,
+                         n_estimators=n_estimators,
+                         estimator_args=estimator_args,
+                         shrinkage_rate=shrinkage_rate,
+                         cuda=cuda)
+
+        self.is_classification = False    
 
     def _pseudo_residual(self, X, y, est_idx):
         """Compute pseudo residuals in regression."""

@@ -191,7 +191,7 @@ class FusionRegressor(BaseModule):
         # Instantiate base estimators and set attributes
         for _ in range(self.n_estimators):
             self.estimators_.append(self._make_estimator())
-        self.n_outputs = self._decide_n_outputs(train_loader, True)
+        self.n_outputs = self._decide_n_outputs(train_loader, False)
         optimizer = utils.set_optimizer(self, optimizer, lr, weight_decay)
 
         self.train()
