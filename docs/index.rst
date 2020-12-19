@@ -1,11 +1,9 @@
-.. Ensemble-PyTorch documentation master file, created by
-   sphinx-quickstart on Thu Dec 10 14:44:54 2020.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 Welcome to Ensemble-PyTorch's documentation!
 ============================================
 
+.. image:: ./_images/badge.png
+   :align: center
+   :width: 400
 
 |github|_ |readthedocs|_
 
