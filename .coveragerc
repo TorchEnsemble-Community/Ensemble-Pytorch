@@ -1,0 +1,8 @@
+[report]
+show_missing = True
+
+[run]
+include = */torchensemble/*
+omit =
+    */setup.py
+	*/torchensemble/__init__.py
