@@ -1,26 +1,29 @@
 Get started
 ===========
 
-Install from PyPI
------------------
+Install from Source
+-------------------
 
-Ensemble-PyTorch is available at PyPI, you can install it with the following command:
+You can install the latest version of Ensemble-PyTorch with the following command:
 
-.. code-block:: none
+.. code-block:: bash
 
-    pip install torchensemble
+    git clone https://github.com/AaronX121/Ensemble-Pytorch.git
+    cd Ensemble-Pytorch
+    pip install -r requirements.txt
+    python setup.py install
 
-Ensemble-PyTorch is designed to be portable and has very small package dependencies. We recommed to use the `Anaconda <https://www.anaconda.com/>`__ environment in combination with PyTorch installed from ``conda install pytorch``.
+Ensemble-PyTorch is designed to be portable and has very small package dependencies. It is recommended to use the Python environment from `Anaconda <https://www.anaconda.com/>`__ in combination with PyTorch installed using ``conda install pytorch``.
 
 Define the Base Estimator
 -------------------------
 
-Since Ensemble-PyTorch uses ensemble methods to improve the performance, one key input argument is your customized model as the base estimator. Same as PyTorch, your model class should inherit from ``torch.nn.Module``, and it should at least implement two methods:
+Since Ensemble-PyTorch uses ensemble methods to improve the performance, a key input argument is your customized model as the base estimator. Same as PyTorch, your model class should inherit from ``torch.nn.Module``, and it should at least implement two methods:
 
 * ``__init__``: Instantiate sub-modules used in your model and assign them as member variables.
 * ``forward``: Define the forward process of your model.
 
-For example, the code snippet below defines a multi-layered perceptron (MLP) with the structure ``Input(90)-128-128-Output(1)``:
+For example, the code snippet below defines a multi-layered perceptron (MLP) with the structure `Input(90) - 128 - 128 - Output(1)`:
 
 .. code-block:: python
 
@@ -49,7 +52,7 @@ For example, the code snippet below defines a multi-layered perceptron (MLP) wit
 Choose the Ensemble Wrapper
 ---------------------------
 
-After implementing the model, we can then wrap it using one of the emsemble wrappers in Ensemble-PyTorch. Different wrappers have very similar APIs, take the ``VotingClassifier`` as an example:
+After implementing the model, we can then wrap it using one of the emsemble wrappers available in Ensemble-PyTorch. Different wrappers have very similar APIs, take the ``VotingClassifier`` as an example:
 
 .. code-block:: python
 
@@ -57,19 +60,13 @@ After implementing the model, we can then wrap it using one of the emsemble wrap
 
     model = VotingClassifier(
         estimator=MLP,
-        n_estimators=10,
-        lr=lr,
-        weight_decay=weight_decay,
-        epochs=epochs
+        n_estimators=10
     )
 
-The meaning of different input arguments is listed as follow:
+The meaning of different arguments is listed as follow:
 
 * ``estimator``: The class of your model, used in instantiate the base estimator in ensemble learning.
 * ``n_estimators``: The number of base estimators.
-* ``lr``: The learning rate of the internal Adam optimizer.
-* ``weight_decay``: The weight decay of the internal Adam optimizer.
-* ``epochs``: The number of training epochs.
 
 .. note::
     The design on APIs is still on-going, and more options well be added latter.
@@ -82,9 +79,18 @@ Ensemble-PyTorch provides Scikit-Learn APIs on the training and evaluating stage
 .. code-block:: python
 
     # Training
-    model.fit(train_loader)
+    model.fit(train_loader,
+              lr,
+              weight_decay,
+              epochs,
+              "Adam")
 
     # Evaluating
     accuracy = model.predict(test_loader)
 
-In the code snippet above, ``train_loader`` and ``test_loader`` is the PyTorch ``DataLoader`` wrapper on your own dataset.
+In the code snippet above, ``train_loader`` and ``test_loader`` is the PyTorch ``DataLoader`` wrapper on your own dataset. In addition,
+
+* ``lr``: The learning rate of the internal Adam optimizer.
+* ``weight_decay``: The weight decay of the internal Adam optimizer.
+* ``epochs``: The number of training epochs.
+* ``"Adam"``: Specify the Adam optimizer.

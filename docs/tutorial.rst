@@ -152,9 +152,6 @@ Concretely, you can imagine each LetNet-5 model as a voter, and now we have many
     model = VotingClassifier(
         estimator=LeNet5,
         n_estimators=10,
-        lr=lr,
-        weight_decay=weight_decay,
-        epochs=epochs
     )
 
 In the code snippet above, we have used **10** LetNet-5 models (i.e., voters), and the input parameter ``LeNet5`` is simply the class of LetNet-5 defined in Section :ref:`model-definition`.
@@ -164,7 +161,10 @@ Once again, we use the ``train_loader`` and ``test_loader`` to train and evaluat
 .. code-block:: python
 
     # training
-    model.fit(train_loader)
+    model.fit(train_loader,
+              lr=lr,
+              weight_decay=weight_decay,
+              epochs=epochs)
 
     # evaluating
     accuracy = model.predict(test_loader)
