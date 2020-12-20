@@ -5,7 +5,6 @@
   estimators in the ensemble.
 """
 
-import copy
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -56,11 +55,11 @@ def _parallel_fit(
 
             # Print training status
             if batch_idx % log_interval == 0:
-        
+
                 if is_classification:
                     pred = sampling_output.data.max(1)[1]
                     correct = pred.eq(sampling_target.view(-1).data).sum()
-        
+
                     msg = ("Estimator: {:03d} | Epoch: {:03d} | Batch: {:03d}"
                            " | Loss: {:.5f} | Correct: {:d}/{:d}")
                     print(msg.format(idx, epoch, batch_idx, loss,
@@ -271,7 +270,7 @@ class BaggingRegressor(BaseModule):
         ----------
         test_loader : torch.utils.data.DataLoader
             A :mod:`DataLoader` container that contains the testing data.
-        
+
         Returns
         -------
         mse : float

@@ -50,7 +50,7 @@ def _parallel_fit(
                 if is_classification:
                     pred = output.data.max(1)[1]
                     correct = pred.eq(target.view(-1).data).sum()
-    
+
                     msg = ("Estimator: {:03d} | Epoch: {:03d} | Batch: {:03d}"
                            " | Loss: {:.5f} | Correct: {:d}/{:d}")
                     print(msg.format(idx, epoch, batch_idx, loss,
@@ -262,7 +262,7 @@ class VotingRegressor(BaseModule):
         ----------
         test_loader : torch.utils.data.DataLoader
             A :mod:`DataLoader` container that contains the testing data.
-        
+
         Returns
         -------
         mse : float

@@ -67,7 +67,7 @@ class BaseGradientBoosting(BaseModule):
             msg = ("The number of training epochs = {} should be strictly"
                    " positive.")
             raise ValueError(msg.format(epochs))
-        
+
         if not log_interval > 0:
             msg = ("The number of batches to wait before printting the"
                    " training status should be strictly positive, but got {}"
@@ -160,7 +160,7 @@ class GradientBoostingClassifier(BaseGradientBoosting):
                          estimator_args=estimator_args,
                          shrinkage_rate=shrinkage_rate,
                          cuda=cuda)
-        
+
         self.is_classification = True
 
     def _onehot_coding(self, target):
@@ -260,7 +260,7 @@ class GradientBoostingRegressor(BaseGradientBoosting):
                          shrinkage_rate=shrinkage_rate,
                          cuda=cuda)
 
-        self.is_classification = False    
+        self.is_classification = False
 
     def _pseudo_residual(self, X, y, est_idx):
         """Compute pseudo residuals in regression."""

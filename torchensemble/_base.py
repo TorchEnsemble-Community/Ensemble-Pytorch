@@ -106,7 +106,7 @@ class BaseModule(abc.ABC, nn.Module):
             msg = ("The number of training epochs = {} should be strictly"
                    " positive.")
             raise ValueError(msg.format(epochs))
-        
+
         if not log_interval > 0:
             msg = ("The number of batches to wait before printting the"
                    " training status should be strictly positive, but got {}"
