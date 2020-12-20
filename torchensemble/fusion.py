@@ -73,7 +73,7 @@ class FusionClassifier(BaseModule):
         log_interval : int, default=100
             The number of batches to wait before printting the training status.
         """
-        
+
         # Instantiate base estimators and set attributes
         for _ in range(self.n_estimators):
             self.estimators_.append(self._make_estimator())
@@ -224,7 +224,7 @@ class FusionRegressor(BaseModule):
         ----------
         test_loader : torch.utils.data.DataLoader
             A :mod:`DataLoader` container that contains the testing data.
-        
+
         Returns
         -------
         mse : float
