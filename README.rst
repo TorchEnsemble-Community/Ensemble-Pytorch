@@ -6,7 +6,6 @@
 .. |readthedocs| image:: https://readthedocs.org/projects/ensemble-pytorch/badge/?version=latest
 .. _readthedocs: https://ensemble-pytorch.readthedocs.io/en/latest/?badge=latest
 
-
 Ensemble-Pytorch
 ================
 
