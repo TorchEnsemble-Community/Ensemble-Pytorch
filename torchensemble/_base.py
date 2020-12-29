@@ -19,11 +19,12 @@ class BaseModule(abc.ABC, nn.Module):
         Parameters
         ----------
         estimator : torch.nn.Module
-            The class of base estimator inherited from ``torch.nn.Module``.
+            The class of base estimator inherited from :mod:`torch.nn.Module`.
         n_estimators : int
             The number of base estimators in the ensemble.
         estimator_args : dict, default=None
-            The dictionary of parameters used to instantiate base estimators.
+            The dictionary of hyper-parameters used to instantiate base
+            estimators.
         cuda : bool, default=True
             - If ``True``, use GPU to train and evaluate the ensemble.
             - If ``False``, use CPU to train and evaluate the ensemble.
@@ -31,13 +32,13 @@ class BaseModule(abc.ABC, nn.Module):
             The number of workers for training the ensemble. This
             argument is used for parallel ensemble methods such as
             :mod:`voting` and :mod:`bagging`. Setting it to an integer larger
-            than ``1`` enables more than one base estimators to be jointly
-            trained.
+            than ``1`` enables a total number of ``n_jobs`` base estimators
+            to be jointly trained.
 
         Attributes
         ----------
         estimators_ : torch.nn.ModuleList
-            An internal container that stores all base estimators.
+            The internal container that stores all base estimators.
         """
         super(BaseModule, self).__init__()
 
@@ -47,24 +48,20 @@ class BaseModule(abc.ABC, nn.Module):
         self.device = torch.device("cuda" if cuda else "cpu")
         self.n_jobs = n_jobs
 
-        self.estimators_ = nn.ModuleList()  # internal container
+        self.estimators_ = nn.ModuleList()
 
     def __len__(self):
         """Return the number of base estimators in the ensemble."""
         return len(self.estimators_)
 
     def __getitem__(self, index):
-        """Return the index"th base estimator in the ensemble."""
+        """Return the index-th base estimator in the ensemble."""
         return self.estimators_[index]
 
-    def __iter__(self):
-        """Return iterator over base estimators in the ensemble."""
-        return iter(self.estimators_)
-
-    def _decide_n_outputs(self, train_loader, is_classification):
-        """Decide the number of outputs according to the train_loader."""
-        n_outputs = None
-        # For Classification: n_outputs = # classes
+    def _decide_n_outputs(self, train_loader, is_classification=True):
+        """Determine the number of outputs according to the train_loader."""
+        n_outputs = 0
+        # For Classification: n_outputs = n_classes
         if is_classification:
             if hasattr(train_loader.dataset, "classes"):
                 n_outputs = len(train_loader.dataset.classes)
@@ -75,7 +72,7 @@ class BaseModule(abc.ABC, nn.Module):
                     labels.append(target)
                 labels = torch.unique(torch.cat(labels))
                 n_outputs = labels.size()[0]
-        # For Regression: n_outputs = # target dimensions
+        # For Regression: n_outputs = n_target_dimensions
         else:
             for _, (_, target) in enumerate(train_loader):
                 n_outputs = target.size()[1]
@@ -118,7 +115,7 @@ class BaseModule(abc.ABC, nn.Module):
         """
         Implementation on the data forwarding in the ensemble. Notice
         that the input ``X`` should be a data batch instead of a standalone
-        data loader that contains all data batches.
+        data loader that contains many data batches.
         """
 
     @abc.abstractmethod

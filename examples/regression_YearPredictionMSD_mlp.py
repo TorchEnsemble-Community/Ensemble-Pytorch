@@ -1,6 +1,4 @@
-""" Example on univariate regression using YearPredictionMSD. """
-import sys
-sys.path.append("../")
+"""Example on regression using YearPredictionMSD."""
 
 import time
 import torch
@@ -87,11 +85,11 @@ class MLP(nn.Module):
 if __name__ == "__main__":
 
     # Hyper-parameters
-    n_estimators = 10
+    n_estimators = 1
     output_dim = 1
     lr = 1e-3
     weight_decay = 5e-4
-    epochs = 50
+    epochs = 1
 
     # Utils
     batch_size = 256
@@ -106,7 +104,7 @@ if __name__ == "__main__":
     model = FusionRegressor(
         estimator=MLP,
         n_estimators=n_estimators,
-        cuda=False,
+        cuda=True,
         n_jobs=1,
     )
 
@@ -127,7 +125,7 @@ if __name__ == "__main__":
     model = VotingRegressor(
         estimator=MLP,
         n_estimators=n_estimators,
-        cuda=False,
+        cuda=True,
         n_jobs=1,
     )
 
@@ -148,7 +146,7 @@ if __name__ == "__main__":
     model = BaggingRegressor(
         estimator=MLP,
         n_estimators=n_estimators,
-        cuda=False,
+        cuda=True,
         n_jobs=1,
     )
 
@@ -169,7 +167,7 @@ if __name__ == "__main__":
     model = GradientBoostingRegressor(
         estimator=MLP,
         n_estimators=n_estimators,
-        cuda=False
+        cuda=True
     )
 
     tic = time.time()

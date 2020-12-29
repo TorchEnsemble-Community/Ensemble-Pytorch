@@ -9,13 +9,26 @@
 Ensemble-Pytorch
 ================
 
-Implementation of scikit-learn like ensemble methods in Pytorch.
+Implementation of Scikit-Learn like ensemble methods in Pytorch to improve the performance of your PyTorch models.
 
 News
 ----
 
 -  A pre-released documentation is available at
    https://ensemble-pytorch.readthedocs.io/en/latest/.
+
+Installation
+------------
+
+Installing Ensemble-Pytorch package is simple. Just clone this repo and
+run ``setup.py``.
+
+::
+
+    $ git clone https://github.com/AaronX121/Ensemble-Pytorch.git
+    $ cd Ensemble-Pytorch
+    $ pip install -r requirements.txt
+    $ python setup.py install
 
 Methods
 -------
@@ -39,19 +52,6 @@ Methods
    base estimators previously fitted with respect to the loss function
    and the ground-truth, using least square regression.
 
-Installation
-------------
-
-Installing Ensemble-Pytorch package is simple. Just clone this repo and
-run ``setup.py``.
-
-::
-
-    $ git clone https://github.com/AaronX121/Ensemble-Pytorch.git
-    $ cd Ensemble-Pytorch
-    $ pip install -r requirements.txt
-    $ python setup.py install
-
 Minimal example on how to use
 -----------------------------
 
@@ -67,7 +67,7 @@ Minimal example on how to use
 
     # Define the ensemble model
     model = ensemble_method(estimator=base_estimator,   # class of your base estimator
-                            n_estimators=10)            # number of base estimators              
+                            n_estimators=10)            # the number of base estimators              
 
     # Load data
     train_loader = DataLoader(...)

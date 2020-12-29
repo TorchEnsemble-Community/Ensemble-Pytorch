@@ -23,7 +23,6 @@ class FusionClassifier(BaseModule):
         batch_size = X.size()[0]
         proba = torch.zeros(batch_size, self.n_outputs).to(self.device)
 
-        # Take the average over predictions from all base estimators.
         for estimator in self.estimators_:
             proba += estimator(X) / self.n_estimators
 
@@ -120,10 +119,10 @@ class FusionClassifier(BaseModule):
         Returns
         -------
         accuracy : float
-            The testing accuracy of the fitted model on the ``test_loader``.
+            The testing accuracy of the fitted ensemble on the ``test_loader``.
         """
         self.eval()
-        correct = 0.
+        correct = 0
 
         for batch_idx, (data, target) in enumerate(test_loader):
             data, target = data.to(self.device), target.to(self.device)
@@ -141,13 +140,13 @@ class FusionRegressor(BaseModule):
 
     def forward(self, X):
         """
-        Implementation on the data forwarding process in FusionRegressor.
+        Implementation on the data forwarding in FusionRegressor.
 
         Parameters
         ----------
         X : tensor
-            Input tensor. Internally, the model will check whether ``X`` is
-            compatible with the base estimator.
+            Input batch of data, which should be a valid input data batch for
+            base estimators.
 
         Returns
         -------
@@ -157,7 +156,6 @@ class FusionRegressor(BaseModule):
         batch_size = X.size()[0]
         pred = torch.zeros(batch_size, self.n_outputs).to(self.device)
 
-        # Take the average over predictions from all base estimators.
         for estimator in self.estimators_:
             pred += estimator(X) / self.n_estimators
 

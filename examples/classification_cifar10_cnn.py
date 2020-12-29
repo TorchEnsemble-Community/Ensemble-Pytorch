@@ -62,10 +62,10 @@ class LeNet5(nn.Module):
 if __name__ == "__main__":
 
     # Hyper-parameters
-    n_estimators = 10
+    n_estimators = 1
     lr = 1e-3
     weight_decay = 5e-4
-    epochs = 100
+    epochs = 1
 
     # Utils
     batch_size = 128

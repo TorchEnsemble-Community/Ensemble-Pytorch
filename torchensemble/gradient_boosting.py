@@ -25,13 +25,13 @@ class BaseGradientBoosting(BaseModule):
         Parameters
         ----------
         estimator : torch.nn.Module
-            The class of base estimator inherited from ``torch.nn.Module``.
+            The class of base estimator inherited from :mod:`torch.nn.Module`.
         n_estimators : int
             The number of base estimators in the ensemble.
         estimator_args : dict, default=None
             The dictionary of parameters used to instantiate base estimators.
         shrinkage_rate : float, default=1
-            The shrinkage rate of each base estimator in gradient boosting.
+            The shrinkage rate in gradient boosting.
         cuda : bool, default=True
             - If ``True``, use GPU to train and evaluate the ensemble.
             - If ``False``, use CPU to train and evaluate the ensemble.
@@ -39,7 +39,7 @@ class BaseGradientBoosting(BaseModule):
         Attributes
         ----------
         estimators_ : torch.nn.ModuleList
-            An internal container that stores all base estimators.
+            The internal container that stores all base estimators.
         """
         super(BaseModule, self).__init__()
 
@@ -49,7 +49,7 @@ class BaseGradientBoosting(BaseModule):
         self.shrinkage_rate = shrinkage_rate
         self.device = torch.device("cuda" if cuda else "cpu")
 
-        self.estimators_ = nn.ModuleList()  # internal container
+        self.estimators_ = nn.ModuleList()
 
     def _validate_parameters(self, lr, weight_decay, epochs, log_interval):
         """Validate hyper-parameters on training the ensemble."""
@@ -112,7 +112,7 @@ class BaseGradientBoosting(BaseModule):
 
         self.train()
         self._validate_parameters(lr, weight_decay, epochs, log_interval)
-        criterion = nn.MSELoss(reduction="sum")
+        criterion = nn.MSELoss()
 
         # Base estimators are fitted sequentially in gradient boosting
         for est_idx, estimator in enumerate(self.estimators_):
@@ -130,7 +130,7 @@ class BaseGradientBoosting(BaseModule):
 
                     data, target = data.to(self.device), target.to(self.device)
 
-                    # Learning target of the current estimator
+                    # Compute the learning target of the current estimator
                     residual = self._pseudo_residual(data, target, est_idx)
 
                     output = estimator(data)
@@ -148,6 +148,7 @@ class BaseGradientBoosting(BaseModule):
 
 
 class GradientBoostingClassifier(BaseGradientBoosting):
+    """Implementation of the GradientBoostingClassifier."""
 
     def __init__(self,
                  estimator,
@@ -164,7 +165,7 @@ class GradientBoostingClassifier(BaseGradientBoosting):
         self.is_classification = True
 
     def _onehot_coding(self, target):
-        """Convert the class label to a one-hot encoded vector."""
+        """Convert the class label into the one-hot encoded vector."""
         target = target.view(-1)
         target_onehot = torch.FloatTensor(
             target.size()[0], self.n_outputs).to(self.device)
@@ -247,6 +248,7 @@ class GradientBoostingClassifier(BaseGradientBoosting):
 
 
 class GradientBoostingRegressor(BaseGradientBoosting):
+    """Implementation of the GradientBoostingRegressor."""
 
     def __init__(self,
                  estimator,
