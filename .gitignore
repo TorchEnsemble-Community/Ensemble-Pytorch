@@ -2,7 +2,9 @@
 *.swp
 *.vsdx
 *.pth
+*.xml
 .DS_Store
+.coverage
 
 .idea/
 .vscode/
