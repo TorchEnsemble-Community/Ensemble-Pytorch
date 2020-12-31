@@ -1,6 +1,7 @@
 *.pyc
 *.swp
 *.vsdx
+*.pth
 .DS_Store
 
 .idea/
