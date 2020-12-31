@@ -1,10 +1,13 @@
-|github|_ |readthedocs|_
+|github|_ |readthedocs|_ |codecov|_
 
 .. |github| image:: https://github.com/AaronX121/Ensemble-Pytorch/workflows/Python%20package/badge.svg
 .. _github: https://github.com/AaronX121/Ensemble-Pytorch/workflows/Python%20package/badge.svg
 
 .. |readthedocs| image:: https://readthedocs.org/projects/ensemble-pytorch/badge/?version=latest
 .. _readthedocs: https://ensemble-pytorch.readthedocs.io/en/latest/?badge=latest
+
+.. |codecov| image:: https://codecov.io/gh/xuyxu/Ensemble-Pytorch/branch/master/graph/badge.svg?token=2FXCFRIDTV
+.. _codecov: https://codecov.io/gh/xuyxu/Ensemble-Pytorch
 
 Ensemble-Pytorch
 ================
