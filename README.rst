@@ -9,15 +9,16 @@
 .. |codecov| image:: https://codecov.io/gh/xuyxu/Ensemble-Pytorch/branch/master/graph/badge.svg?token=2FXCFRIDTV
 .. _codecov: https://codecov.io/gh/xuyxu/Ensemble-Pytorch
 
-Ensemble-Pytorch
-================
+.. image:: ./docs/_images/badge.png
+   :align: center
+   :width: 300
 
-Implementation of Scikit-Learn like ensemble methods in Pytorch to improve the performance of your PyTorch models.
+Implementation of scikit-Learn like ensemble methods in Pytorch to boost  the performance of your models.
 
 News
 ----
 
--  A pre-released documentation is available at
+-  A pre-released version of documentation is available at
    https://ensemble-pytorch.readthedocs.io/en/latest/.
 
 Installation
@@ -32,28 +33,6 @@ run ``setup.py``.
     $ cd Ensemble-Pytorch
     $ pip install -r requirements.txt
     $ python setup.py install
-
-Methods
--------
-
--  **FusionClassifier** / **FusionRegressor**
--  In ``Fusion``, the output from all base estimators is first
-   aggregated as an average output. After then, a loss is computed based
-   on the average output and the ground-truth. Next, all base estimators
-   are jointly trained with back-propagation.
--  **VotingClassifier** / **VotingRegressor**
--  In ``Voting``, each base estimator is independently trained. The
-   majority voting is adopted for classification, and the average over
-   predictions from all base estimators is adopted for regression.
--  **BaggingClassifier** / **BaggingRegressor**
--  The training stage of ``Bagging`` is similar to that of ``Voting``.
-   In addition, sampling with replacement is adopted when training each
-   base estimator to introduce more diversity.
--  **GradientBoostingClassifier** / **GradientBoostingRegressor**
--  In ``GradientBoosting``, the learning target of a newly-added base
-   estimator is to fit toward the negative gradient of the output from
-   base estimators previously fitted with respect to the loss function
-   and the ground-truth, using least square regression.
 
 Minimal example on how to use
 -----------------------------
@@ -156,5 +135,4 @@ happy to have someone join me to make this lib better.
 -  Add ``SoftGradientBoostingClassifier`` and
    ``SoftGradientBoostingRegressor``.
 -  Add more callbacks to ``predict``.
--  Add PyTest scripts.
 - Finish the documentation.
