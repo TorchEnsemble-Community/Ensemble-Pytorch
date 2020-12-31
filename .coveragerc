@@ -6,3 +6,4 @@ include = */torchensemble/*
 omit =
     */setup.py
 	*/torchensemble/__init__.py
+	*/torchensemble/tests/*
