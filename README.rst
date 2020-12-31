@@ -11,7 +11,7 @@
 
 .. image:: ./docs/_images/badge.png
    :align: center
-   :width: 100
+   :width: 10
 
 Implementation of scikit-Learn like ensemble methods in Pytorch to boost  the performance of your models.
 
