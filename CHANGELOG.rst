@@ -6,8 +6,8 @@ Changelog
 
 Added
 ~~~~~
-* Add CI and maintenance tools @xuyxu
-* Add the code coverage on codecov @xuyxu
+* [MNT] Add CI and maintenance tools | @xuyxu
+* [MNT] Add the code coverage on codecov | @xuyxu
 
 Changed
 ~~~~~~~
