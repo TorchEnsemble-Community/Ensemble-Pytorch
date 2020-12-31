@@ -9,9 +9,8 @@
 .. |codecov| image:: https://codecov.io/gh/xuyxu/Ensemble-Pytorch/branch/master/graph/badge.svg?token=2FXCFRIDTV
 .. _codecov: https://codecov.io/gh/xuyxu/Ensemble-Pytorch
 
-.. image:: ./docs/_images/badge.png
-   :align: center
-   :width: 200 px
+Ensemble Pytorch
+================
 
 Implementation of scikit-Learn like ensemble methods in Pytorch to boost  the performance of your models.
 
