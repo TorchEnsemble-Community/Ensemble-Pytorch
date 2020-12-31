@@ -105,8 +105,3 @@ def test_reg(reg):
 
     # Test
     model.predict(test_loader)
-
-
-if __name__ == "__main__":
-    
-    test_reg(torchensemble.FusionRegressor)
