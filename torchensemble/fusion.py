@@ -6,7 +6,6 @@
 """
 
 import torch
-import numpy as np
 import torch.nn as nn
 import torch.nn.functional as F
 
@@ -354,7 +353,7 @@ class FusionRegressor(BaseModule):
 
         # Utils
         criterion = nn.MSELoss()
-        best_mse = np.float("inf")
+        best_mse = float("inf")
 
         # Training loop
         for epoch in range(epochs):

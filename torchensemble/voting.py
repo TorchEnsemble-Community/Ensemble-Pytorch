@@ -5,7 +5,6 @@
 """
 
 import torch
-import numpy as np
 import torch.nn as nn
 import torch.nn.functional as F
 from joblib import Parallel, delayed
@@ -408,7 +407,7 @@ class VotingRegressor(BaseModule):
 
         # Utils
         criterion = nn.MSELoss()
-        best_mse = np.float("inf")
+        best_mse = float("inf")
 
         # Internal helper function on pesudo forward
         def _forward(estimators, data):
@@ -454,7 +453,7 @@ class VotingRegressor(BaseModule):
                             mse += criterion(output, target)
                         mse /= len(test_loader)
 
-                        if mse > best_mse:
+                        if mse < best_mse:
                             best_mse = mse
                             self.estimators_ = nn.ModuleList()
                             self.estimators_.extend(estimators)
