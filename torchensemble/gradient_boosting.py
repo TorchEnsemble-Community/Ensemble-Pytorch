@@ -10,7 +10,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from ._base import BaseModule
+from ._base import BaseModule, torchensemble_model_doc
 from . import utils
 
 
@@ -18,6 +18,100 @@ __author__ = ["Yi-Xuan Xu"]
 __all__ = ["_BaseGradientBoosting",
            "GradientBoostingClassifier",
            "GradientBoostingRegressor"]
+
+
+__model_doc = """
+    Parameters
+    ----------
+    estimator : torch.nn.Module
+        The class of base estimator inherited from :mod:`torch.nn.Module`.
+    n_estimators : int
+        The number of base estimators in the ensemble.
+    estimator_args : dict, default=None
+        The dictionary of parameters used to instantiate base estimators.
+    shrinkage_rate : float, default=1
+        The shrinkage rate in gradient boosting.
+    cuda : bool, default=True
+
+        - If ``True``, use GPU to train and evaluate the ensemble.
+        - If ``False``, use CPU to train and evaluate the ensemble.
+    verbose : int, default=1
+        Control the level on printing logging information.
+
+        - If ``0``, trigger the silent mode
+        - If ``1``, basic logging information on the training and
+          evaluating status is printed.
+        - If ``> 1``, full logging information is printed.
+
+    Attributes
+    ----------
+    estimators_ : torch.nn.ModuleList
+        The internal container that stores all base estimators.
+"""
+
+
+__fit_doc = """
+    Parameters
+    ----------
+    train_loader : torch.utils.data.DataLoader
+        A :mod:`DataLoader` container that contains the training data.
+    lr : float, default=1e-3
+        The learning rate of the parameter optimizer.
+    weight_decay : float, default=5e-4
+        The weight decay of the parameter optimizer.
+    epochs : int, default=100
+        The number of training epochs.
+    optimizer : {"SGD", "Adam", "RMSprop"}, default="Adam"
+        The type of parameter optimizer.
+    log_interval : int, default=100
+        The number of batches to wait before printting the training status.
+    test_loader : torch.utils.data.DataLoader, default=None
+        A :mod:`DataLoader` container that contains the evaluating data.
+
+        - If ``None``, no validation is conducted after each training
+          epoch.
+        - If not ``None``, the ensemble will be evaluated on this
+          dataloader after each training epoch.
+    early_stopping_rounds : int, default=2
+        Specify the number of tolerant rounds for early stopping. When the
+        validation performance of the ensemble does not improve after
+        adding the base estimator fitted in current iteration, the internal
+        counter on early stopping will increase by one. When the value of
+        the internal counter reaches ``early_stopping_rounds``, the
+        training stage  will terminate early.
+    save_model : bool, default=True
+        Whether to save the model.
+
+        - If test_loader is ``None``, the ensemble containing
+          ``n_estimators`` base estimators will be saved.
+        - If test_loader is not ``None``, the ensemble with the best
+          validation performance will be saved.
+    save_dir : string, default=None
+        Specify where to save the model.
+
+        - If ``None``, the model will be saved in the current directory.
+        - If not ``None``, the model will be saved in the specified
+          directory: ``save_dir``.
+"""
+
+
+def _gradient_boosting_model_doc(header, item="model"):
+    """
+    Decorator on obtaining documentation for different gradient boosting
+    models.
+    """
+    def get_doc(item):
+        """Return selected item"""
+        __doc = {"model": __model_doc,
+                 "fit": __fit_doc}
+        return __doc[item]
+
+    def adddoc(cls):
+        doc = [header + "\n\n"]
+        doc.extend(get_doc(item))
+        cls.__doc__ = "".join(doc)
+        return cls
+    return adddoc
 
 
 class _BaseGradientBoosting(BaseModule):
@@ -193,37 +287,10 @@ class _BaseGradientBoosting(BaseModule):
             utils.save(self, save_dir, self.verbose)
 
 
+@_gradient_boosting_model_doc(
+    """Implementation on the GradientBoostingClassifier.""", "model"
+)
 class GradientBoostingClassifier(_BaseGradientBoosting):
-    """
-    Implementation on the GradientBoostingClassifier.
-
-    Parameters
-    ----------
-    estimator : torch.nn.Module
-        The class of base estimator inherited from :mod:`torch.nn.Module`.
-    n_estimators : int
-        The number of base estimators in the ensemble.
-    estimator_args : dict, default=None
-        The dictionary of parameters used to instantiate base estimators.
-    shrinkage_rate : float, default=1
-        The shrinkage rate in gradient boosting.
-    cuda : bool, default=True
-
-        - If ``True``, use GPU to train and evaluate the ensemble.
-        - If ``False``, use CPU to train and evaluate the ensemble.
-    verbose : int, default=1
-        Control the level on printing logging information.
-
-        - If ``0``, trigger the silent mode
-        - If ``1``, basic logging information on the training and
-          evaluating status is printed.
-        - If ``> 1``, full logging information is printed.
-
-    Attributes
-    ----------
-    estimators_ : torch.nn.ModuleList
-        The internal container that stores all base estimators.
-    """
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -283,6 +350,10 @@ class GradientBoostingClassifier(_BaseGradientBoosting):
 
         return flag
 
+    @_gradient_boosting_model_doc(
+        """Implementation on the training stage of GradientBoostingClassifier.""",  # noqa: E501
+        "fit"
+    )
     def fit(self,
             train_loader,
             lr=1e-3,
@@ -294,51 +365,6 @@ class GradientBoostingClassifier(_BaseGradientBoosting):
             early_stopping_rounds=2,
             save_model=True,
             save_dir=None):
-        """
-        Implementation on the training stage of GradientBoostingClassifier.
-
-        Parameters
-        ----------
-        train_loader : torch.utils.data.DataLoader
-            A :mod:`DataLoader` container that contains the training data.
-        lr : float, default=1e-3
-            The learning rate of the parameter optimizer.
-        weight_decay : float, default=5e-4
-            The weight decay of the parameter optimizer.
-        epochs : int, default=100
-            The number of training epochs.
-        optimizer : {"SGD", "Adam", "RMSprop"}, default="Adam"
-            The type of parameter optimizer.
-        log_interval : int, default=100
-            The number of batches to wait before printting the training status.
-        test_loader : torch.utils.data.DataLoader, default=None
-            A :mod:`DataLoader` container that contains the evaluating data.
-
-            - If ``None``, no validation is conducted after each training
-              epoch.
-            - If not ``None``, the ensemble will be evaluated on this
-              dataloader after each training epoch.
-        early_stopping_rounds : int, default=2
-            Specify the number of tolerant rounds for early stopping. When the
-            validation performance of the ensemble does not improve after
-            adding the base estimator fitted in current iteration, the internal
-            counter on early stopping will increase by one. When the value of
-            the internal counter reaches ``early_stopping_rounds``, the
-            training stage  will terminate early.
-        save_model : bool, default=True
-            Whether to save the model.
-
-            - If test_loader is ``None``, the ensemble containing
-              ``n_estimators`` base estimators will be saved.
-            - If test_loader is not ``None``, the ensemble with the best
-              validation performance will be saved.
-        save_dir : string, default=None
-            Specify where to save the model.
-
-            - If ``None``, the model will be saved in the current directory.
-            - If not ``None``, the model will be saved in the specified
-              directory: ``save_dir``.
-        """
         super().fit(
             train_loader=train_loader,
             lr=lr,
@@ -351,22 +377,10 @@ class GradientBoostingClassifier(_BaseGradientBoosting):
             save_model=save_model,
             save_dir=save_dir)
 
+    @torchensemble_model_doc(
+        """Implementation on the data forwarding in GradientBoostingClassifier.""",  # noqa: E501
+        "classifier_forward")
     def forward(self, X):
-        """
-        Implementation on the data forwarding in GradientBoostingClassifier.
-
-        Parameters
-        ----------
-        X : tensor
-            Input batch of data, which should be a valid input data batch for
-            base estimators.
-
-        Returns
-        -------
-        proba : tensor of shape (batch_size, n_classes)
-            The predicted class distribution.
-
-        """
         batch_size = X.size()[0]
         output = torch.zeros(batch_size, self.n_outputs).to(self.device)
 
@@ -376,20 +390,10 @@ class GradientBoostingClassifier(_BaseGradientBoosting):
 
         return proba
 
+    @torchensemble_model_doc(
+        """Implementation on the evaluating stage of GradientBoostingClassifier.""",  # noqa: E501
+        "classifier_predict")
     def predict(self, test_loader):
-        """
-        Implementation on the evaluating stage of GradientBoostingClassifier.
-
-        Parameters
-        ----------
-        test_loader : torch.utils.data.DataLoader
-            A :mod:`DataLoader` container that contains the testing data.
-
-        Returns
-        -------
-        accuracy : float
-            The testing accuracy of the fitted ensemble on the ``test_loader``.
-        """
         self.eval()
         correct = 0.
 
@@ -405,37 +409,10 @@ class GradientBoostingClassifier(_BaseGradientBoosting):
         return accuracy
 
 
+@_gradient_boosting_model_doc(
+    """Implementation on the GradientBoostingRegressor.""", "model"
+)
 class GradientBoostingRegressor(_BaseGradientBoosting):
-    """
-    Implementation on the GradientBoostingRegressor.
-
-    Parameters
-    ----------
-    estimator : torch.nn.Module
-        The class of base estimator inherited from :mod:`torch.nn.Module`.
-    n_estimators : int
-        The number of base estimators in the ensemble.
-    estimator_args : dict, default=None
-        The dictionary of parameters used to instantiate base estimators.
-    shrinkage_rate : float, default=1
-        The shrinkage rate in gradient boosting.
-    cuda : bool, default=True
-
-        - If ``True``, use GPU to train and evaluate the ensemble.
-        - If ``False``, use CPU to train and evaluate the ensemble.
-    verbose : int, default=1
-        Control the level on printing logging information.
-
-        - If ``0``, trigger the silent mode
-        - If ``1``, basic logging information on the training and
-          evaluating status is printed.
-        - If ``> 1``, full logging information is printed.
-
-    Attributes
-    ----------
-    estimators_ : torch.nn.ModuleList
-        The internal container that stores all base estimators.
-    """
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -482,6 +459,10 @@ class GradientBoostingRegressor(_BaseGradientBoosting):
 
         return flag
 
+    @_gradient_boosting_model_doc(
+        """Implementation on the training stage of GradientBoostingRegressor.""",  # noqa: E501
+        "fit"
+    )
     def fit(self,
             train_loader,
             lr=1e-3,
@@ -493,51 +474,6 @@ class GradientBoostingRegressor(_BaseGradientBoosting):
             early_stopping_rounds=2,
             save_model=True,
             save_dir=None):
-        """
-        Implementation on the training stage of GradientBoostingRegressor.
-
-        Parameters
-        ----------
-        train_loader : torch.utils.data.DataLoader
-            A :mod:`DataLoader` container that contains the training data.
-        lr : float, default=1e-3
-            The learning rate of the parameter optimizer.
-        weight_decay : float, default=5e-4
-            The weight decay of the parameter optimizer.
-        epochs : int, default=100
-            The number of training epochs.
-        optimizer : {"SGD", "Adam", "RMSprop"}, default="Adam"
-            The type of parameter optimizer.
-        log_interval : int, default=100
-            The number of batches to wait before printting the training status.
-        test_loader : torch.utils.data.DataLoader, default=None
-            A :mod:`DataLoader` container that contains the evaluating data.
-
-            - If ``None``, no validation is conducted after each training
-              epoch.
-            - If not ``None``, the ensemble will be evaluated on this
-              dataloader after each training epoch.
-        early_stopping_rounds : int, default=2
-            Specify the number of tolerant rounds for early stopping. When the
-            validation performance of the ensemble does not improve after
-            adding the base estimator fitted in current iteration, the internal
-            counter on early stopping will increase by one. When the value of
-            the internal counter reaches ``early_stopping_rounds``, the
-            training stage  will terminate early.
-        save_model : bool, default=True
-            Whether to save the model.
-
-            - If test_loader is ``None``, the ensemble containing
-              ``n_estimators`` base estimators will be saved.
-            - If test_loader is not ``None``, the ensemble with the best
-              validation performance will be saved.
-        save_dir : string, default=None
-            Specify where to save the model.
-
-            - If ``None``, the model will be saved in the current directory.
-            - If not ``None``, the model will be saved in the specified
-              directory: ``save_dir``.
-        """
         super().fit(
             train_loader=train_loader,
             lr=lr,
@@ -550,22 +486,10 @@ class GradientBoostingRegressor(_BaseGradientBoosting):
             save_model=save_model,
             save_dir=save_dir)
 
+    @torchensemble_model_doc(
+        """Implementation on the data forwarding in GradientBoostingRegressor.""",  # noqa: E501
+        "regressor_forward")
     def forward(self, X):
-        """
-        Implementation on the data forwarding in GradientBoostingRegressor.
-
-        Parameters
-        ----------
-        X : tensor
-            Input batch of data, which should be a valid input data batch for
-            base estimators.
-
-        Returns
-        -------
-        pred : tensor of shape (batch_size, n_outputs)
-            The predicted values.
-
-        """
         batch_size = X.size()[0]
         pred = torch.zeros(batch_size, self.n_outputs).to(self.device)
 
@@ -574,22 +498,10 @@ class GradientBoostingRegressor(_BaseGradientBoosting):
 
         return pred
 
+    @torchensemble_model_doc(
+        """Implementation on the evaluating stage of GradientBoostingRegressor.""",  # noqa: E501
+        "regressor_predict")
     def predict(self, test_loader):
-        """
-        Implementation on the evaluating stage of GradientBoostingRegressor.
-
-        Parameters
-        ----------
-        test_loader : torch.utils.data.DataLoader
-            A :mod:`DataLoader` container that contains the testing data.
-
-        Returns
-        -------
-        mse : float
-            The testing mean squared error of the fitted model on the
-            ``test_loader``.
-
-        """
         self.eval()
         mse = 0.
         criterion = nn.MSELoss()

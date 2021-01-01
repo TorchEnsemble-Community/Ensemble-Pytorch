@@ -2,6 +2,37 @@ import abc
 import torch
 import torch.nn as nn
 
+from . import _constants as const
+
+
+def torchensemble_model_doc(header, item):
+    """
+    Decorator on obtaining documentation for different ensemble models.
+
+    Parameters
+    ----------
+    header: string
+       An introducion to the decorated class.
+    item : string
+       Type of the doc item.
+    """
+    def get_doc(item):
+        """Return selected item"""
+        __doc = {"model": const.__model_doc,
+                 "fit": const.__fit_doc,
+                 "classifier_forward": const.__classification_forward_doc,
+                 "classifier_predict": const.__classification_predict_doc,
+                 "regressor_forward": const.__regression_forward_doc,
+                 "regressor_predict": const.__regression_predict_doc}
+        return __doc[item]
+
+    def adddoc(cls):
+        doc = [header + "\n\n"]
+        doc.extend(get_doc(item))
+        cls.__doc__ = "".join(doc)
+        return cls
+    return adddoc
+
 
 class BaseModule(abc.ABC, nn.Module):
     """Base class for ensemble methods.
