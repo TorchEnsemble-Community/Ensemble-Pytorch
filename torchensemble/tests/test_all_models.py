@@ -70,7 +70,7 @@ y_test_reg = y_test_reg.view(-1, 1)
 @pytest.mark.parametrize("clf", all_clf)
 def test_clf(clf):
     """
-    This unit test checks the training and evaluating stage of all methods.
+    This unit test checks the training and evaluating stage of all classifiers.
     """
     model = clf(estimator=MLP_clf, n_estimators=2, cuda=False)
 
@@ -81,7 +81,7 @@ def test_clf(clf):
     test_loader = DataLoader(test, batch_size=2)
 
     # Train
-    model.fit(train_loader, epochs=1)
+    model.fit(train_loader, epochs=1, save_model=False)
 
     # Test
     model.predict(test_loader)
@@ -90,7 +90,7 @@ def test_clf(clf):
 @pytest.mark.parametrize("reg", all_reg)
 def test_reg(reg):
     """
-    This unit test checks the training and evaluating stage of all methods.
+    This unit test checks the training and evaluating stage of all regressors.
     """
     model = reg(estimator=MLP_reg, n_estimators=2, cuda=False)
 
@@ -101,7 +101,7 @@ def test_reg(reg):
     test_loader = DataLoader(test, batch_size=2)
 
     # Train
-    model.fit(train_loader, epochs=1)
+    model.fit(train_loader, epochs=1, save_model=False)
 
     # Test
     model.predict(test_loader)
