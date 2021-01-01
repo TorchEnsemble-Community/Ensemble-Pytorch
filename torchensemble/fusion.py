@@ -79,7 +79,7 @@ class FusionClassifier(BaseModule):
         X : tensor
             Input batch of data, which should be a valid input data batch for
             base estimators.
-    
+
         Returns
         -------
         proba : tensor of shape (batch_size, n_classes)
@@ -119,21 +119,21 @@ class FusionClassifier(BaseModule):
             The number of batches to wait before printting the training status.
         test_loader : torch.utils.data.DataLoader, default=None
             A :mod:`DataLoader` container that contains the evaluating data.
-    
+
             - If ``None``, no validation is conducted after each training
               epoch.
             - If not ``None``, the ensemble will be evaluated on this
               dataloader after each training epoch.
         save_model : bool, default=True
             Whether to save the model.
-    
+
             - If test_loader is ``None``, the ensemble trained over ``epochs``
               will be saved.
             - If test_loader is not ``None``, the ensemble with the best
               validation performance will be saved.
         save_dir : string, default=None
             Specify where to save the model.
-    
+
             - If ``None``, the model will be saved in the current directory.
             - If not ``None``, the model will be saved in the specified
               directory: ``save_dir``.
@@ -212,7 +212,7 @@ class FusionClassifier(BaseModule):
         ----------
         test_loader : torch.utils.data.DataLoader
             A :mod:`DataLoader` container that contains the testing data.
-    
+
         Returns
         -------
         accuracy : float
@@ -323,21 +323,21 @@ class FusionRegressor(BaseModule):
             The number of batches to wait before printting the training status.
         test_loader : torch.utils.data.DataLoader, default=None
             A :mod:`DataLoader` container that contains the evaluating data.
-    
+
             - If ``None``, no validation is conducted after each training
               epoch.
             - If not ``None``, the ensemble will be evaluated on this
               dataloader after each training epoch.
         save_model : bool, default=True
             Whether to save the model.
-    
+
             - If test_loader is ``None``, the ensemble trained over ``epochs``
               will be saved.
             - If test_loader is not ``None``, the ensemble with the best
               validation performance will be saved.
         save_dir : string, default=None
             Specify where to save the model.
-    
+
             - If ``None``, the model will be saved in the current directory.
             - If not ``None``, the model will be saved in the specified
               directory: ``save_dir``.
@@ -409,7 +409,7 @@ class FusionRegressor(BaseModule):
         ----------
         test_loader : torch.utils.data.DataLoader
             A :mod:`DataLoader` container that contains the testing data.
-    
+
         Returns
         -------
         mse : float
