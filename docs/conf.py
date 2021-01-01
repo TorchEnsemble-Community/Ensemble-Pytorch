@@ -12,13 +12,7 @@
 #
 import os
 import sys
-
-import torchensemble
-
-
-ON_READTHEDOCS = os.environ.get("READTHEDOCS") == "True"
-if not ON_READTHEDOCS:
-    sys.path.insert(0, os.path.abspath(".."))
+sys.path.insert(0, os.path.abspath(".."))
 
 
 # -- Project information -----------------------------------------------------

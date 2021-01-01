@@ -14,16 +14,14 @@ is then back-propagated to all base estimators simultaneously.
 FusionClassifier
 ****************
 
-.. autoclass:: torchensemble.fusion.FusionClassifier
+.. autoclass:: torchensemble.FusionClassifier
     :members:
-    :inherited-members:
 
 FusionRegressor
 ***************
 
-.. autoclass:: torchensemble.fusion.FusionRegressor
+.. autoclass:: torchensemble.FusionRegressor
     :members:
-    :inherited-members:
 
 Voting
 ------
@@ -35,15 +33,14 @@ from all base estimators.
 VotingClassifier
 ****************
 
-.. autoclass:: torchensemble.voting.VotingClassifier
+.. autoclass:: torchensemble.VotingClassifier
     :members:
 
 VotingRegressor
 ***************
 
-.. autoclass:: torchensemble.voting.VotingRegressor
+.. autoclass:: torchensemble.VotingRegressor
     :members:
-    :inherited-members:
 
 Bagging
 -------
@@ -56,16 +53,14 @@ estimators in the ensemble model.
 BaggingClassifier
 *****************
 
-.. autoclass:: torchensemble.bagging.BaggingClassifier
+.. autoclass:: torchensemble.BaggingClassifier
     :members:
-    :inherited-members:
 
 BaggingRegressor
 ****************
 
-.. autoclass:: torchensemble.bagging.BaggingRegressor
+.. autoclass:: torchensemble.BaggingRegressor
     :members:
-    :inherited-members:
 
 Gradient Boosting
 -----------------
@@ -81,13 +76,11 @@ fitted before, using ordinary least square.
 GradientBoostingClassifier
 **************************
 
-.. autoclass:: torchensemble.gradient_boosting.GradientBoostingClassifier
+.. autoclass:: torchensemble.GradientBoostingClassifier
     :members:
-    :inherited-members:
 
 GradientBoostingRegressor
 *************************
 
-.. autoclass:: torchensemble.gradient_boosting.GradientBoostingRegressor
+.. autoclass:: torchensemble.GradientBoostingRegressor
     :members:
-    :inherited-members:
