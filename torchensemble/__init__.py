@@ -7,7 +7,12 @@ from .bagging import BaggingRegressor
 from .gradient_boosting import GradientBoostingClassifier
 from .gradient_boosting import GradientBoostingRegressor
 
-__all__ = ['FusionClassifier', 'FusionRegressor',
-           'VotingClassifier', 'VotingRegressor',
-           'BaggingClassifier', 'BaggingRegressor',
-           'GradientBoostingClassifier', 'GradientBoostingRegressor']
+
+__all__ = ["FusionClassifier",
+           "FusionRegressor",
+           "VotingClassifier",
+           "VotingRegressor",
+           "BaggingClassifier",
+           "BaggingRegressor",
+           "GradientBoostingClassifier",
+           "GradientBoostingRegressor"]

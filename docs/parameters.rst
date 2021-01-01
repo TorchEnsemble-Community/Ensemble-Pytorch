@@ -17,15 +17,11 @@ FusionClassifier
 .. autoclass:: torchensemble.fusion.FusionClassifier
     :members:
 
-    .. automethod:: __init__
-
 FusionRegressor
 ***************
 
 .. autoclass:: torchensemble.fusion.FusionRegressor
     :members:
-
-    .. automethod:: __init__
 
 Voting
 ------
@@ -40,15 +36,11 @@ VotingClassifier
 .. autoclass:: torchensemble.voting.VotingClassifier
     :members:
 
-    .. automethod:: __init__
-
 VotingRegressor
 ***************
 
 .. autoclass:: torchensemble.voting.VotingRegressor
     :members:
-
-    .. automethod:: __init__
 
 
 Bagging
@@ -65,15 +57,11 @@ BaggingClassifier
 .. autoclass:: torchensemble.bagging.BaggingClassifier
     :members:
 
-    .. automethod:: __init__
-
 BaggingRegressor
 ****************
 
 .. autoclass:: torchensemble.bagging.BaggingRegressor
     :members:
-
-    .. automethod:: __init__
 
 
 Gradient Boosting
@@ -92,13 +80,11 @@ GradientBoostingClassifier
 
 .. autoclass:: torchensemble.gradient_boosting.GradientBoostingClassifier
     :members:
-
-    .. automethod:: __init__
+    :inherited-members:
 
 GradientBoostingRegressor
 *************************
 
 .. autoclass:: torchensemble.gradient_boosting.GradientBoostingRegressor
     :members:
-
-    .. automethod:: __init__
+    :inherited-members:

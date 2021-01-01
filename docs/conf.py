@@ -61,7 +61,7 @@ autodoc_default_flags = ['members', 'inherited-members', 'show-inheritance']
 autodoc_default_options = {
     "members": True,
     "inherited-members": False,
-    "show-inheritance": True,
+    "show-inheritance": False,
 }
 
 # Add any paths that contain templates here, relative to this directory.

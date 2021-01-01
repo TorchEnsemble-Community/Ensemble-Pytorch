@@ -2,6 +2,37 @@ import abc
 import torch
 import torch.nn as nn
 
+from . import _constants as const
+
+
+def torchensemble_model_doc(header, item):
+    """
+    Decorator on obtaining documentation for different ensemble models.
+
+    Parameters
+    ----------
+    header: string
+       An introducion to the decorated class.
+    item : string
+       Type of the doc item.
+    """
+    def get_doc(item):
+        """Return selected item"""
+        __doc = {"model": const.__model_doc,
+                 "fit": const.__fit_doc,
+                 "classifier_forward": const.__classification_forward_doc,
+                 "classifier_predict": const.__classification_predict_doc,
+                 "regressor_forward": const.__regression_forward_doc,
+                 "regressor_predict": const.__regression_predict_doc}
+        return __doc[item]
+
+    def adddoc(cls):
+        doc = [header + "\n\n"]
+        doc.extend(get_doc(item))
+        cls.__doc__ = "".join(doc)
+        return cls
+    return adddoc
+
 
 class BaseModule(abc.ABC, nn.Module):
     """Base class for ensemble methods.
@@ -14,32 +45,8 @@ class BaseModule(abc.ABC, nn.Module):
                  n_estimators,
                  estimator_args=None,
                  cuda=True,
-                 n_jobs=None):
-        """
-        Parameters
-        ----------
-        estimator : torch.nn.Module
-            The class of base estimator inherited from :mod:`torch.nn.Module`.
-        n_estimators : int
-            The number of base estimators in the ensemble.
-        estimator_args : dict, default=None
-            The dictionary of hyper-parameters used to instantiate base
-            estimators.
-        cuda : bool, default=True
-            - If ``True``, use GPU to train and evaluate the ensemble.
-            - If ``False``, use CPU to train and evaluate the ensemble.
-        n_jobs : int, default=None
-            The number of workers for training the ensemble. This
-            argument is used for parallel ensemble methods such as
-            :mod:`voting` and :mod:`bagging`. Setting it to an integer larger
-            than ``1`` enables a total number of ``n_jobs`` base estimators
-            to be jointly trained.
-
-        Attributes
-        ----------
-        estimators_ : torch.nn.ModuleList
-            The internal container that stores all base estimators.
-        """
+                 n_jobs=None,
+                 verbose=1):
         super(BaseModule, self).__init__()
 
         self.base_estimator_ = estimator
@@ -47,6 +54,7 @@ class BaseModule(abc.ABC, nn.Module):
         self.estimator_args = estimator_args
         self.device = torch.device("cuda" if cuda else "cpu")
         self.n_jobs = n_jobs
+        self.verbose = verbose
 
         self.estimators_ = nn.ModuleList()
 
@@ -75,7 +83,10 @@ class BaseModule(abc.ABC, nn.Module):
         # For Regression: n_outputs = n_target_dimensions
         else:
             for _, (_, target) in enumerate(train_loader):
-                n_outputs = target.size()[1]
+                if len(target.size()) == 1:
+                    n_outputs = 1
+                else:
+                    n_outputs = target.size()[1]
                 break
         return n_outputs
 
@@ -125,7 +136,10 @@ class BaseModule(abc.ABC, nn.Module):
             weight_decay=5e-4,
             epochs=100,
             optimizer="Adam",
-            log_interval=100):
+            log_interval=100,
+            test_loader=None,
+            save_model=True,
+            save_dir=None):
         """
         Implementation on the training stage of the ensemble.
         """
