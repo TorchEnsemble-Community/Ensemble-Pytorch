@@ -6,10 +6,8 @@
 .. |readthedocs| image:: https://readthedocs.org/projects/ensemble-pytorch/badge/?version=latest
 .. _readthedocs: https://ensemble-pytorch.readthedocs.io/en/latest/?badge=latest
 
-.. |codecov| image:: https://codecov.io/gh/xuyxu/Ensemble-Pytorch/branch/master/graph/badge.svg?token=2FXCFRIDTV
-.. _codecov: https://codecov.io/gh/xuyxu/Ensemble-Pytorch
 
-Ensemble Pytorch
+Ensemble-Pytorch
 ================
 
 Implementation of scikit-Learn like ensemble methods in Pytorch to boost  the performance of your models.
