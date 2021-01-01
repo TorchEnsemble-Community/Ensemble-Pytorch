@@ -12,7 +12,13 @@
 #
 import os
 import sys
-sys.path.insert(0, os.path.abspath('..'))
+
+import torchensemble
+
+
+ON_READTHEDOCS = os.environ.get("READTHEDOCS") == "True"
+if not ON_READTHEDOCS:
+    sys.path.insert(0, os.path.abspath(".."))
 
 
 # -- Project information -----------------------------------------------------
@@ -60,7 +66,7 @@ napoleon_type_aliases = None
 autodoc_default_flags = ['members', 'inherited-members', 'show-inheritance']
 autodoc_default_options = {
     "members": True,
-    "inherited-members": True,
+    "inherited-members": False,
     "show-inheritance": False,
 }
 
