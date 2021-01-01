@@ -351,8 +351,8 @@ class GradientBoostingClassifier(_BaseGradientBoosting):
         return flag
 
     @_gradient_boosting_model_doc(
-    """Implementation on the training stage of GradientBoostingClassifier.""",
-    "fit"
+        """Implementation on the training stage of GradientBoostingClassifier.""",  # noqa: E501
+        "fit"
     )
     def fit(self,
             train_loader,
@@ -460,8 +460,8 @@ class GradientBoostingRegressor(_BaseGradientBoosting):
         return flag
 
     @_gradient_boosting_model_doc(
-    """Implementation on the training stage of GradientBoostingRegressor.""",
-    "fit"
+        """Implementation on the training stage of GradientBoostingRegressor.""",  # noqa: E501
+        "fit"
     )
     def fit(self,
             train_loader,
