@@ -16,12 +16,14 @@ FusionClassifier
 
 .. autoclass:: torchensemble.fusion.FusionClassifier
     :members:
+    :inherited-members:
 
 FusionRegressor
 ***************
 
 .. autoclass:: torchensemble.fusion.FusionRegressor
     :members:
+    :inherited-members:
 
 Voting
 ------
@@ -41,7 +43,7 @@ VotingRegressor
 
 .. autoclass:: torchensemble.voting.VotingRegressor
     :members:
-
+    :inherited-members:
 
 Bagging
 -------
@@ -56,13 +58,14 @@ BaggingClassifier
 
 .. autoclass:: torchensemble.bagging.BaggingClassifier
     :members:
+    :inherited-members:
 
 BaggingRegressor
 ****************
 
 .. autoclass:: torchensemble.bagging.BaggingRegressor
     :members:
-
+    :inherited-members:
 
 Gradient Boosting
 -----------------

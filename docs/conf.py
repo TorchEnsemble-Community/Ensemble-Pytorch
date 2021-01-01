@@ -60,7 +60,7 @@ napoleon_type_aliases = None
 autodoc_default_flags = ['members', 'inherited-members', 'show-inheritance']
 autodoc_default_options = {
     "members": True,
-    "inherited-members": False,
+    "inherited-members": True,
     "show-inheritance": False,
 }
 
