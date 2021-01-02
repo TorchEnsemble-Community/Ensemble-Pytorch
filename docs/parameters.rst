@@ -84,3 +84,27 @@ GradientBoostingRegressor
 
 .. autoclass:: torchensemble.gradient_boosting.GradientBoostingRegressor
     :members:
+
+Snapshot Ensemble
+-----------------
+
+Snapshot ensemble generates many base estimators by enforcing a base
+estimator to converge to its local minima many times and save the
+model parameters at that point as a snapshot. The final prediction takes
+the average over predictions from all snapshot models.
+
+Reference:
+    G. Huang, Y.-X. Li, G. Pleiss et al., Snapshot Ensemble: Train 1, and
+    M for free, ICLR, 2017.
+
+SnapshotEnsembleClassifier
+**************************
+
+.. autoclass:: torchensemble.snapshot_ensemble.SnapshotEnsembleClassifier
+    :members:
+
+SnapshotEnsembleRegressor
+*************************
+
+.. autoclass:: torchensemble.snapshot_ensemble.SnapshotEnsembleRegressor
+    :members:

@@ -33,8 +33,8 @@ __fit_doc = """
         A :mod:`DataLoader` container that contains the training data.
     init_lr : float, default=1e-1
         The initial learning rate of the parameter optimizer. Snapshot
-        ensemble will adjust the learning rate given ``init_lr``, ``epochs``,
-         and ``n_estimators`` automatically.
+        ensemble will adjust the learning rate based on ``init_lr``,
+        ``epochs``, and ``n_estimators`` automatically.
     weight_decay : float, default=5e-4
         The weight decay of the parameter optimizer.
     epochs : int, default=100
@@ -50,13 +50,6 @@ __fit_doc = """
           epoch.
         - If not ``None``, the ensemble will be evaluated on this
           dataloader after each training epoch.
-    early_stopping_rounds : int, default=2
-        Specify the number of tolerant rounds for early stopping. When the
-        validation performance of the ensemble does not improve after
-        adding the base estimator fitted in current iteration, the internal
-        counter on early stopping will increase by one. When the value of
-        the internal counter reaches ``early_stopping_rounds``, the
-        training stage  will terminate early.
     save_model : bool, default=True
         Whether to save the model.
 
