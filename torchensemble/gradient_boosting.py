@@ -125,6 +125,13 @@ class _BaseGradientBoosting(BaseModule):
                  verbose=1):
         super(BaseModule, self).__init__()
 
+        # Make sure estimator is not an instance
+        if not isinstance(estimator, type):
+            msg = ("The input argument `estimator` should be a class"
+                   " inherited from nn.Module. Perhaps you have passed"
+                   " an instance of that class into the ensemble.")
+            raise RuntimeError(msg)
+
         self.base_estimator_ = estimator
         self.n_estimators = n_estimators
         self.estimator_args = estimator_args
