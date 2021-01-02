@@ -105,3 +105,14 @@ def test_reg(reg):
 
     # Test
     model.predict(test_loader)
+
+
+@pytest.mark.parametrize("method", all_clf + all_reg)
+def test_estimator_check(method):
+    """
+    This unit test checks that the input argument estimator should not be
+    an instance of a class inherited from nn.Module.
+    """
+    with pytest.raises(RuntimeError) as excinfo:
+        model = method(estimator=MLP_clf(), n_estimators=2, cuda=False)  # noqa: F841,E501
+    assert "input argument `estimator` should be a class" in str(excinfo.value)
