@@ -7,7 +7,8 @@ from . import _constants as const
 
 def torchensemble_model_doc(header, item):
     """
-    Decorator on obtaining documentation for different ensemble models.
+    Decorator on obtaining documentation for different ensemble models,
+    this decorator is modified from sklearn.py in XGBoost.
 
     Parameters
     ----------
@@ -38,7 +39,7 @@ class BaseModule(abc.ABC, nn.Module):
     """Base class for ensemble methods.
 
     WARNING: This class cannot be used directly.
-    Use the derived classes instead.
+    Please use the derived classes instead.
     """
     def __init__(self,
                  estimator,
@@ -48,6 +49,13 @@ class BaseModule(abc.ABC, nn.Module):
                  n_jobs=None,
                  verbose=1):
         super(BaseModule, self).__init__()
+
+        # Make sure estimator is not an instance
+        if not isinstance(estimator, type):
+            msg = ("The input argument `estimator` should be a class"
+                   " inherited from nn.Module. Perhaps you have passed"
+                   " an instance of that class into the ensemble.")
+            raise RuntimeError(msg)
 
         self.base_estimator_ = estimator
         self.n_estimators = n_estimators
