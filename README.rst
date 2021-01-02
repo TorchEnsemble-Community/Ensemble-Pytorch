@@ -1,4 +1,4 @@
-|github|_ |readthedocs|_ |codecov|_
+|github|_ |readthedocs|_ |codecov|_ |python|_
 
 .. |github| image:: https://github.com/AaronX121/Ensemble-Pytorch/workflows/Python%20package/badge.svg
 .. _github: https://github.com/AaronX121/Ensemble-Pytorch/workflows/Python%20package/badge.svg
@@ -8,6 +8,9 @@
 
 .. |codecov| image:: https://codecov.io/gh/xuyxu/Ensemble-Pytorch/branch/master/graph/badge.svg?token=2FXCFRIDTV
 .. _codecov: https://codecov.io/gh/xuyxu/Ensemble-Pytorch
+
+.. |python| image:: https://img.shields.io/badge/python-3.6+-blue?logo=python
+.. _python: https://www.python.org/
 
 Ensemble Pytorch
 ================

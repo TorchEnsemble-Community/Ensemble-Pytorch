@@ -72,7 +72,7 @@ y_test_reg = y_test_reg.view(-1, 1)
 @pytest.mark.parametrize("clf", all_clf)
 def test_clf(clf):
     """
-    This unit test checks the training and evaluating stage of all methods.
+    This unit test checks the training and evaluating stage of all classifiers.
     """
     epochs = 1
     n_estimators = 2
@@ -99,7 +99,7 @@ def test_clf(clf):
 @pytest.mark.parametrize("reg", all_reg)
 def test_reg(reg):
     """
-    This unit test checks the training and evaluating stage of all methods.
+    This unit test checks the training and evaluating stage of all regressors.
     """
     epochs = 1
     n_estimators = 2
