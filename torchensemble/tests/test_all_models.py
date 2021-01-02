@@ -10,13 +10,15 @@ import torchensemble
 all_clf = [torchensemble.FusionClassifier,
            torchensemble.VotingClassifier,
            torchensemble.BaggingClassifier,
-           torchensemble.GradientBoostingClassifier]
+           torchensemble.GradientBoostingClassifier,
+           torchensemble.SnapshotEnsembleClassifier]
 
 
 all_reg = [torchensemble.FusionRegressor,
            torchensemble.VotingRegressor,
            torchensemble.BaggingRegressor,
-           torchensemble.GradientBoostingRegressor]
+           torchensemble.GradientBoostingRegressor,
+           torchensemble.SnapshotEnsembleRegressor]
 
 
 # Base estimator
@@ -72,7 +74,10 @@ def test_clf(clf):
     """
     This unit test checks the training and evaluating stage of all methods.
     """
-    model = clf(estimator=MLP_clf, n_estimators=2, cuda=False)
+    epochs = 1
+    n_estimators = 2
+
+    model = clf(estimator=MLP_clf, n_estimators=n_estimators, cuda=False)
 
     # Prepare data
     train = TensorDataset(X_train, y_train_clf)
@@ -80,8 +85,12 @@ def test_clf(clf):
     test = TensorDataset(X_test, y_test_clf)
     test_loader = DataLoader(test, batch_size=2)
 
+    # Snapshot ensemble needs more epochs
+    if isinstance(model, torchensemble.SnapshotEnsembleClassifier):
+        epochs = 6
+
     # Train
-    model.fit(train_loader, epochs=1)
+    model.fit(train_loader, epochs=epochs, save_model=False)
 
     # Test
     model.predict(test_loader)
@@ -92,7 +101,10 @@ def test_reg(reg):
     """
     This unit test checks the training and evaluating stage of all methods.
     """
-    model = reg(estimator=MLP_reg, n_estimators=2, cuda=False)
+    epochs = 1
+    n_estimators = 2
+
+    model = reg(estimator=MLP_reg, n_estimators=n_estimators, cuda=False)
 
     # Prepare data
     train = TensorDataset(X_train, y_train_reg)
@@ -100,8 +112,12 @@ def test_reg(reg):
     test = TensorDataset(X_test, y_test_reg)
     test_loader = DataLoader(test, batch_size=2)
 
+    # Snapshot ensemble needs more epochs
+    if isinstance(model, torchensemble.SnapshotEnsembleRegressor):
+        epochs = 6
+
     # Train
-    model.fit(train_loader, epochs=1)
+    model.fit(train_loader, epochs=epochs, save_model=False)
 
     # Test
     model.predict(test_loader)
