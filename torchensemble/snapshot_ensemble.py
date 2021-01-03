@@ -35,6 +35,12 @@ __fit_doc = """
         The initial learning rate of the parameter optimizer. Snapshot
         ensemble will adjust the learning rate based on ``init_lr``,
         ``epochs``, and ``n_estimators`` automatically.
+    lr_clip : list or tuple, default=None
+        Specify the accepted range of learning rate. When the learning rate
+        determined by the scheduler is out of this range, it will be clipped.
+
+        - The first element should be the lower bound of learning rate.
+        - The second element should be the upper bound of learning rate.
     weight_decay : float, default=5e-4
         The weight decay of the parameter optimizer.
     epochs : int, default=100
@@ -261,7 +267,7 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble):
             for batch_idx, (data, target) in enumerate(train_loader):
 
                 # Clip the learning rate
-                optimizer = self._clip_lr(optimizer, lr_clip) 
+                optimizer = self._clip_lr(optimizer, lr_clip)
 
                 batch_size = data.size()[0]
                 data, target = data.to(self.device), target.to(self.device)
