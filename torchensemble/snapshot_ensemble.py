@@ -261,7 +261,7 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble):
             for batch_idx, (data, target) in enumerate(train_loader):
 
                 # Clip the learning rate
-                optimizer = self._clip_lr(optimizer, lr_clip)                
+                optimizer = self._clip_lr(optimizer, lr_clip)       
 
                 batch_size = data.size()[0]
                 data, target = data.to(self.device), target.to(self.device)
@@ -420,7 +420,7 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble):
             for batch_idx, (data, target) in enumerate(train_loader):
 
                 # Clip the learning rate
-                optimizer = self._clip_lr(optimizer, lr_clip)     
+                optimizer = self._clip_lr(optimizer, lr_clip)
 
                 data, target = data.to(self.device), target.to(self.device)
 
