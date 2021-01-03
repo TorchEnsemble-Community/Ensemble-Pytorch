@@ -154,13 +154,13 @@ class _BaseSnapshotEnsemble(BaseModule):
 
         return output
 
-    def _set_scheduler(self, optimizer, init_lr, epochs):
+    def _set_scheduler(self, optimizer, n_iters):
         """
-        Set the scheduler for snapshot ensemble.
+        Set the learning rate scheduler for snapshot ensemble.
         Please refer to the equation (2) in original paper for details.
         """
-        T_M = math.ceil(epochs / self.n_estimators)
-        lr_lambda = lambda iteration: 0.5 * init_lr * (  # noqa: E731
+        T_M = math.ceil(n_iters / self.n_estimators)
+        lr_lambda = lambda iteration: 0.5 * (  # noqa: E731
             torch.cos(torch.tensor(math.pi * (iteration % T_M) / T_M)) + 1
         )
         scheduler = LambdaLR(optimizer, lr_lambda=lr_lambda)
@@ -211,7 +211,7 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble):
                                         init_lr,
                                         weight_decay)
 
-        scheduler = self._set_scheduler(optimizer, init_lr, epochs)
+        scheduler = self._set_scheduler(optimizer, epochs * len(train_loader))
 
         estimator_.train()
         self._validate_parameters(init_lr, weight_decay, epochs, log_interval)
@@ -219,17 +219,14 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble):
         # Utils
         criterion = nn.CrossEntropyLoss()
         best_acc = 0.
-        counter = 0  # the counter on base estimators
-        epoch_per_estimator = epochs // self.n_estimators
-
-        if epoch_per_estimator <= 2:
-            msg = "Too few number of training epochs for each base estimator."
-            raise RuntimeError(msg)
+        counter = 0  # the counter on generating snapshots
+        n_iters_per_estimator = epochs * len(train_loader) // self.n_estimators
 
         # Training loop
         for epoch in range(epochs):
             for batch_idx, (data, target) in enumerate(train_loader):
 
+                batch_size = data.size()[0]
                 data, target = data.to(self.device), target.to(self.device)
 
                 output = estimator_(data)
@@ -239,31 +236,44 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble):
                 loss.backward()
                 optimizer.step()
 
-                # Snapshot ensemble updates the learning rate per iteration
-                # instead of per epoch.
-                scheduler.step()
-
                 # Print training status
                 if batch_idx % log_interval == 0:
                     with torch.no_grad():
-                        msg = ("{} Estimator: {} | Epoch: {:03d} |"
-                               " Batch: {:03d} | Loss: {:.5f}")
-                        print(
-                            msg.format(
-                                utils.ctime(),
-                                counter,
-                                epoch % epoch_per_estimator,
-                                batch_idx,
-                                loss)
-                        )
+                        pred = output.data.max(1)[1]
+                        correct = pred.eq(target.view(-1).data).sum()
 
-            if epoch > 0 and (epoch + 1) % epoch_per_estimator == 0:
+                        if self.verbose > 0:
+                            msg = ("{} lr: {:.5f} | Epoch: {:03d} | Batch:"
+                                   " {:03d} | Loss: {:.5f} | Correct: "
+                                   "{:d}/{:d}")
+                            print(
+                                msg.format(
+                                    utils.ctime(),
+                                    scheduler.get_last_lr()[0],
+                                    epoch,
+                                    batch_idx,
+                                    loss,
+                                    correct,
+                                    batch_size
+                                )
+                            )
+
+                # Snapshot ensemble updates the learning rate per iteration
+                # instead of per epoch.
+                scheduler.step()
+                counter += 1
+
+            if counter % n_iters_per_estimator == 0:
                 # Generate and save the snapshot
                 snapshot = copy.deepcopy(estimator_)
                 self.estimators_.append(snapshot)
 
+                if self.verbose > 0:
+                    msg = "{} Generate the snapshot with index: {}"
+                    print(msg.format(utils.ctime(), len(self.estimators_) - 1))
+
             # Validation after each snapshot being generated
-            if test_loader and (epoch + 1) % epoch_per_estimator == 0:
+            if test_loader and counter % n_iters_per_estimator == 0:
                 with torch.no_grad():
                     correct = 0.
                     for batch_idx, (data, target) in enumerate(test_loader):
@@ -280,7 +290,7 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble):
                             utils.save(self, save_dir, self.verbose)
 
                     if self.verbose > 0:
-                        msg = ("{} n_estimator: {} | Validation Acc: {:.3f} %"
+                        msg = ("{} n_estimators: {} | Validation Acc: {:.3f} %"
                                " | Historical Best: {:.3f} %")
                         print(msg.format(
                             utils.ctime(),
@@ -288,10 +298,6 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble):
                             acc,
                             best_acc)
                         )
-
-            if epoch > 0 and (epoch + 1) % epoch_per_estimator == 0:
-                # Step into the next base estimator
-                counter += 1
 
         if save_model and not test_loader:
             utils.save(self, save_dir, self.verbose)
@@ -356,7 +362,7 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble):
                                         init_lr,
                                         weight_decay)
 
-        scheduler = self._set_scheduler(optimizer, init_lr, epochs)
+        scheduler = self._set_scheduler(optimizer, epochs * len(train_loader))
 
         estimator_.train()
         self._validate_parameters(init_lr, weight_decay, epochs, log_interval)
@@ -364,12 +370,8 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble):
         # Utils
         criterion = nn.MSELoss()
         best_mse = float("inf")
-        counter = 0  # the counter on base estimators
-        epoch_per_estimator = epochs // self.n_estimators
-
-        if epoch_per_estimator <= 2:
-            msg = "Too few number of training epochs for each base estimator."
-            raise RuntimeError(msg)
+        counter = 0  # the counter on generating snapshots
+        n_iters_per_estimator = epochs * len(train_loader) // self.n_estimators
 
         # Training loop
         for epoch in range(epochs):
@@ -384,31 +386,36 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble):
                 loss.backward()
                 optimizer.step()
 
-                # Snapshot ensemble updates the learning rate per iteration
-                # instead of per epoch.
-                scheduler.step()
-
                 # Print training status
                 if batch_idx % log_interval == 0:
                     with torch.no_grad():
-                        msg = ("{} Estimator: {} | Epoch: {:03d} |"
-                               " Batch: {:03d} | Loss: {:.5f}")
+                        msg = ("{} lr: {:.5f} | Epoch: {:03d} | Batch: {:03d}"
+                               " | Loss: {:.5f}")
                         print(
                             msg.format(
                                 utils.ctime(),
-                                counter,
-                                epoch % epoch_per_estimator,
+                                scheduler.get_last_lr()[0],
+                                epoch,
                                 batch_idx,
                                 loss)
                         )
 
-            if epoch > 0 and (epoch + 1) % epoch_per_estimator == 0:
+                # Snapshot ensemble updates the learning rate per iteration
+                # instead of per epoch.
+                scheduler.step()
+                counter += 1
+
+            if counter % n_iters_per_estimator == 0:
                 # Generate and save the snapshot
                 snapshot = copy.deepcopy(estimator_)
                 self.estimators_.append(snapshot)
 
+                if self.verbose > 0:
+                    msg = "{} Generate the snapshot with index: {}"
+                    print(msg.format(utils.ctime(), len(self.estimators_) - 1))
+
             # Validation after each snapshot being generated
-            if test_loader and (epoch + 1) % epoch_per_estimator == 0:
+            if test_loader and counter % n_iters_per_estimator == 0:
                 with torch.no_grad():
                     mse = 0.
                     for batch_idx, (data, target) in enumerate(test_loader):
@@ -424,7 +431,7 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble):
                             utils.save(self, save_dir, self.verbose)
 
                     if self.verbose > 0:
-                        msg = ("{} n_estimator: {} | Validation MSE: {:.5f} |"
+                        msg = ("{} n_estimators: {} | Validation MSE: {:.5f} |"
                                " Historical Best: {:.5f}")
                         print(msg.format(
                             utils.ctime(),
@@ -432,10 +439,6 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble):
                             mse,
                             best_mse)
                         )
-
-            if epoch > 0 and (epoch + 1) % epoch_per_estimator == 0:
-                # Step into the next base estimator
-                counter += 1
 
         if save_model and not test_loader:
             utils.save(self, save_dir, self.verbose)
