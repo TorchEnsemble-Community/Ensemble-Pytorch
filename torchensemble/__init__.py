@@ -6,6 +6,8 @@ from .bagging import BaggingClassifier
 from .bagging import BaggingRegressor
 from .gradient_boosting import GradientBoostingClassifier
 from .gradient_boosting import GradientBoostingRegressor
+from .snapshot_ensemble import SnapshotEnsembleClassifier
+from .snapshot_ensemble import SnapshotEnsembleRegressor
 
 
 __all__ = ["FusionClassifier",
@@ -15,4 +17,6 @@ __all__ = ["FusionClassifier",
            "BaggingClassifier",
            "BaggingRegressor",
            "GradientBoostingClassifier",
-           "GradientBoostingRegressor"]
+           "GradientBoostingRegressor",
+           "SnapshotEnsembleClassifier",
+           "SnapshotEnsembleRegressor"]

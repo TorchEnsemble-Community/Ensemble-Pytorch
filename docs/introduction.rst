@@ -47,3 +47,19 @@ The figure below presents the data flow of gradient boosting during the training
 .. image:: ./_images/gradient_boosting.png
    :align: center
    :width: 500
+
+Snapshot Ensemble [1]_
+----------------------
+
+Unlike all methods above, where :math:`M` independent base estimators will be trained, snapshot ensemble generates the ensemble by enforcing a single base estimator to converege to different local minima :math:`M` times. At each minima, the parameters of this estimator are saved (i.e., snapshot), serving as a base estimator in the ensemble. The output of snapshot ensemble takes the average over the predictions from all snapshots.
+
+To obtain snapshots with good performance, snapshot ensemble uses **cyclic annealing schedule on learning rate** to train the base estimator. Suppose that the initial learning rate is :math:`\alpha_0`, the total number of training iterations is :math:`T`, the learning rate at iteration :math:`t` is:
+
+.. math::
+   \alpha_t = \frac{\alpha_0}{2} \left(\cos \left(\pi \frac{(t-1) \pmod{ \left \lceil T/M \right \rceil}}{\left \lceil T/M \right \rceil}\right) + 1\right).
+
+Notice that the iteration above indicates the loop on enumerating all batches within each epoch, instead of the loop on iterating over all training epochs.
+
+**References**
+
+.. [1] Huang, Gao, et al. "Snapshot ensembles: Train 1, get m for free." ICLR, 2017.
