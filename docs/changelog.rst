@@ -1,4 +1,4 @@
 Change Log
 ==========
 
-To be added.
+.. include:: ../CHANGELOG.rst
