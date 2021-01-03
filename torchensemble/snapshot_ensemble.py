@@ -74,7 +74,7 @@ __fit_doc = """
 
 def _snapshot_ensemble_model_doc(header, item="fit"):
     """
-    Decorator on obtaining documentation for different gradient boosting
+    Decorator on obtaining documentation for different snapshot ensemble
     models.
     """
     def get_doc(item):
@@ -254,8 +254,6 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble):
 
         scheduler = self._set_scheduler(optimizer, epochs * len(train_loader))
 
-        estimator_.train()
-
         # Utils
         criterion = nn.CrossEntropyLoss()
         best_acc = 0.
@@ -263,6 +261,7 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble):
         n_iters_per_estimator = epochs * len(train_loader) // self.n_estimators
 
         # Training loop
+        estimator_.train()
         for epoch in range(epochs):
             for batch_idx, (data, target) in enumerate(train_loader):
 
@@ -280,26 +279,25 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble):
                 optimizer.step()
 
                 # Print training status
-                if batch_idx % log_interval == 0:
+                if batch_idx % log_interval == 0 and self.verbose > 0:
                     with torch.no_grad():
                         pred = output.data.max(1)[1]
                         correct = pred.eq(target.view(-1).data).sum()
 
-                        if self.verbose > 0:
-                            msg = ("{} lr: {:.5f} | Epoch: {:03d} | Batch:"
-                                   " {:03d} | Loss: {:.5f} | Correct: "
-                                   "{:d}/{:d}")
-                            print(
-                                msg.format(
-                                    utils.ctime(),
-                                    optimizer.param_groups[0]["lr"],
-                                    epoch,
-                                    batch_idx,
-                                    loss,
-                                    correct,
-                                    batch_size
-                                )
+                        msg = ("{} lr: {:.5f} | Epoch: {:03d} | Batch:"
+                               " {:03d} | Loss: {:.5f} | Correct: "
+                               "{:d}/{:d}")
+                        print(
+                            msg.format(
+                                utils.ctime(),
+                                optimizer.param_groups[0]["lr"],
+                                epoch,
+                                batch_idx,
+                                loss,
+                                correct,
+                                batch_size
                             )
+                        )
 
                 # Snapshot ensemble updates the learning rate per iteration
                 # instead of per epoch.
@@ -413,8 +411,6 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble):
 
         scheduler = self._set_scheduler(optimizer, epochs * len(train_loader))
 
-        estimator_.train()
-
         # Utils
         criterion = nn.MSELoss()
         best_mse = float("inf")
@@ -422,6 +418,7 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble):
         n_iters_per_estimator = epochs * len(train_loader) // self.n_estimators
 
         # Training loop
+        estimator_.train()
         for epoch in range(epochs):
             for batch_idx, (data, target) in enumerate(train_loader):
 
@@ -438,7 +435,7 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble):
                 optimizer.step()
 
                 # Print training status
-                if batch_idx % log_interval == 0:
+                if batch_idx % log_interval == 0 and self.verbose > 0:
                     with torch.no_grad():
                         msg = ("{} lr: {:.5f} | Epoch: {:03d} | Batch: {:03d}"
                                " | Loss: {:.5f}")
