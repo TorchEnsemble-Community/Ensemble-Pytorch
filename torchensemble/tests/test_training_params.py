@@ -7,18 +7,9 @@ from torch.utils.data import TensorDataset, DataLoader
 import torchensemble
 
 
-all_clf = [torchensemble.FusionClassifier,
-           torchensemble.VotingClassifier,
-           torchensemble.BaggingClassifier,
-           torchensemble.GradientBoostingClassifier,
-           torchensemble.SnapshotEnsembleClassifier]
-
-
-all_reg = [torchensemble.FusionRegressor,
-           torchensemble.VotingRegressor,
-           torchensemble.BaggingRegressor,
-           torchensemble.GradientBoostingRegressor,
-           torchensemble.SnapshotEnsembleRegressor]
+parallel = [torchensemble.FusionClassifier,
+            torchensemble.VotingClassifier,
+            torchensemble.BaggingClassifier]
 
 
 # Base estimator
@@ -47,6 +38,31 @@ y_train = torch.LongTensor(np.array(([0, 0, 1, 1])))
 # Prepare data
 train = TensorDataset(X_train, y_train)
 train_loader = DataLoader(train, batch_size=2)
+
+
+@pytest.mark.parametrize("method", parallel)
+def test_parallel(method):
+    model = method(estimator=MLP, n_estimators=2, cuda=False)
+
+    # Learning rate
+    with pytest.raises(ValueError) as excinfo:
+        model.fit(train_loader, lr=-1)
+    assert "learning rate of optimizer" in str(excinfo.value)
+
+    # Weight decay
+    with pytest.raises(ValueError) as excinfo:
+        model.fit(train_loader, weight_decay=-1)
+    assert "weight decay of optimizer" in str(excinfo.value)
+
+    # Epochs
+    with pytest.raises(ValueError) as excinfo:
+        model.fit(train_loader, epochs=-1)
+    assert "number of training epochs" in str(excinfo.value)
+
+    # Log interval
+    with pytest.raises(ValueError) as excinfo:
+        model.fit(train_loader, log_interval=-1)
+    assert "number of batches to wait" in str(excinfo.value)
 
 
 def test_snapshot_ensemble():

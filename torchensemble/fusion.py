@@ -61,10 +61,10 @@ class FusionClassifier(BaseModule):
         for _ in range(self.n_estimators):
             self.estimators_.append(self._make_estimator())
         self.n_outputs = self._decide_n_outputs(train_loader, True)
+        self._validate_parameters(lr, weight_decay, epochs, log_interval)
         optimizer = utils.set_optimizer(self, optimizer, lr, weight_decay)
 
         self.train()
-        self._validate_parameters(lr, weight_decay, epochs, log_interval)
 
         # Utils
         criterion = nn.CrossEntropyLoss()
@@ -172,10 +172,10 @@ class FusionRegressor(BaseModule):
         for _ in range(self.n_estimators):
             self.estimators_.append(self._make_estimator())
         self.n_outputs = self._decide_n_outputs(train_loader, False)
+        self._validate_parameters(lr, weight_decay, epochs, log_interval)
         optimizer = utils.set_optimizer(self, optimizer, lr, weight_decay)
 
         self.train()
-        self._validate_parameters(lr, weight_decay, epochs, log_interval)
 
         # Utils
         criterion = nn.MSELoss()
@@ -195,7 +195,7 @@ class FusionRegressor(BaseModule):
                 optimizer.step()
 
                 # Print training status
-                if batch_idx % log_interval == 0:
+                if batch_idx % log_interval == 0 and self.verbose > 0:
                     with torch.no_grad():
                         msg = "{} Epoch: {:03d} | Batch: {:03d} | Loss: {:.5f}"
                         print(
