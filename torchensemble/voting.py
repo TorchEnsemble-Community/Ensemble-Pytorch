@@ -102,9 +102,9 @@ class VotingClassifier(BaseModule):
         for _ in range(self.n_estimators):
             estimators.append(self._make_estimator())
         self.n_outputs = self._decide_n_outputs(train_loader, True)
+        self._validate_parameters(lr, weight_decay, epochs, log_interval)
 
         self.train()
-        self._validate_parameters(lr, weight_decay, epochs, log_interval)
 
         # Utils
         criterion = nn.CrossEntropyLoss()
@@ -226,10 +226,10 @@ class VotingRegressor(BaseModule):
         estimators = []
         for _ in range(self.n_estimators):
             estimators.append(self._make_estimator())
+        self._validate_parameters(lr, weight_decay, epochs, log_interval)
         self.n_outputs = self._decide_n_outputs(train_loader, False)
 
         self.train()
-        self._validate_parameters(lr, weight_decay, epochs, log_interval)
 
         # Utils
         criterion = nn.MSELoss()

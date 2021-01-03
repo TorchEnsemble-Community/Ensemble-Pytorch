@@ -109,9 +109,9 @@ class BaggingClassifier(BaseModule):
         for _ in range(self.n_estimators):
             estimators.append(self._make_estimator())
         self.n_outputs = self._decide_n_outputs(train_loader, True)
+        self._validate_parameters(lr, weight_decay, epochs, log_interval)
 
         self.train()
-        self._validate_parameters(lr, weight_decay, epochs, log_interval)
 
         # Utils
         criterion = nn.CrossEntropyLoss()
@@ -234,9 +234,9 @@ class BaggingRegressor(BaseModule):
         for _ in range(self.n_estimators):
             estimators.append(self._make_estimator())
         self.n_outputs = self._decide_n_outputs(train_loader, False)
+        self._validate_parameters(lr, weight_decay, epochs, log_interval)
 
         self.train()
-        self._validate_parameters(lr, weight_decay, epochs, log_interval)
 
         # Utils
         criterion = nn.MSELoss()
