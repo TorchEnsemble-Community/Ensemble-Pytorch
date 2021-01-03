@@ -111,6 +111,7 @@ class _BaseSnapshotEnsemble(BaseModule):
 
     def _validate_parameters(self,
                              init_lr,
+                             lr_clip,
                              weight_decay,
                              epochs,
                              log_interval):
@@ -120,6 +121,21 @@ class _BaseSnapshotEnsemble(BaseModule):
             msg = ("The initial learning rate of optimizer = {} should be"
                    " strictly positive.")
             raise ValueError(msg.format(init_lr))
+
+        if lr_clip:
+            if not (isinstance(lr_clip, list) or isinstance(lr_clip, tuple)):
+                msg = "lr_clip should be a list or tuple with two elements."
+                raise ValueError(msg)
+
+            if len(lr_clip) != 2:
+                msg = ("lr_clip should only have two elements, one for lower"
+                       " bound, and another for upper bound.")
+                raise ValueError(msg)
+
+            if not lr_clip[0] < lr_clip[1]:
+                msg = ("The first element = {} should be smaller than the"
+                       " second element = {} in lr_clip.")
+                raise ValueError(msg.format(lr_clip[0], lr_clip[1]))
 
         if not weight_decay >= 0:
             msg = "The weight decay of optimizer = {} should not be negative."
@@ -153,6 +169,19 @@ class _BaseSnapshotEnsemble(BaseModule):
             output += estimator(X) / len(self.estimators_)
 
         return output
+
+    def _clip_lr(self, optimizer, lr_clip):
+        """Clip the learning rate of the optimizer according to `lr_clip`."""
+        if not lr_clip:
+            return optimizer
+
+        for param_group in optimizer.param_groups:
+            if param_group["lr"] < lr_clip[0]:
+                param_group["lr"] = lr_clip[0]
+            if param_group["lr"] > lr_clip[1]:
+                param_group["lr"] = lr_clip[1]
+
+        return optimizer
 
     def _set_scheduler(self, optimizer, n_iters):
         """
@@ -191,6 +220,7 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble):
     def fit(self,
             train_loader,
             init_lr=1e-1,
+            lr_clip=None,
             weight_decay=5e-4,
             epochs=100,
             optimizer="Adam",
@@ -201,6 +231,11 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble):
 
         self.n_outputs = self._decide_n_outputs(train_loader,
                                                 self.is_classification)
+        self._validate_parameters(init_lr,
+                                  lr_clip,
+                                  weight_decay,
+                                  epochs,
+                                  log_interval)
 
         # Model used to generate snapshot ensembles
         estimator_ = self._make_estimator()
@@ -214,7 +249,6 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble):
         scheduler = self._set_scheduler(optimizer, epochs * len(train_loader))
 
         estimator_.train()
-        self._validate_parameters(init_lr, weight_decay, epochs, log_interval)
 
         # Utils
         criterion = nn.CrossEntropyLoss()
@@ -225,6 +259,9 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble):
         # Training loop
         for epoch in range(epochs):
             for batch_idx, (data, target) in enumerate(train_loader):
+
+                # Clip the learning rate
+                optimizer = self._clip_lr(optimizer, lr_clip)                
 
                 batch_size = data.size()[0]
                 data, target = data.to(self.device), target.to(self.device)
@@ -249,7 +286,7 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble):
                             print(
                                 msg.format(
                                     utils.ctime(),
-                                    scheduler.get_last_lr()[0],
+                                    optimizer.param_groups[0]["lr"],
                                     epoch,
                                     batch_idx,
                                     loss,
@@ -342,6 +379,7 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble):
     def fit(self,
             train_loader,
             init_lr=1e-1,
+            lr_clip=None,
             weight_decay=5e-4,
             epochs=100,
             optimizer="Adam",
@@ -352,6 +390,11 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble):
 
         self.n_outputs = self._decide_n_outputs(train_loader,
                                                 self.is_classification)
+        self._validate_parameters(init_lr,
+                                  lr_clip,
+                                  weight_decay,
+                                  epochs,
+                                  log_interval)
 
         # Model used to generate snapshot ensembles
         estimator_ = self._make_estimator()
@@ -365,7 +408,6 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble):
         scheduler = self._set_scheduler(optimizer, epochs * len(train_loader))
 
         estimator_.train()
-        self._validate_parameters(init_lr, weight_decay, epochs, log_interval)
 
         # Utils
         criterion = nn.MSELoss()
@@ -376,6 +418,9 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble):
         # Training loop
         for epoch in range(epochs):
             for batch_idx, (data, target) in enumerate(train_loader):
+
+                # Clip the learning rate
+                optimizer = self._clip_lr(optimizer, lr_clip)     
 
                 data, target = data.to(self.device), target.to(self.device)
 
@@ -394,7 +439,7 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble):
                         print(
                             msg.format(
                                 utils.ctime(),
-                                scheduler.get_last_lr()[0],
+                                optimizer.param_groups[0]["lr"],
                                 epoch,
                                 batch_idx,
                                 loss)
