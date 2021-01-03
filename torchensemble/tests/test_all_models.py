@@ -90,7 +90,10 @@ def test_clf(clf):
         epochs = 6
 
     # Train
-    model.fit(train_loader, epochs=epochs, save_model=False)
+    model.fit(train_loader,
+              epochs=epochs,
+              test_loader=test_loader,
+              save_model=False)
 
     # Test
     model.predict(test_loader)
@@ -117,7 +120,10 @@ def test_reg(reg):
         epochs = 6
 
     # Train
-    model.fit(train_loader, epochs=epochs, save_model=False)
+    model.fit(train_loader,
+              epochs=epochs,
+              test_loader=test_loader,
+              save_model=False)
 
     # Test
     model.predict(test_loader)
