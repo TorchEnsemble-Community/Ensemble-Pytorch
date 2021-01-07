@@ -1,10 +1,6 @@
 Welcome to Ensemble-PyTorch's documentation!
 ============================================
 
-.. image:: ./_images/badge.png
-   :align: center
-   :width: 400
-
 |github|_ |readthedocs|_ |codecov|_ |python|_
 
 .. |github| image:: https://github.com/AaronX121/Ensemble-Pytorch/workflows/Python%20package/badge.svg
@@ -19,11 +15,19 @@ Welcome to Ensemble-PyTorch's documentation!
 .. |python| image:: https://img.shields.io/badge/python-3.6+-blue?logo=python
 .. _python: https://www.python.org/
 
-**Ensemble-PyTorch** provides easy-to-use APIs on improving the performance of your PyTorch models using ensemble methods.
+.. image:: ./_images/badge.png
+   :align: center
+   :width: 400
 
-To get started, please refer to `Quick Start <./quick_start.html>`__. You can also check `Tutorial <./tutorial.html>`__, which contains an example presenting the entire workflow on boosting the performance of your CNN model with Ensemble-PyTorch. To learn more about different ensmeble methods, please refer to `Introduction <./introduction.html>`__.
+**Ensemble-PyTorch** implements state-of-the-art ensemble methods using PyTorch. It provides:
 
-Please feel free to open an `issue <https://github.com/AaronX121/Ensemble-Pytorch/issues>`__ if your have any problem. In addition, any feature request or `pull request <https://github.com/AaronX121/Ensemble-Pytorch/pulls>`__ is highly welcomed.
+* Easy ways to improve the performance of your deep learning models.
+* Easy-to-use APIs on training and evaluating.
+* High training efficiency and better memory management.
+
+To get started, please refer to `Quick Start <./quick_start.html>`__. You can also check `Tutorial <./tutorial.html>`__ to walk through an example presenting the entire workflow of Ensemble-PyTorch. To learn more about ensmeble methods currently supported, please refer to `Introduction <./introduction.html>`__.
+
+This package is under active development. Please feel free to open an `issue <https://github.com/AaronX121/Ensemble-Pytorch/issues>`__ if your have any problem. In addition, any feature request or `pull request <https://github.com/AaronX121/Ensemble-Pytorch/pulls>`__ is highly welcomed.
 
 .. toctree::
    :maxdepth: 2

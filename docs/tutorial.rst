@@ -9,7 +9,7 @@ Tutorial
 Define the base model
 ---------------------
 
-Suppose that our task is to build a CNN model for classification on the CIFAR-10 dataset. At the begining, we would like to try some traditional CNN models. For example, below is the PyTorch implementation of a modified version of LeNet-5, which is used for the "Hello, World!" program in Deep Learning: MNIST.
+Suppose that our task is to build a CNN model for classification on the CIFAR-10 dataset. At the beginning, we would like to try some traditional CNN models. For example, below is the PyTorch implementation of a modified version of LeNet-5, which is used for the "Hello, World!" program in Deep Learning: MNIST.
 
 .. code-block:: python
 
@@ -156,7 +156,7 @@ Concretely, you can imagine each LetNet-5 model as a voter, and now we have many
 
 In the code snippet above, we have used **10** LetNet-5 models (i.e., voters), and the input parameter ``LeNet5`` is simply the class of LetNet-5 defined in Section :ref:`model-definition`.
 
-Once again, we use the ``train_loader`` and ``test_loader`` to train and evaluate the model. However, unlike the workflow in Section :ref:`train-and-evaluate`, Ensemble-PyTorch provides high-leval APIs on the training and evaluating stage, which free us from writing the loops on training and evaluating.
+Once again, we use the ``train_loader`` and ``test_loader`` to train and evaluate the model. However, unlike the workflow in Section :ref:`train-and-evaluate`, Ensemble-PyTorch provides high-level APIs on the training and evaluating stage, which free us from writing the loops on training and evaluating.
 
 .. code-block:: python
 
