@@ -3,11 +3,11 @@ Welcome to Ensemble-PyTorch's documentation!
 
 |github|_ |readthedocs|_ |codecov|_ |python|_
 
-.. |github| image:: https://github.com/AaronX121/Ensemble-Pytorch/workflows/Python%20package/badge.svg
-.. _github: https://github.com/AaronX121/Ensemble-Pytorch/workflows/Python%20package/badge.svg
+.. |github| image:: https://github.com/xuyxu/Ensemble-Pytorch/workflows/torchensemble-CI/badge.svg
+.. _github: https://github.com/xuyxu/Ensemble-Pytorch/actions
 
 .. |readthedocs| image:: https://readthedocs.org/projects/ensemble-pytorch/badge/?version=latest
-.. _readthedocs: https://ensemble-pytorch.readthedocs.io/en/latest/?badge=latest
+.. _readthedocs: https://ensemble-pytorch.readthedocs.io/en/latest/index.html
 
 .. |codecov| image:: https://codecov.io/gh/xuyxu/Ensemble-Pytorch/branch/master/graph/badge.svg?token=2FXCFRIDTV
 .. _codecov: https://codecov.io/gh/xuyxu/Ensemble-Pytorch
