@@ -15,17 +15,16 @@ Fusion
 
 The output of fusion is the averaged output of all base estimators. Formally, given a sample :math:`\mathbf{x}_i`, the output of fusion is :math:`\mathbf{o}_i = \frac{1}{M} \sum_{m=1}^M \mathbf{o}_i^m`.
 
-During the training stage, all base estimators in fusion are jointly trained with mini-batch gradient desecent. Given the output of fusion on a data batch :math:`\mathcal{B}`, the training loss is: :math:`\frac{1}{B} \sum_{i=1}^B \mathcal{L}(\mathbf{o}_i, y_i)`. After then, learnable parameters of all base estimator can be jointly updated with the auto-differentiation system in PyTorch and gradient descent. The figure below presents the data flow of fusion:
+During the training stage, all base estimators in fusion are jointly trained with mini-batch gradient descent. Given the output of fusion on a data batch :math:`\mathcal{B}`, the training loss is: :math:`\frac{1}{B} \sum_{i=1}^B \mathcal{L}(\mathbf{o}_i, y_i)`. After then, learnable parameters of all base estimator can be jointly updated with the auto-differentiation system in PyTorch and gradient descent. The figure below presents the data flow of fusion:
 
 .. image:: ./_images/fusion.png
    :align: center
    :width: 200
 
-Voting
-------
+Voting & Bagging
+----------------
 
-Bagging
--------
+Voting and bagging are popularly used ensemble methods. Basically, voting and bagging fits $M$ base estimators independently, and the final predictions take average over the predictions from all base estimators. Compared to voting, bagging further uses sampling with replacement on each batch of data.
 
 Gradient Boosting
 -----------------
