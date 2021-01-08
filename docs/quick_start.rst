@@ -4,7 +4,7 @@ Get started
 Install from Source
 -------------------
 
-You can install the latest version of Ensemble-PyTorch with the following command:
+You can use the latest version of Ensemble-PyTorch with the following command:
 
 .. code-block:: bash
 
@@ -18,12 +18,12 @@ Ensemble-PyTorch is designed to be portable and has very small package dependenc
 Define Your Base Estimator
 --------------------------
 
-Since Ensemble-PyTorch uses ensemble methods to improve the performance, a key input argument is your deep learning model as the base estimator. Same as PyTorch, the class of your model should inherit from ``torch.nn.Module``, and it should at least implements two methods:
+Since Ensemble-PyTorch uses ensemble methods to improve the performance, a key input argument is your deep learning model as the base estimator. Same as PyTorch, the class of your model should inherit from ``torch.nn.Module``, and it should at least implement two methods:
 
 * ``__init__``: Instantiate sub-modules in your model and assign them as member variables.
 * ``forward``: Define the forward process of your model.
 
-For example, the code snippet below defines a multi-layered perceptron (MLP) with the structure `Input(90) - 128 - 128 - Output(1)`:
+For example, the code snippet below defines a multi-layered perceptron (MLP) with the network structure: ``Input(90) - 128 - 128 - Output(1)``:
 
 .. code-block:: python
 
@@ -67,7 +67,7 @@ After implementing the base estimator, you can then choose one of the ensemble m
 
 The meaning of different arguments is listed as follow:
 
-* ``estimator``: The class of your model, used to instantiate base estimators in the ensemble.
+* ``estimator``: The class of your deep learning model, used to instantiate base estimators in the ensemble.
 * ``n_estimators``: The number of base estimators in the ensemble.
 * ``cuda``: Whether to use GPU to train and evaluate the ensemble.
 
@@ -88,16 +88,16 @@ Ensemble-PyTorch provides Scikit-Learn APIs on the training and evaluating stage
     # Evaluating
     accuracy = model.predict(test_loader)
 
-In the code snippet above, ``train_loader`` and ``test_loader`` is the PyTorch ``DataLoader`` wrapper on your own dataset. In addition,
+In the code snippet above, ``train_loader`` and ``test_loader`` is the PyTorch ``DataLoader`` object that contains your own dataset. In addition,
 
 * ``lr``: The learning rate of the internal parameter optimizer.
 * ``weight_decay``: The weight decay of the internal parameter optimizer.
 * ``epochs``: The number of training epochs.
 * ``optimizer``: Specify the type of the optimizer.
 
-Since ``VotingClassifier`` is used for the classification problem, the predict function returns the classification accuracy on the ``test_loader``.
+Since ``VotingClassifier`` is used for the classification, the ``predict`` function will return the classification accuracy on the ``test_loader``.
 
 What's next
 -----------
 * You can check `Introduction <./introduction.html>`__ for details on ensemble methods available in Ensemble-PyTorch.
-* You can check `Parameters <./parameters.html>`__ for detailed API design on different ensemble methods.
+* You can check `API Reference <./parameters.html>`__ for detailed API design on ensemble methods.

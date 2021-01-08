@@ -19,15 +19,15 @@ Welcome to Ensemble-PyTorch's documentation!
    :align: center
    :width: 400
 
-**Ensemble-PyTorch** implements state-of-the-art ensemble methods using PyTorch. It provides:
+Ensemble-PyTorch implements a collection of ensemble methods using PyTorch. It provides:
 
-* Easy ways to improve the performance of your deep learning models.
-* Easy-to-use APIs on training and evaluating.
-* High training efficiency and better memory management.
+* Easy ways to boost the performance of your deep learning models;
+* Easy-to-use APIs on training and evaluating;
+* High training efficiency.
 
-To get started, please refer to `Quick Start <./quick_start.html>`__. You can also check `Tutorial <./tutorial.html>`__ to walk through an example presenting the entire workflow of Ensemble-PyTorch. To learn more about ensmeble methods currently supported, please refer to `Introduction <./introduction.html>`__.
+To get started, please refer to `Quick Start <./quick_start.html>`__. You can also check `Tutorial <./tutorial.html>`__ to walk through an example on the entire workflow of Ensemble-PyTorch. To learn more about ensemble methods currently supported, please refer to `Introduction <./introduction.html>`__.
 
-This package is under active development. Please feel free to open an `issue <https://github.com/AaronX121/Ensemble-Pytorch/issues>`__ if your have any problem. In addition, any feature request or `pull request <https://github.com/AaronX121/Ensemble-Pytorch/pulls>`__ is highly welcomed.
+This package is under active development. Please feel free to open an `issue <https://github.com/AaronX121/Ensemble-Pytorch/issues>`__ if your have any problem. In addition, any feature request or `pull request <https://github.com/AaronX121/Ensemble-Pytorch/pulls>`__ would be highly welcomed.
 
 .. toctree::
    :maxdepth: 2
@@ -38,11 +38,10 @@ This package is under active development. Please feel free to open an `issue <ht
    Introduction <introduction>
    Installation <installation>
    Experiment <experiment>
-   Parameters <parameters>
+   API Reference <parameters>
 
 .. toctree::
    :caption: Development
 
    Changelog <changelog>
    Roadmap <roadmap>
-
