@@ -13,15 +13,17 @@ from torchensemble.fusion import FusionRegressor
 from torchensemble.voting import VotingRegressor
 from torchensemble.bagging import BaggingRegressor
 from torchensemble.gradient_boosting import GradientBoostingRegressor
+from torchensemble.utils import get_logger
 
 
-def load_data(batch_size):
+def load_data(batch_size, logger):
 
     # The dataset can be downloaded from:
     #   https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/regression.html#YearPredictionMSD
 
     if not isinstance(batch_size, numbers.Integral):
         msg = "`batch_size` should be an integer, but got {} instead."
+        logger.error(msg.format(batch_size))
         raise ValueError(msg.format(batch_size))
 
     # MODIFY THE PATH IF YOU WANT
@@ -52,7 +54,7 @@ def load_data(batch_size):
     return train_loader, test_loader
 
 
-def display_records(records):
+def display_records(records, logger):
     msg = (
         "{:<28} | Testing MSE: {:.2f} | Training Time: {:.2f} s |"
         " Evaluating Time: {:.2f} s"
@@ -60,7 +62,8 @@ def display_records(records):
 
     print("\n")
     for method, training_time, evaluating_time, mse in records:
-        print(msg.format(method, mse, training_time, evaluating_time))
+        logger.info(msg.format(method, mse, training_time, evaluating_time))
+        # print(msg.format(method, mse, training_time, evaluating_time))
 
 
 class MLP(nn.Module):
@@ -96,14 +99,18 @@ if __name__ == "__main__":
     records = []
     torch.manual_seed(0)
 
+    logger = get_logger("INFO", "regression_YearPredictionMSD_mlp", "DEBUG")
+
     # Load data
-    train_loader, test_loader = load_data(batch_size)
-    print("Finish loading data...\n")
+    train_loader, test_loader = load_data(batch_size, logger)
+    # print("Finish loading data...\n")
+    logger.info("Finish loading data...\n")
 
     # FusionRegressor
     model = FusionRegressor(
         estimator=MLP,
         n_estimators=n_estimators,
+        logger=logger,
         cuda=True,
         n_jobs=1,
     )
@@ -125,6 +132,7 @@ if __name__ == "__main__":
     model = VotingRegressor(
         estimator=MLP,
         n_estimators=n_estimators,
+        logger=logger,
         cuda=True,
         n_jobs=1,
     )
@@ -146,6 +154,7 @@ if __name__ == "__main__":
     model = BaggingRegressor(
         estimator=MLP,
         n_estimators=n_estimators,
+        logger=logger,
         cuda=True,
         n_jobs=1,
     )
@@ -167,6 +176,7 @@ if __name__ == "__main__":
     model = GradientBoostingRegressor(
         estimator=MLP,
         n_estimators=n_estimators,
+        logger=logger,
         cuda=True
     )
 
@@ -184,4 +194,4 @@ if __name__ == "__main__":
                     evaluating_time, testing_mse))
 
     # Print results on different ensemble methods
-    display_records(records)
+    display_records(records, logger)

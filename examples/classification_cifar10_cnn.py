@@ -7,13 +7,14 @@ import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 
+from torchensemble.utils import get_logger
 from torchensemble.fusion import FusionClassifier
 from torchensemble.voting import VotingClassifier
 from torchensemble.bagging import BaggingClassifier
 from torchensemble.gradient_boosting import GradientBoostingClassifier
 
 
-def display_records(records):
+def display_records(records, logger):
     msg = (
         "{:<28} | Testing Acc: {:.2f} % | Training Time: {:.2f} s |"
         " Evaluating Time: {:.2f} s"
@@ -21,7 +22,8 @@ def display_records(records):
 
     print("\n")
     for method, training_time, evaluating_time, acc in records:
-        print(msg.format(method, acc, training_time, evaluating_time))
+        logger.info(msg.format(method, acc, training_time, evaluating_time))
+        # print(msg.format(method, acc, training_time, evaluating_time))
 
 
 class LeNet5(nn.Module):
@@ -108,10 +110,13 @@ if __name__ == "__main__":
         shuffle=True,
     )
 
+    logger = get_logger("INFO", "classification_cifar10_cnn", "DEBUG")
+
     # FusionClassifier
     model = FusionClassifier(
         estimator=LeNet5,
         n_estimators=n_estimators,
+        logger=logger,
         cuda=True,
         n_jobs=1
     )
@@ -133,6 +138,7 @@ if __name__ == "__main__":
     model = VotingClassifier(
         estimator=LeNet5,
         n_estimators=n_estimators,
+        logger=logger,
         cuda=True,
         n_jobs=1
     )
@@ -154,6 +160,7 @@ if __name__ == "__main__":
     model = BaggingClassifier(
         estimator=LeNet5,
         n_estimators=n_estimators,
+        logger=logger,
         cuda=True,
         n_jobs=1
     )
@@ -175,6 +182,7 @@ if __name__ == "__main__":
     model = GradientBoostingClassifier(
         estimator=LeNet5,
         n_estimators=n_estimators,
+        logger=logger,
         cuda=True
     )
 
@@ -192,4 +200,4 @@ if __name__ == "__main__":
                     evaluating_time, testing_acc))
 
     # Print results on different ensemble methods
-    display_records(records)
+    display_records(records, logger)

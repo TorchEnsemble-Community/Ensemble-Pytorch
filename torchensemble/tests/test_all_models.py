@@ -5,6 +5,7 @@ import torch.nn as nn
 from torch.utils.data import TensorDataset, DataLoader
 
 import torchensemble
+from torchensemble.utils import get_default_logger
 
 
 all_clf = [torchensemble.FusionClassifier,
@@ -20,6 +21,8 @@ all_reg = [torchensemble.FusionRegressor,
            torchensemble.GradientBoostingRegressor,
            torchensemble.SnapshotEnsembleRegressor]
 
+
+logger = get_default_logger("INFO", "pytest_models", "DEBUG")
 
 # Base estimator
 class MLP_clf(nn.Module):
@@ -77,7 +80,7 @@ def test_clf(clf):
     epochs = 1
     n_estimators = 2
 
-    model = clf(estimator=MLP_clf, n_estimators=n_estimators, cuda=False)
+    model = clf(estimator=MLP_clf, n_estimators=n_estimators, logger=logger, cuda=False)
 
     # Prepare data
     train = TensorDataset(X_train, y_train_clf)
@@ -107,7 +110,7 @@ def test_reg(reg):
     epochs = 1
     n_estimators = 2
 
-    model = reg(estimator=MLP_reg, n_estimators=n_estimators, cuda=False)
+    model = reg(estimator=MLP_reg, n_estimators=n_estimators, logger=logger, cuda=False)
 
     # Prepare data
     train = TensorDataset(X_train, y_train_reg)
@@ -136,5 +139,5 @@ def test_estimator_check(method):
     an instance of a class inherited from nn.Module.
     """
     with pytest.raises(RuntimeError) as excinfo:
-        model = method(estimator=MLP_clf(), n_estimators=2, cuda=False)  # noqa: F841,E501
+        model = method(estimator=MLP_clf(), n_estimators=2, logger=logger, cuda=False)  # noqa: F841,E501
     assert "input argument `estimator` should be a class" in str(excinfo.value)

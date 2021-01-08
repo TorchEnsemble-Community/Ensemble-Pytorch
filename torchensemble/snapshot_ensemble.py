@@ -95,9 +95,9 @@ class _BaseSnapshotEnsemble(BaseModule):
     def __init__(self,
                  estimator,
                  n_estimators,
+                 logger,
                  estimator_args=None,
-                 cuda=True,
-                 verbose=1):
+                 cuda=True):
         super(BaseModule, self).__init__()
 
         # Make sure estimator is not an instance
@@ -111,7 +111,7 @@ class _BaseSnapshotEnsemble(BaseModule):
         self.n_estimators = n_estimators
         self.estimator_args = estimator_args
         self.device = torch.device("cuda" if cuda else "cpu")
-        self.verbose = verbose
+        self.logger = logger
 
         self.estimators_ = nn.ModuleList()
 
@@ -126,41 +126,49 @@ class _BaseSnapshotEnsemble(BaseModule):
         if not init_lr > 0:
             msg = ("The initial learning rate of optimizer = {} should be"
                    " strictly positive.")
+            self.logger.error(msg.format(init_lr))
             raise ValueError(msg.format(init_lr))
 
         if lr_clip:
             if not (isinstance(lr_clip, list) or isinstance(lr_clip, tuple)):
                 msg = "lr_clip should be a list or tuple with two elements."
+                self.logger.error(msg)
                 raise ValueError(msg)
 
             if len(lr_clip) != 2:
                 msg = ("lr_clip should only have two elements, one for lower"
                        " bound, and another for upper bound.")
+                self.logger.error(msg)
                 raise ValueError(msg)
 
             if not lr_clip[0] < lr_clip[1]:
                 msg = ("The first element = {} should be smaller than the"
                        " second element = {} in lr_clip.")
+                self.logger.error(msg.format(lr_clip[0], lr_clip[1]))
                 raise ValueError(msg.format(lr_clip[0], lr_clip[1]))
 
         if not weight_decay >= 0:
             msg = "The weight decay of optimizer = {} should not be negative."
+            self.logger.error(msg.format(weight_decay))
             raise ValueError(msg.format(weight_decay))
 
         if not epochs > 0:
             msg = ("The number of training epochs = {} should be strictly"
                    " positive.")
+            self.logger.error(msg.format(epochs))
             raise ValueError(msg.format(epochs))
 
         if not log_interval > 0:
             msg = ("The number of batches to wait before printting the"
                    " training status should be strictly positive, but got {}"
                    " instead.")
+            self.logger.error(msg.format(log_interval))
             raise ValueError(msg.format(log_interval))
 
         if not epochs % self.n_estimators == 0:
             msg = ("The number of training epochs = {} should be a multiple"
                    " of n_estimators = {}.")
+            self.logger.error(msg.format(epochs, self.n_estimators))
             raise ValueError(msg.format(epochs, self.n_estimators))
 
     def _forward(self, X):
@@ -279,17 +287,27 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble):
                 optimizer.step()
 
                 # Print training status
-                if batch_idx % log_interval == 0 and self.verbose > 0:
+                if batch_idx % log_interval == 0:
                     with torch.no_grad():
                         pred = output.data.max(1)[1]
                         correct = pred.eq(target.view(-1).data).sum()
 
-                        msg = ("{} lr: {:.5f} | Epoch: {:03d} | Batch:"
+                        msg = ("lr: {:.5f} | Epoch: {:03d} | Batch:"
                                " {:03d} | Loss: {:.5f} | Correct: "
                                "{:d}/{:d}")
-                        print(
+                        # print(
+                        #     msg.format(
+                        #         utils.ctime(),
+                        #         optimizer.param_groups[0]["lr"],
+                        #         epoch,
+                        #         batch_idx,
+                        #         loss,
+                        #         correct,
+                        #         batch_size
+                        #     )
+                        # )
+                        self.logger.info(
                             msg.format(
-                                utils.ctime(),
                                 optimizer.param_groups[0]["lr"],
                                 epoch,
                                 batch_idx,
@@ -309,9 +327,9 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble):
                 snapshot = copy.deepcopy(estimator_)
                 self.estimators_.append(snapshot)
 
-                if self.verbose > 0:
-                    msg = "{} Generate the snapshot with index: {}"
-                    print(msg.format(utils.ctime(), len(self.estimators_) - 1))
+                msg = "Generate the snapshot with index: {}"
+                # print(msg.format(utils.ctime(), len(self.estimators_) - 1))
+                self.logger.info(msg.format(len(self.estimators_) - 1))
 
             # Validation after each snapshot being generated
             if test_loader and counter % n_iters_per_estimator == 0:
@@ -328,20 +346,26 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble):
                     if acc > best_acc:
                         best_acc = acc
                         if save_model:
-                            utils.save(self, save_dir, self.verbose)
+                            utils.save(self, save_dir, self.logger)
 
-                    if self.verbose > 0:
-                        msg = ("{} n_estimators: {} | Validation Acc: {:.3f} %"
-                               " | Historical Best: {:.3f} %")
-                        print(msg.format(
-                            utils.ctime(),
+                    msg = ("n_estimators: {} | Validation Acc: {:.3f} %"
+                            " | Historical Best: {:.3f} %")
+                    # print(msg.format(
+                    #     utils.ctime(),
+                    #     len(self.estimators_),
+                    #     acc,
+                    #     best_acc)
+                    # )
+                    self.logger.info(
+                        msg.format(
                             len(self.estimators_),
                             acc,
-                            best_acc)
+                            best_acc
                         )
+                    )
 
         if save_model and not test_loader:
-            utils.save(self, save_dir, self.verbose)
+            utils.save(self, save_dir, self.logger)
 
     @torchensemble_model_doc(
         """Implementation on the evaluating stage of SnapshotEnsembleClassifier.""",  # noqa: E501
@@ -435,13 +459,20 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble):
                 optimizer.step()
 
                 # Print training status
-                if batch_idx % log_interval == 0 and self.verbose > 0:
+                if batch_idx % log_interval == 0:
                     with torch.no_grad():
-                        msg = ("{} lr: {:.5f} | Epoch: {:03d} | Batch: {:03d}"
+                        msg = ("lr: {:.5f} | Epoch: {:03d} | Batch: {:03d}"
                                " | Loss: {:.5f}")
-                        print(
+                        # print(
+                        #     msg.format(
+                        #         utils.ctime(),
+                        #         optimizer.param_groups[0]["lr"],
+                        #         epoch,
+                        #         batch_idx,
+                        #         loss)
+                        # )
+                        self.logger.info(
                             msg.format(
-                                utils.ctime(),
                                 optimizer.param_groups[0]["lr"],
                                 epoch,
                                 batch_idx,
@@ -458,9 +489,9 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble):
                 snapshot = copy.deepcopy(estimator_)
                 self.estimators_.append(snapshot)
 
-                if self.verbose > 0:
-                    msg = "{} Generate the snapshot with index: {}"
-                    print(msg.format(utils.ctime(), len(self.estimators_) - 1))
+                msg = "Generate the snapshot with index: {}"
+                # print(msg.format(utils.ctime(), len(self.estimators_) - 1))
+                self.logger.info(msg.format(len(self.estimators_) - 1))
 
             # Validation after each snapshot being generated
             if test_loader and counter % n_iters_per_estimator == 0:
@@ -476,20 +507,25 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble):
                     if mse < best_mse:
                         best_mse = mse
                         if save_model:
-                            utils.save(self, save_dir, self.verbose)
+                            utils.save(self, save_dir, self.logger)
 
-                    if self.verbose > 0:
-                        msg = ("{} n_estimators: {} | Validation MSE: {:.5f} |"
-                               " Historical Best: {:.5f}")
-                        print(msg.format(
-                            utils.ctime(),
-                            len(self.estimators_),
-                            mse,
-                            best_mse)
-                        )
+                    msg = ("n_estimators: {} | Validation MSE: {:.5f} |"
+                            " Historical Best: {:.5f}")
+                    # print(msg.format(
+                    #     utils.ctime(),
+                    #     len(self.estimators_),
+                    #     mse,
+                    #     best_mse)
+                    # )
+                    self.logger.info(
+                        msg.format(
+                        len(self.estimators_),
+                        mse,
+                        best_mse)
+                    )
 
         if save_model and not test_loader:
-            utils.save(self, save_dir, self.verbose)
+            utils.save(self, save_dir, self.logger)
 
     @torchensemble_model_doc(
         """Implementation on the evaluating stage of SnapshotEnsembleRegressor.""",  # noqa: E501

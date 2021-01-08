@@ -5,12 +5,14 @@ import torch.nn as nn
 from torch.utils.data import TensorDataset, DataLoader
 
 import torchensemble
+from torchensemble.utils import get_default_logger
 
 
 parallel = [torchensemble.FusionClassifier,
             torchensemble.VotingClassifier,
             torchensemble.BaggingClassifier]
 
+logger = get_default_logger("INFO", "pytest_params", "DEBUG")
 
 # Base estimator
 class MLP(nn.Module):
@@ -42,7 +44,7 @@ train_loader = DataLoader(train, batch_size=2)
 
 @pytest.mark.parametrize("method", parallel)
 def test_parallel(method):
-    model = method(estimator=MLP, n_estimators=2, cuda=False)
+    model = method(estimator=MLP, n_estimators=2, logger=logger, cuda=False)
 
     # Learning rate
     with pytest.raises(ValueError) as excinfo:
@@ -68,6 +70,7 @@ def test_parallel(method):
 def test_snapshot_ensemble():
     model = torchensemble.SnapshotEnsembleClassifier(estimator=MLP,
                                                      n_estimators=2,
+                                                     logger=logger,
                                                      cuda=False)
     # Learning rate
     with pytest.raises(ValueError) as excinfo:

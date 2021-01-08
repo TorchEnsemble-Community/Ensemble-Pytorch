@@ -29,7 +29,7 @@ def _parallel_fit_per_epoch(train_loader,
                             estimator,
                             criterion,
                             device,
-                            verbose,
+                            logger,
                             is_classification=True):
     """Private function used to fit base estimators in parallel."""
     optimizer = utils.set_optimizer(estimator, optimizer, lr, weight_decay)
@@ -55,20 +55,23 @@ def _parallel_fit_per_epoch(train_loader,
         optimizer.step()
 
         # Print training status
-        if batch_idx % log_interval == 0 and verbose > 0:
+        if batch_idx % log_interval == 0:
 
             if is_classification:
                 pred = sampling_output.data.max(1)[1]
                 correct = pred.eq(sampling_target.view(-1).data).sum()
 
-                msg = ("{} Estimator: {:03d} | Epoch: {:03d} | Batch: {:03d}"
+                msg = ("Estimator: {:03d} | Epoch: {:03d} | Batch: {:03d}"
                        " | Loss: {:.5f} | Correct: {:d}/{:d}")
-                print(msg.format(utils.ctime(), idx, epoch, batch_idx, loss,
-                                 correct, sampling_data.size()[0]))
+                # print(msg.format(utils.ctime(), idx, epoch, batch_idx, loss,
+                #                  correct, sampling_data.size()[0]))
+                logger.info(msg.format(idx, epoch, batch_idx, loss,
+                                            correct, sampling_data.size()[0]))
             else:
-                msg = ("{} Estimator: {:03d} | Epoch: {:03d} | Batch: {:03d}"
+                msg = ("Estimator: {:03d} | Epoch: {:03d} | Batch: {:03d}"
                        " | Loss: {:.5f}")
-                print(msg.format(utils.ctime(), idx, epoch, batch_idx, loss))
+                # print(msg.format(utils.ctime(), idx, epoch, batch_idx, loss))
+                logger.info(msg.format(idx, epoch, batch_idx, loss))
 
     return estimator
 
@@ -143,7 +146,7 @@ class BaggingClassifier(BaseModule):
                         estimator,
                         criterion,
                         self.device,
-                        self.verbose,
+                        self.logger,
                         True
                     )
                     for idx, estimator in enumerate(estimators)
@@ -167,18 +170,18 @@ class BaggingClassifier(BaseModule):
                             self.estimators_ = nn.ModuleList()
                             self.estimators_.extend(estimators)
                             if save_model:
-                                utils.save(self, save_dir, self.verbose)
+                                utils.save(self, save_dir, self.logger)
 
-                        if self.verbose > 0:
-                            msg = ("{} Epoch: {:03d} | Validation Acc: {:.3f}"
-                                   " % | Historical Best: {:.3f} %")
-                            print(msg.format(utils.ctime(), epoch, acc,
-                                             best_acc))
+                        msg = ("Epoch: {:03d} | Validation Acc: {:.3f}"
+                                " % | Historical Best: {:.3f} %")
+                        # print(msg.format(utils.ctime(), epoch, acc,
+                        #                     best_acc))
+                        self.logger.info(msg.format(epoch, acc, best_acc))
 
         self.estimators_ = nn.ModuleList()
         self.estimators_.extend(rets)
         if save_model and not test_loader:
-            utils.save(self, save_dir, self.verbose)
+            utils.save(self, save_dir, self.logger)
 
     @torchensemble_model_doc(
         """Implementation on the evaluating stage of BaggingClassifier.""",
@@ -268,7 +271,7 @@ class BaggingRegressor(BaseModule):
                         estimator,
                         criterion,
                         self.device,
-                        self.verbose,
+                        self.logger,
                         False
                     )
                     for idx, estimator in enumerate(estimators)
@@ -291,18 +294,18 @@ class BaggingRegressor(BaseModule):
                             self.estimators_ = nn.ModuleList()
                             self.estimators_.extend(estimators)
                             if save_model:
-                                utils.save(self, save_dir, self.verbose)
+                                utils.save(self, save_dir, self.logger)
 
-                        if self.verbose > 0:
-                            msg = ("{} Epoch: {:03d} | Validation MSE:"
-                                   " {:.5f} | Historical Best: {:.5f}")
-                            print(msg.format(utils.ctime(), epoch,
-                                             mse, best_mse))
+                        msg = ("Epoch: {:03d} | Validation MSE:"
+                                " {:.5f} | Historical Best: {:.5f}")
+                        # print(msg.format(utils.ctime(), epoch,
+                        #                     mse, best_mse))
+                        self.logger.info(msg.format(epoch, mse, best_mse))
 
         self.estimators_ = nn.ModuleList()
         self.estimators_.extend(rets)
         if save_model and not test_loader:
-            utils.save(self, save_dir, self.verbose)
+            utils.save(self, save_dir, self.logger)
 
     @torchensemble_model_doc(
         """Implementation on the evaluating stage of BaggingRegressor.""",
