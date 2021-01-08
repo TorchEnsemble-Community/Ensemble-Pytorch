@@ -349,7 +349,7 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble):
                             utils.save(self, save_dir, self.logger)
 
                     msg = ("n_estimators: {} | Validation Acc: {:.3f} %"
-                            " | Historical Best: {:.3f} %")
+                           " | Historical Best: {:.3f} %")
                     # print(msg.format(
                     #     utils.ctime(),
                     #     len(self.estimators_),
@@ -510,7 +510,7 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble):
                             utils.save(self, save_dir, self.logger)
 
                     msg = ("n_estimators: {} | Validation MSE: {:.5f} |"
-                            " Historical Best: {:.5f}")
+                           " Historical Best: {:.5f}")
                     # print(msg.format(
                     #     utils.ctime(),
                     #     len(self.estimators_),
@@ -519,9 +519,10 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble):
                     # )
                     self.logger.info(
                         msg.format(
-                        len(self.estimators_),
-                        mse,
-                        best_mse)
+                            len(self.estimators_),
+                            mse,
+                            best_mse
+                        )
                     )
 
         if save_model and not test_loader:

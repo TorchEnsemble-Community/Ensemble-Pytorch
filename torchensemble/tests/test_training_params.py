@@ -14,6 +14,7 @@ parallel = [torchensemble.FusionClassifier,
 
 logger = get_default_logger("INFO", "pytest_params", "DEBUG")
 
+
 # Base estimator
 class MLP(nn.Module):
     def __init__(self):

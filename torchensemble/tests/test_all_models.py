@@ -24,6 +24,7 @@ all_reg = [torchensemble.FusionRegressor,
 
 logger = get_default_logger("INFO", "pytest_models", "DEBUG")
 
+
 # Base estimator
 class MLP_clf(nn.Module):
     def __init__(self):
@@ -80,7 +81,8 @@ def test_clf(clf):
     epochs = 1
     n_estimators = 2
 
-    model = clf(estimator=MLP_clf, n_estimators=n_estimators, logger=logger, cuda=False)
+    model = clf(estimator=MLP_clf, n_estimators=n_estimators,
+                logger=logger, cuda=False)
 
     # Prepare data
     train = TensorDataset(X_train, y_train_clf)
@@ -110,7 +112,8 @@ def test_reg(reg):
     epochs = 1
     n_estimators = 2
 
-    model = reg(estimator=MLP_reg, n_estimators=n_estimators, logger=logger, cuda=False)
+    model = reg(estimator=MLP_reg, n_estimators=n_estimators,
+                logger=logger, cuda=False)
 
     # Prepare data
     train = TensorDataset(X_train, y_train_reg)

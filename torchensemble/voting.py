@@ -166,7 +166,7 @@ class VotingClassifier(BaseModule):
                                 utils.save(self, save_dir, self.logger)
 
                         msg = ("Epoch: {:03d} | Validation Acc: {:.3f}"
-                                " % | Historical Best: {:.3f} %")
+                               " % | Historical Best: {:.3f} %")
                         # print(msg.format(utils.ctime(), epoch, acc,
                         #                     best_acc))
                         self.logger.info(msg.format(epoch, acc, best_acc))

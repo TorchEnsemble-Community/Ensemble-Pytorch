@@ -91,7 +91,7 @@ class FusionClassifier(BaseModule):
                         correct = pred.eq(target.view(-1).data).sum()
 
                         msg = ("Epoch: {:03d} | Batch: {:03d} | Loss:"
-                                " {:.5f} | Correct: {:d}/{:d}")
+                               " {:.5f} | Correct: {:d}/{:d}")
                         # print(msg.format(utils.ctime(), epoch, batch_idx,
                         #                     loss, correct, batch_size))
                         self.logger.info(msg.format(epoch, batch_idx,
@@ -115,7 +115,7 @@ class FusionClassifier(BaseModule):
                             utils.save(self, save_dir, self.logger)
 
                     msg = ("Epoch: {:03d} | Validation Acc: {:.3f}"
-                            " % | Historical Best: {:.3f} %")
+                           " % | Historical Best: {:.3f} %")
                     # print(msg.format(utils.ctime(), epoch, acc, best_acc))
                     self.logger.info(msg.format(epoch, acc, best_acc))
 
@@ -221,7 +221,7 @@ class FusionRegressor(BaseModule):
                             utils.save(self, save_dir, self.logger)
 
                     msg = ("Epoch: {:03d} | Validation MSE: {:.5f} |"
-                            " Historical Best: {:.5f}")
+                           " Historical Best: {:.5f}")
                     # print(msg.format(utils.ctime(), epoch, mse, best_mse))
                     self.logger.info(msg.format(epoch, mse, best_mse))
 

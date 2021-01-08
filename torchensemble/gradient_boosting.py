@@ -274,7 +274,8 @@ class _BaseGradientBoosting(BaseModule):
                     # print(msg.format(
                     #     utils.ctime(), n_counter, early_stopping_rounds)
                     # )
-                    self.logger.info(msg.format(n_counter, early_stopping_rounds))
+                    self.logger.info(msg.format(n_counter,
+                                                early_stopping_rounds))
 
                     if n_counter == early_stopping_rounds:
                         msg = "Handling early stopping"

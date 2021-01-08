@@ -7,7 +7,7 @@ import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 
-from torchensemble.utils import get_logger
+from torchensemble.utils import get_default_logger
 from torchensemble.fusion import FusionClassifier
 from torchensemble.voting import VotingClassifier
 from torchensemble.bagging import BaggingClassifier
@@ -110,7 +110,7 @@ if __name__ == "__main__":
         shuffle=True,
     )
 
-    logger = get_logger("INFO", "classification_cifar10_cnn", "DEBUG")
+    logger = get_default_logger("INFO", "classification_cifar10_cnn", "DEBUG")
 
     # FusionClassifier
     model = FusionClassifier(
