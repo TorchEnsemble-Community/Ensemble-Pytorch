@@ -56,7 +56,7 @@ def set_optimizer(estimator, optimizer_name, lr, weight_decay):
     return optimizer
 
 
-def set_logger(log_console_level, log_file=None, log_file_level=None):
+def set_logger(log_file=None, log_console_level="info", log_file_level=None):
     """Bind the default logger with console and file stream output."""
 
     def _get_level(level):
