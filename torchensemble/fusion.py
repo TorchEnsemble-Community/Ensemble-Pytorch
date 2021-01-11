@@ -90,11 +90,13 @@ class FusionClassifier(BaseModule):
                         pred = output.data.max(1)[1]
                         correct = pred.eq(target.view(-1).data).sum()
 
-                        if self.verbose > 0:
-                            msg = ("{} Epoch: {:03d} | Batch: {:03d} | Loss:"
-                                   " {:.5f} | Correct: {:d}/{:d}")
-                            print(msg.format(utils.ctime(), epoch, batch_idx,
-                                             loss, correct, batch_size))
+                        msg = ("Epoch: {:03d} | Batch: {:03d} | Loss:"
+                               " {:.5f} | Correct: {:d}/{:d}")
+                        self.logger.info(
+                            msg.format(
+                                epoch, batch_idx, loss, correct, batch_size
+                                )
+                            )
 
             # Validation
             if test_loader:
@@ -111,15 +113,14 @@ class FusionClassifier(BaseModule):
                     if acc > best_acc:
                         best_acc = acc
                         if save_model:
-                            utils.save(self, save_dir, self.verbose)
+                            utils.save(self, save_dir, self.logger)
 
-                    if self.verbose > 0:
-                        msg = ("{} Epoch: {:03d} | Validation Acc: {:.3f}"
-                               " % | Historical Best: {:.3f} %")
-                        print(msg.format(utils.ctime(), epoch, acc, best_acc))
+                    msg = ("Epoch: {:03d} | Validation Acc: {:.3f}"
+                           " % | Historical Best: {:.3f} %")
+                    self.logger.info(msg.format(epoch, acc, best_acc))
 
         if save_model and not test_loader:
-            utils.save(self, save_dir, self.verbose)
+            utils.save(self, save_dir, self.logger)
 
     @torchensemble_model_doc(
         """Implementation on the evaluating stage of FusionClassifier.""",
@@ -195,12 +196,10 @@ class FusionRegressor(BaseModule):
                 optimizer.step()
 
                 # Print training status
-                if batch_idx % log_interval == 0 and self.verbose > 0:
+                if batch_idx % log_interval == 0:
                     with torch.no_grad():
-                        msg = "{} Epoch: {:03d} | Batch: {:03d} | Loss: {:.5f}"
-                        print(
-                            msg.format(utils.ctime(), epoch, batch_idx, loss)
-                        )
+                        msg = "Epoch: {:03d} | Batch: {:03d} | Loss: {:.5f}"
+                        self.logger.info(msg.format(epoch, batch_idx, loss))
 
             # Validation
             if test_loader:
@@ -216,15 +215,14 @@ class FusionRegressor(BaseModule):
                     if mse < best_mse:
                         best_mse = mse
                         if save_model:
-                            utils.save(self, save_dir, self.verbose)
+                            utils.save(self, save_dir, self.logger)
 
-                    if self.verbose > 0:
-                        msg = ("{} Epoch: {:03d} | Validation MSE: {:.5f} |"
-                               " Historical Best: {:.5f}")
-                        print(msg.format(utils.ctime(), epoch, mse, best_mse))
+                    msg = ("Epoch: {:03d} | Validation MSE: {:.5f} |"
+                           " Historical Best: {:.5f}")
+                    self.logger.info(msg.format(epoch, mse, best_mse))
 
         if save_model and not test_loader:
-            utils.save(self, save_dir, self.verbose)
+            utils.save(self, save_dir, self.logger)
 
     @torchensemble_model_doc(
         """Implementation on the evaluating stage of FusionRegressor.""",

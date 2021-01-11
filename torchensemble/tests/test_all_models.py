@@ -5,6 +5,7 @@ import torch.nn as nn
 from torch.utils.data import TensorDataset, DataLoader
 
 import torchensemble
+from torchensemble.utils import set_logger
 
 
 all_clf = [torchensemble.FusionClassifier,
@@ -19,6 +20,9 @@ all_reg = [torchensemble.FusionRegressor,
            torchensemble.BaggingRegressor,
            torchensemble.GradientBoostingRegressor,
            torchensemble.SnapshotEnsembleRegressor]
+
+
+set_logger("pytest_all_models", "INFO", "DEBUG")
 
 
 # Base estimator
@@ -77,7 +81,8 @@ def test_clf(clf):
     epochs = 1
     n_estimators = 2
 
-    model = clf(estimator=MLP_clf, n_estimators=n_estimators, cuda=False)
+    model = clf(estimator=MLP_clf, n_estimators=n_estimators,
+                cuda=False)
 
     # Prepare data
     train = TensorDataset(X_train, y_train_clf)
@@ -107,7 +112,8 @@ def test_reg(reg):
     epochs = 1
     n_estimators = 2
 
-    model = reg(estimator=MLP_reg, n_estimators=n_estimators, cuda=False)
+    model = reg(estimator=MLP_reg, n_estimators=n_estimators,
+                cuda=False)
 
     # Prepare data
     train = TensorDataset(X_train, y_train_reg)

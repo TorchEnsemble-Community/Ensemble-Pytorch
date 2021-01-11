@@ -53,7 +53,7 @@ For example, the code snippet below defines a multi-layered perceptron (MLP) wit
 Choose the Ensemble Method
 --------------------------
 
-After implementing the base estimator, you can then choose one of the ensemble methods implemented in Ensemble-PyTorch. They have very similar APIs, take the ``VotingClassifier`` as an example:
+After implementing the model, we can then wrap it using one of the emsemble methods available in Ensemble-PyTorch. Different methods have very similar APIs, take the ``VotingClassifier`` as an example:
 
 .. code-block:: python
 
@@ -67,9 +67,21 @@ After implementing the base estimator, you can then choose one of the ensemble m
 
 The meaning of different arguments is listed as follow:
 
-* ``estimator``: The class of your deep learning model, used to instantiate base estimators in the ensemble.
-* ``n_estimators``: The number of base estimators in the ensemble.
-* ``cuda``: Whether to use GPU to train and evaluate the ensemble.
+* ``estimator``: The class of your model, used in instantiate the base estimator in ensemble learning.
+* ``n_estimators``: The number of base estimators.
+* ``cuda``: Specify whether to use GPU for training and evaluating.
+
+Set the Logger
+--------------
+Ensemble-PyTorch uses a global logger to track and print the intermediate logs. For example, the code snippet below sets a logger and geneartes a text file named ``classification_mnist_mlp-{TIME}``:
+
+.. code-block:: python
+
+    from torchensemble.utils import set_logger
+
+    logger = set_logger("classification_mnist_mlp")
+
+Through setting the logger, all intermediate logs will be printed on the command line and saved to the specified text file.
 
 Train and Evaluate
 ------------------

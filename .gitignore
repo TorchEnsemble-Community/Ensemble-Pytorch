@@ -9,7 +9,9 @@
 
 .idea/
 .vscode/
+.pytest_cache/
 build/
 _build/
 dist/
+logs/
 torchensemble.egg-info

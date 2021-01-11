@@ -18,13 +18,6 @@ __model_doc = """
         :mod:`voting` and :mod:`bagging`. Setting it to an integer larger
         than ``1`` enables a total number of ``n_jobs`` base estimators
         to be trained simultaneously.
-    verbose : int, default=1
-        Control the level on printing logging information.
-
-        - If ``0``, trigger the silent mode
-        - If ``1``, basic logging information on the training and
-          evaluating status is printed.
-        - If ``> 1``, full logging information is printed.
 
     Attributes
     ----------
