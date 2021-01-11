@@ -7,10 +7,9 @@
 
 import abc
 import torch
+import logging
 import torch.nn as nn
 import torch.nn.functional as F
-
-import logging
 
 from ._base import BaseModule, torchensemble_model_doc
 from . import utils

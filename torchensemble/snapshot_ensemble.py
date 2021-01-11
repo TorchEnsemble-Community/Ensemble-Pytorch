@@ -12,11 +12,10 @@
 import copy
 import math
 import torch
+import logging
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.optim.lr_scheduler import LambdaLR
-
-import logging
 
 from ._base import BaseModule, torchensemble_model_doc
 from . import utils

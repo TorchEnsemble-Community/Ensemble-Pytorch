@@ -1,8 +1,7 @@
 import abc
 import torch
-import torch.nn as nn
-
 import logging
+import torch.nn as nn
 
 from . import _constants as const
 

@@ -55,8 +55,11 @@ def _parallel_fit_per_epoch(train_loader,
 
                 msg = ("Estimator: {:03d} | Epoch: {:03d} | Batch: {:03d}"
                        " | Loss: {:.5f} | Correct: {:d}/{:d}")
-                logger.info(msg.format(idx, epoch, batch_idx, loss,
-                                       correct, batch_size))
+                logger.info(
+                    msg.format(
+                        idx, epoch, batch_idx, loss, correct, batch_size
+                    )
+                )
             # Regression
             else:
                 msg = ("Estimator: {:03d} | Epoch: {:03d} | Batch: {:03d}"

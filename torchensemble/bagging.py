@@ -58,13 +58,17 @@ def _parallel_fit_per_epoch(train_loader,
         if batch_idx % log_interval == 0:
 
             if is_classification:
+                subsample_size = sampling_data.size()[0]
                 pred = sampling_output.data.max(1)[1]
                 correct = pred.eq(sampling_target.view(-1).data).sum()
 
                 msg = ("Estimator: {:03d} | Epoch: {:03d} | Batch: {:03d}"
                        " | Loss: {:.5f} | Correct: {:d}/{:d}")
-                logger.info(msg.format(idx, epoch, batch_idx, loss,
-                                       correct, sampling_data.size()[0]))
+                logger.info(
+                    msg.format(
+                        idx, epoch, batch_idx, loss, correct, subsample_size
+                    )
+                )
             else:
                 msg = ("Estimator: {:03d} | Epoch: {:03d} | Batch: {:03d}"
                        " | Loss: {:.5f}")

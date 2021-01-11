@@ -92,8 +92,11 @@ class FusionClassifier(BaseModule):
 
                         msg = ("Epoch: {:03d} | Batch: {:03d} | Loss:"
                                " {:.5f} | Correct: {:d}/{:d}")
-                        self.logger.info(msg.format(epoch, batch_idx,
-                                                    loss, correct, batch_size))
+                        self.logger.info(
+                            msg.format(
+                                epoch, batch_idx, loss, correct, batch_size
+                                )
+                            )
 
             # Validation
             if test_loader:
