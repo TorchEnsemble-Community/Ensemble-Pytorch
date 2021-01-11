@@ -13,7 +13,7 @@ from torchensemble.fusion import FusionRegressor
 from torchensemble.voting import VotingRegressor
 from torchensemble.bagging import BaggingRegressor
 from torchensemble.gradient_boosting import GradientBoostingRegressor
-from torchensemble.utils import get_logger
+from torchensemble.utils import get_default_logger
 
 
 def load_data(batch_size, logger):
@@ -63,7 +63,6 @@ def display_records(records, logger):
     print("\n")
     for method, training_time, evaluating_time, mse in records:
         logger.info(msg.format(method, mse, training_time, evaluating_time))
-        # print(msg.format(method, mse, training_time, evaluating_time))
 
 
 class MLP(nn.Module):
@@ -99,7 +98,7 @@ if __name__ == "__main__":
     records = []
     torch.manual_seed(0)
 
-    logger = get_logger("INFO", "regression_YearPredictionMSD_mlp", "DEBUG")
+    logger = get_default_logger("INFO", "regression_YearPredictionMSD_mlp", "DEBUG")
 
     # Load data
     train_loader, test_loader = load_data(batch_size, logger)
@@ -110,9 +109,9 @@ if __name__ == "__main__":
     model = FusionRegressor(
         estimator=MLP,
         n_estimators=n_estimators,
-        logger=logger,
         cuda=True,
         n_jobs=1,
+        logger=logger
     )
 
     tic = time.time()
@@ -132,9 +131,9 @@ if __name__ == "__main__":
     model = VotingRegressor(
         estimator=MLP,
         n_estimators=n_estimators,
-        logger=logger,
         cuda=True,
         n_jobs=1,
+        logger=logger
     )
 
     tic = time.time()
@@ -154,9 +153,9 @@ if __name__ == "__main__":
     model = BaggingRegressor(
         estimator=MLP,
         n_estimators=n_estimators,
-        logger=logger,
         cuda=True,
         n_jobs=1,
+        logger=logger
     )
 
     tic = time.time()
@@ -176,8 +175,8 @@ if __name__ == "__main__":
     model = GradientBoostingRegressor(
         estimator=MLP,
         n_estimators=n_estimators,
-        logger=logger,
-        cuda=True
+        cuda=True,
+        logger=logger
     )
 
     tic = time.time()

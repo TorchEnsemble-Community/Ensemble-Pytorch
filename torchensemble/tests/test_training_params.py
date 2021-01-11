@@ -45,7 +45,7 @@ train_loader = DataLoader(train, batch_size=2)
 
 @pytest.mark.parametrize("method", parallel)
 def test_parallel(method):
-    model = method(estimator=MLP, n_estimators=2, logger=logger, cuda=False)
+    model = method(estimator=MLP, n_estimators=2, cuda=False, logger=logger)
 
     # Learning rate
     with pytest.raises(ValueError) as excinfo:
@@ -71,8 +71,8 @@ def test_parallel(method):
 def test_snapshot_ensemble():
     model = torchensemble.SnapshotEnsembleClassifier(estimator=MLP,
                                                      n_estimators=2,
-                                                     logger=logger,
-                                                     cuda=False)
+                                                     cuda=False,
+                                                     logger=logger)
     # Learning rate
     with pytest.raises(ValueError) as excinfo:
         model.fit(train_loader, init_lr=-1)

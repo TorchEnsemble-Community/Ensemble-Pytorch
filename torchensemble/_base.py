@@ -3,6 +3,7 @@ import torch
 import torch.nn as nn
 
 from . import _constants as const
+from . import utils
 
 
 def torchensemble_model_doc(header, item):
@@ -44,10 +45,10 @@ class BaseModule(abc.ABC, nn.Module):
     def __init__(self,
                  estimator,
                  n_estimators,
-                 logger,
                  estimator_args=None,
                  cuda=True,
-                 n_jobs=None):
+                 n_jobs=None,
+                 logger=utils.default_logger):
         super(BaseModule, self).__init__()
 
         # Make sure estimator is not an instance

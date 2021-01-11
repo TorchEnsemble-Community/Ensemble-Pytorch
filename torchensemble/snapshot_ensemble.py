@@ -95,9 +95,9 @@ class _BaseSnapshotEnsemble(BaseModule):
     def __init__(self,
                  estimator,
                  n_estimators,
-                 logger,
                  estimator_args=None,
-                 cuda=True):
+                 cuda=True,
+                 logger=utils.default_logger):
         super(BaseModule, self).__init__()
 
         # Make sure estimator is not an instance
@@ -295,17 +295,6 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble):
                         msg = ("lr: {:.5f} | Epoch: {:03d} | Batch:"
                                " {:03d} | Loss: {:.5f} | Correct: "
                                "{:d}/{:d}")
-                        # print(
-                        #     msg.format(
-                        #         utils.ctime(),
-                        #         optimizer.param_groups[0]["lr"],
-                        #         epoch,
-                        #         batch_idx,
-                        #         loss,
-                        #         correct,
-                        #         batch_size
-                        #     )
-                        # )
                         self.logger.info(
                             msg.format(
                                 optimizer.param_groups[0]["lr"],
@@ -328,7 +317,6 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble):
                 self.estimators_.append(snapshot)
 
                 msg = "Generate the snapshot with index: {}"
-                # print(msg.format(utils.ctime(), len(self.estimators_) - 1))
                 self.logger.info(msg.format(len(self.estimators_) - 1))
 
             # Validation after each snapshot being generated
@@ -350,12 +338,6 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble):
 
                     msg = ("n_estimators: {} | Validation Acc: {:.3f} %"
                            " | Historical Best: {:.3f} %")
-                    # print(msg.format(
-                    #     utils.ctime(),
-                    #     len(self.estimators_),
-                    #     acc,
-                    #     best_acc)
-                    # )
                     self.logger.info(
                         msg.format(
                             len(self.estimators_),
@@ -463,14 +445,6 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble):
                     with torch.no_grad():
                         msg = ("lr: {:.5f} | Epoch: {:03d} | Batch: {:03d}"
                                " | Loss: {:.5f}")
-                        # print(
-                        #     msg.format(
-                        #         utils.ctime(),
-                        #         optimizer.param_groups[0]["lr"],
-                        #         epoch,
-                        #         batch_idx,
-                        #         loss)
-                        # )
                         self.logger.info(
                             msg.format(
                                 optimizer.param_groups[0]["lr"],
@@ -490,7 +464,6 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble):
                 self.estimators_.append(snapshot)
 
                 msg = "Generate the snapshot with index: {}"
-                # print(msg.format(utils.ctime(), len(self.estimators_) - 1))
                 self.logger.info(msg.format(len(self.estimators_) - 1))
 
             # Validation after each snapshot being generated
@@ -511,12 +484,6 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble):
 
                     msg = ("n_estimators: {} | Validation MSE: {:.5f} |"
                            " Historical Best: {:.5f}")
-                    # print(msg.format(
-                    #     utils.ctime(),
-                    #     len(self.estimators_),
-                    #     mse,
-                    #     best_mse)
-                    # )
                     self.logger.info(
                         msg.format(
                             len(self.estimators_),

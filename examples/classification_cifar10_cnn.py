@@ -23,7 +23,6 @@ def display_records(records, logger):
     print("\n")
     for method, training_time, evaluating_time, acc in records:
         logger.info(msg.format(method, acc, training_time, evaluating_time))
-        # print(msg.format(method, acc, training_time, evaluating_time))
 
 
 class LeNet5(nn.Module):
@@ -116,9 +115,9 @@ if __name__ == "__main__":
     model = FusionClassifier(
         estimator=LeNet5,
         n_estimators=n_estimators,
-        logger=logger,
         cuda=True,
-        n_jobs=1
+        n_jobs=1,
+        logger=logger
     )
 
     tic = time.time()
@@ -138,9 +137,9 @@ if __name__ == "__main__":
     model = VotingClassifier(
         estimator=LeNet5,
         n_estimators=n_estimators,
-        logger=logger,
         cuda=True,
-        n_jobs=1
+        n_jobs=1,
+        logger=logger
     )
 
     tic = time.time()
@@ -160,9 +159,9 @@ if __name__ == "__main__":
     model = BaggingClassifier(
         estimator=LeNet5,
         n_estimators=n_estimators,
-        logger=logger,
         cuda=True,
-        n_jobs=1
+        n_jobs=1,
+        logger=logger
     )
 
     tic = time.time()
@@ -182,8 +181,8 @@ if __name__ == "__main__":
     model = GradientBoostingClassifier(
         estimator=LeNet5,
         n_estimators=n_estimators,
-        logger=logger,
-        cuda=True
+        cuda=True,
+        logger=logger
     )
 
     tic = time.time()

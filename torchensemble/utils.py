@@ -26,7 +26,6 @@ def save(model, save_dir, logger):
     state = {"model": model.state_dict()}
     save_dir = os.path.join(save_dir, filename)
 
-    # print("{} Saving the model to `{}`".format(ctime(), save_dir))
     logger.info("Saving the model to `{}`".format(save_dir))
 
     # Save
@@ -106,3 +105,6 @@ def get_default_logger(log_console_level, log_file=None, log_file_level=None):
         _logger.addHandler(fh)
     _logger.setLevel("DEBUG")
     return _logger
+
+
+default_logger = get_default_logger("INFO", "ensemble-pytorch", "DEBUG")

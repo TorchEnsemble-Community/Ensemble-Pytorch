@@ -114,10 +114,10 @@ class _BaseGradientBoosting(BaseModule):
     def __init__(self,
                  estimator,
                  n_estimators,
-                 logger,
                  estimator_args=None,
                  shrinkage_rate=1.,
-                 cuda=True):
+                 cuda=True,
+                 logger=utils.default_logger):
         super(BaseModule, self).__init__()
 
         # Make sure estimator is not an instance
@@ -259,8 +259,6 @@ class _BaseGradientBoosting(BaseModule):
                     if batch_idx % log_interval == 0:
                         msg = ("Estimator: {:03d} | Epoch: {:03d} | Batch:"
                                " {:03d} | RegLoss: {:.5f}")
-                        # print(msg.format(utils.ctime(), est_idx, epoch,
-                        #                  batch_idx, loss))
                         self.logger.info(msg.format(est_idx, epoch,
                                                     batch_idx, loss))
 
@@ -271,15 +269,11 @@ class _BaseGradientBoosting(BaseModule):
                 if flag:
                     n_counter += 1
                     msg = "Early stopping counter: {} out of {}"
-                    # print(msg.format(
-                    #     utils.ctime(), n_counter, early_stopping_rounds)
-                    # )
                     self.logger.info(msg.format(n_counter,
                                                 early_stopping_rounds))
 
                     if n_counter == early_stopping_rounds:
                         msg = "Handling early stopping"
-                        # print(msg.format(utils.ctime()))
                         self.logger.info(msg)
 
                         # Early stopping
@@ -293,7 +287,6 @@ class _BaseGradientBoosting(BaseModule):
 
         # Post-processing
         msg = "Optimal number of base estimators: {}"
-        # print(msg.format(utils.ctime(), len(self.estimators_)))
         self.logger.info(msg.format(len(self.estimators_)))
         if save_model:
             utils.save(self, save_dir, self.logger)
@@ -357,7 +350,6 @@ class GradientBoostingClassifier(_BaseGradientBoosting):
                 flag = True
 
         msg = "Validation Acc: {:.3f} % | Historical Best: {:.3f} %"
-        # print(msg.format(utils.ctime(), acc, self.best_acc))
         self.logger.info(msg.format(acc, self.best_acc))
 
         return flag
@@ -466,7 +458,6 @@ class GradientBoostingRegressor(_BaseGradientBoosting):
                 flag = True
 
         msg = "Validation MSE: {:.5f} | Historical Best: {:.5f}"
-        # print(msg.format(utils.ctime(), mse, self.best_mse))
         self.logger.info(msg.format(mse, self.best_mse))
 
         return flag

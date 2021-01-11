@@ -92,8 +92,6 @@ class FusionClassifier(BaseModule):
 
                         msg = ("Epoch: {:03d} | Batch: {:03d} | Loss:"
                                " {:.5f} | Correct: {:d}/{:d}")
-                        # print(msg.format(utils.ctime(), epoch, batch_idx,
-                        #                     loss, correct, batch_size))
                         self.logger.info(msg.format(epoch, batch_idx,
                                                     loss, correct, batch_size))
 
@@ -116,7 +114,6 @@ class FusionClassifier(BaseModule):
 
                     msg = ("Epoch: {:03d} | Validation Acc: {:.3f}"
                            " % | Historical Best: {:.3f} %")
-                    # print(msg.format(utils.ctime(), epoch, acc, best_acc))
                     self.logger.info(msg.format(epoch, acc, best_acc))
 
         if save_model and not test_loader:
@@ -199,9 +196,6 @@ class FusionRegressor(BaseModule):
                 if batch_idx % log_interval == 0:
                     with torch.no_grad():
                         msg = "Epoch: {:03d} | Batch: {:03d} | Loss: {:.5f}"
-                        # print(
-                        #     msg.format(utils.ctime(), epoch, batch_idx, loss)
-                        # )
                         self.logger.info(msg.format(epoch, batch_idx, loss))
 
             # Validation
@@ -222,7 +216,6 @@ class FusionRegressor(BaseModule):
 
                     msg = ("Epoch: {:03d} | Validation MSE: {:.5f} |"
                            " Historical Best: {:.5f}")
-                    # print(msg.format(utils.ctime(), epoch, mse, best_mse))
                     self.logger.info(msg.format(epoch, mse, best_mse))
 
         if save_model and not test_loader:

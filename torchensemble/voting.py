@@ -28,8 +28,8 @@ def _parallel_fit_per_epoch(train_loader,
                             estimator,
                             criterion,
                             device,
-                            logger,
-                            is_classification=True):
+                            is_classification=True,
+                            logger=utils.default_logger):
     """Private function used to fit base estimators in parallel."""
     optimizer = utils.set_optimizer(estimator, optimizer, lr, weight_decay)
 
@@ -55,15 +55,12 @@ def _parallel_fit_per_epoch(train_loader,
 
                 msg = ("Estimator: {:03d} | Epoch: {:03d} | Batch: {:03d}"
                        " | Loss: {:.5f} | Correct: {:d}/{:d}")
-                # print(msg.format(utils.ctime(), idx, epoch, batch_idx, loss,
-                #                  correct, batch_size))
                 logger.info(msg.format(idx, epoch, batch_idx, loss,
                                        correct, batch_size))
             # Regression
             else:
                 msg = ("Estimator: {:03d} | Epoch: {:03d} | Batch: {:03d}"
                        " | Loss: {:.5f}")
-                # print(msg.format(utils.ctime(), idx, epoch, batch_idx, loss))
                 logger.info(msg.format(idx, epoch, batch_idx, loss))
 
     return estimator
@@ -139,8 +136,8 @@ class VotingClassifier(BaseModule):
                         estimator,
                         criterion,
                         self.device,
-                        self.logger,
-                        True
+                        True,
+                        self.logger
                     )
                     for idx, estimator in enumerate(estimators)
                 )
@@ -167,8 +164,6 @@ class VotingClassifier(BaseModule):
 
                         msg = ("Epoch: {:03d} | Validation Acc: {:.3f}"
                                " % | Historical Best: {:.3f} %")
-                        # print(msg.format(utils.ctime(), epoch, acc,
-                        #                     best_acc))
                         self.logger.info(msg.format(epoch, acc, best_acc))
 
         self.estimators_ = nn.ModuleList()
@@ -264,8 +259,8 @@ class VotingRegressor(BaseModule):
                         estimator,
                         criterion,
                         self.device,
-                        self.logger,
-                        False
+                        False,
+                        self.logger
                     )
                     for idx, estimator in enumerate(estimators)
                 )
@@ -291,8 +286,6 @@ class VotingRegressor(BaseModule):
 
                         msg = ("Epoch: {:03d} | Validation MSE:"
                                " {:.5f} | Historical Best: {:.5f}")
-                        # print(msg.format(utils.ctime(), epoch,
-                        #                     mse, best_mse))
                         self.logger.info(msg.format(epoch, mse, best_mse))
 
         self.estimators_ = nn.ModuleList()
