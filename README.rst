@@ -1,10 +1,10 @@
 |github|_ |readthedocs|_ |codecov|_ |python|_
 
-.. |github| image:: https://github.com/AaronX121/Ensemble-Pytorch/workflows/Python%20package/badge.svg
-.. _github: https://github.com/AaronX121/Ensemble-Pytorch/workflows/Python%20package/badge.svg
+.. |github| image:: https://github.com/xuyxu/Ensemble-Pytorch/workflows/torchensemble-CI/badge.svg
+.. _github: https://github.com/xuyxu/Ensemble-Pytorch/actions
 
 .. |readthedocs| image:: https://readthedocs.org/projects/ensemble-pytorch/badge/?version=latest
-.. _readthedocs: https://ensemble-pytorch.readthedocs.io/en/latest/?badge=latest
+.. _readthedocs: https://ensemble-pytorch.readthedocs.io/en/latest/index.html
 
 .. |codecov| image:: https://codecov.io/gh/xuyxu/Ensemble-Pytorch/branch/master/graph/badge.svg?token=2FXCFRIDTV
 .. _codecov: https://codecov.io/gh/xuyxu/Ensemble-Pytorch
@@ -15,7 +15,16 @@
 Ensemble Pytorch
 ================
 
-Implementation of scikit-Learn like ensemble methods in Pytorch to boost  the performance of your models.
+Implementation of ensemble methods in Pytorch to boost the performance of your model.
+
+List of methods
+---------------
+
+* Fusion
+* Voting
+* Bagging
+* Gradient Boosting
+* Snapshot Ensemble
 
 News
 ----
@@ -41,17 +50,12 @@ Minimal example on how to use
 
 .. code:: python
 
-    """
-      - Please see scripts in `examples` for details on how to use
-      - Please see implementations in `torchensemble` for details on ensemble methods
-      - Please feel free to open an issue if you have any problem or feature request
-    """
-
     from torchensemble import ensemble_method           # import ensemble method (e.g., VotingClassifier)
 
-    # Define the ensemble model
+    # Define the ensemble
     model = ensemble_method(estimator=base_estimator,   # class of your base estimator
-                            n_estimators=10)            # the number of base estimators              
+                            n_estimators=10,            # the number of base estimators              
+                            cuda=True)                  # whether to use GPU            
 
     # Load data
     train_loader = DataLoader(...)
@@ -65,7 +69,7 @@ Minimal example on how to use
               optimizer="Adam")                         # type of parameter optimizer
 
     # Evaluate
-    model.predict(test_loader)
+    accuracy = model.predict(test_loader)
 
 Benchmarks
 ----------

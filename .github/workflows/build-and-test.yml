@@ -1,4 +1,4 @@
-name: build-and-test
+name: torchensemble-CI
 
 on:
   push:
