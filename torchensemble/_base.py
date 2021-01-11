@@ -2,8 +2,9 @@ import abc
 import torch
 import torch.nn as nn
 
+import logging
+
 from . import _constants as const
-from . import utils
 
 
 def torchensemble_model_doc(header, item):
@@ -47,8 +48,7 @@ class BaseModule(abc.ABC, nn.Module):
                  n_estimators,
                  estimator_args=None,
                  cuda=True,
-                 n_jobs=None,
-                 logger=utils.default_logger):
+                 n_jobs=None):
         super(BaseModule, self).__init__()
 
         # Make sure estimator is not an instance
@@ -63,7 +63,7 @@ class BaseModule(abc.ABC, nn.Module):
         self.estimator_args = estimator_args
         self.device = torch.device("cuda" if cuda else "cpu")
         self.n_jobs = n_jobs
-        self.logger = logger
+        self.logger = logging.getLogger()
 
         self.estimators_ = nn.ModuleList()
 

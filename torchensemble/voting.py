@@ -28,8 +28,8 @@ def _parallel_fit_per_epoch(train_loader,
                             estimator,
                             criterion,
                             device,
-                            is_classification=True,
-                            logger=utils.default_logger):
+                            is_classification,
+                            logger):
     """Private function used to fit base estimators in parallel."""
     optimizer = utils.set_optimizer(estimator, optimizer, lr, weight_decay)
 

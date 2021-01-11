@@ -16,6 +16,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.optim.lr_scheduler import LambdaLR
 
+import logging
+
 from ._base import BaseModule, torchensemble_model_doc
 from . import utils
 
@@ -96,8 +98,7 @@ class _BaseSnapshotEnsemble(BaseModule):
                  estimator,
                  n_estimators,
                  estimator_args=None,
-                 cuda=True,
-                 logger=utils.default_logger):
+                 cuda=True):
         super(BaseModule, self).__init__()
 
         # Make sure estimator is not an instance
@@ -111,7 +112,7 @@ class _BaseSnapshotEnsemble(BaseModule):
         self.n_estimators = n_estimators
         self.estimator_args = estimator_args
         self.device = torch.device("cuda" if cuda else "cpu")
-        self.logger = logger
+        self.logger = logging.getLogger()
 
         self.estimators_ = nn.ModuleList()
 

@@ -13,7 +13,7 @@ from torchensemble.fusion import FusionRegressor
 from torchensemble.voting import VotingRegressor
 from torchensemble.bagging import BaggingRegressor
 from torchensemble.gradient_boosting import GradientBoostingRegressor
-from torchensemble.utils import get_default_logger
+from torchensemble.utils import set_logger
 
 
 def load_data(batch_size, logger):
@@ -98,7 +98,7 @@ if __name__ == "__main__":
     records = []
     torch.manual_seed(0)
 
-    logger = get_default_logger("INFO", "regression_YearPredictionMSD_mlp", "DEBUG")
+    logger = set_logger("INFO", "regression_YearPredictionMSD_mlp", "DEBUG")
 
     # Load data
     train_loader, test_loader = load_data(batch_size, logger)
@@ -110,8 +110,7 @@ if __name__ == "__main__":
         estimator=MLP,
         n_estimators=n_estimators,
         cuda=True,
-        n_jobs=1,
-        logger=logger
+        n_jobs=1
     )
 
     tic = time.time()
@@ -132,8 +131,7 @@ if __name__ == "__main__":
         estimator=MLP,
         n_estimators=n_estimators,
         cuda=True,
-        n_jobs=1,
-        logger=logger
+        n_jobs=1
     )
 
     tic = time.time()
@@ -154,8 +152,7 @@ if __name__ == "__main__":
         estimator=MLP,
         n_estimators=n_estimators,
         cuda=True,
-        n_jobs=1,
-        logger=logger
+        n_jobs=1
     )
 
     tic = time.time()
@@ -175,8 +172,7 @@ if __name__ == "__main__":
     model = GradientBoostingRegressor(
         estimator=MLP,
         n_estimators=n_estimators,
-        cuda=True,
-        logger=logger
+        cuda=True
     )
 
     tic = time.time()

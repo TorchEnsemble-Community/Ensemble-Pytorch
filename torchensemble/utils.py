@@ -56,7 +56,7 @@ def set_optimizer(estimator, optimizer_name, lr, weight_decay):
     return optimizer
 
 
-def get_default_logger(log_console_level, log_file=None, log_file_level=None):
+def set_logger(log_console_level, log_file=None, log_file_level=None):
     """Bind the default logger with console and file stream output,
        where the info level is defined by user."""
 
@@ -105,6 +105,3 @@ def get_default_logger(log_console_level, log_file=None, log_file_level=None):
         _logger.addHandler(fh)
     _logger.setLevel("DEBUG")
     return _logger
-
-
-default_logger = get_default_logger("INFO", "ensemble-pytorch", "DEBUG")
