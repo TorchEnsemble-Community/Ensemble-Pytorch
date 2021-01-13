@@ -7,13 +7,13 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+
 from joblib import Parallel, delayed
 
 from ._base import BaseModule, torchensemble_model_doc
 from . import utils
 
 
-__author__ = ["Yi-Xuan Xu"]
 __all__ = ["VotingClassifier",
            "VotingRegressor"]
 
@@ -34,13 +34,12 @@ def _parallel_fit_per_epoch(train_loader,
 
     for batch_idx, (data, target) in enumerate(train_loader):
 
-        batch_size = data.size()[0]
+        batch_size = data.size(0)
         data, target = data.to(device), target.to(device)
 
+        optimizer.zero_grad()
         output = estimator(data)
         loss = criterion(output, target)
-
-        optimizer.zero_grad()
         loss.backward()
         optimizer.step()
 
@@ -49,8 +48,8 @@ def _parallel_fit_per_epoch(train_loader,
 
             # Classification
             if is_classification:
-                pred = output.data.max(1)[1]
-                correct = pred.eq(target.view(-1).data).sum()
+                _, predicted = torch.max(output.data, 1)
+                correct = (predicted == target).sum().item()
 
                 msg = ("Estimator: {:03d} | Epoch: {:03d} | Batch: {:03d}"
                        " | Loss: {:.5f} | Correct: {:d}/{:d}")
@@ -75,13 +74,13 @@ class VotingClassifier(BaseModule):
     @torchensemble_model_doc(
         """Implementation on the data forwarding in VotingClassifier.""",
         "classifier_forward")
-    def forward(self, X):
-        batch_size = X.size()[0]
+    def forward(self, x):
+        batch_size = x.size(0)
         proba = torch.zeros(batch_size, self.n_outputs).to(self.device)
 
         # Take the average over class distributions from all base estimators.
         for estimator in self.estimators_:
-            proba += F.softmax(estimator(X), dim=1) / self.n_estimators
+            proba += F.softmax(estimator(x), dim=1) / self.n_estimators
 
         return proba
 
@@ -103,10 +102,8 @@ class VotingClassifier(BaseModule):
         estimators = []
         for _ in range(self.n_estimators):
             estimators.append(self._make_estimator())
-        self.n_outputs = self._decide_n_outputs(train_loader, True)
         self._validate_parameters(lr, weight_decay, epochs, log_interval)
-
-        self.train()
+        self.n_outputs = self._decide_n_outputs(train_loader, True)
 
         # Utils
         criterion = nn.CrossEntropyLoss()
@@ -114,7 +111,7 @@ class VotingClassifier(BaseModule):
 
         # Internal helper function on pesudo forward
         def _forward(estimators, data):
-            batch_size = data.size()[0]
+            batch_size = data.size(0)
             proba = torch.zeros(batch_size, self.n_outputs).to(self.device)
 
             for estimator in estimators:
@@ -127,6 +124,7 @@ class VotingClassifier(BaseModule):
 
             # Training loop
             for epoch in range(epochs):
+                self.train()
                 rets = parallel(delayed(_parallel_fit_per_epoch)(
                         train_loader,
                         lr,
@@ -142,19 +140,22 @@ class VotingClassifier(BaseModule):
                     )
                     for idx, estimator in enumerate(estimators)
                 )
+                estimators = rets  # update
 
-                estimators = rets
                 # Validation
                 if test_loader:
+                    self.eval()
                     with torch.no_grad():
-                        correct = 0.
+                        correct = 0
+                        total = 0
                         for _, (data, target) in enumerate(test_loader):
-                            data, target = (data.to(self.device),
-                                            target.to(self.device))
+                            data = data.to(self.device)
+                            target = target.to(self.device)
                             output = _forward(estimators, data)
-                            pred = output.data.max(1)[1]
-                            correct += pred.eq(target.view(-1).data).sum()
-                        acc = 100. * float(correct) / len(test_loader.dataset)
+                            _, predicted = torch.max(output.data, 1)
+                            correct += (predicted == target).sum().item()
+                            total += target.size(0)
+                        acc = 100 * correct / total
 
                         if acc > best_acc:
                             best_acc = acc
@@ -177,17 +178,19 @@ class VotingClassifier(BaseModule):
         "classifier_predict")
     def predict(self, test_loader):
         self.eval()
-        correct = 0.
+        correct = 0
+        total = 0
 
-        for batch_idx, (data, target) in enumerate(test_loader):
+        for _, (data, target) in enumerate(test_loader):
             data, target = data.to(self.device), target.to(self.device)
             output = self.forward(data)
-            pred = output.data.max(1)[1]
-            correct += pred.eq(target.view(-1).data).sum()
+            _, predicted = torch.max(output.data, 1)
+            correct += (predicted == target).sum().item()
+            total += target.size(0)
 
-        accuracy = 100. * float(correct) / len(test_loader.dataset)
+        acc = 100 * correct / total
 
-        return accuracy
+        return acc
 
 
 @torchensemble_model_doc("""Implementation on the VotingRegressor.""",
@@ -197,13 +200,13 @@ class VotingRegressor(BaseModule):
     @torchensemble_model_doc(
         """Implementation on the data forwarding in VotingRegressor.""",
         "regressor_forward")
-    def forward(self, X):
-        batch_size = X.size()[0]
+    def forward(self, x):
+        batch_size = x.size(0)
         pred = torch.zeros(batch_size, self.n_outputs).to(self.device)
 
         # Take the average over predictions from all base estimators.
         for estimator in self.estimators_:
-            pred += estimator(X) / self.n_estimators
+            pred += estimator(x) / self.n_estimators
 
         return pred
 
@@ -228,15 +231,13 @@ class VotingRegressor(BaseModule):
         self._validate_parameters(lr, weight_decay, epochs, log_interval)
         self.n_outputs = self._decide_n_outputs(train_loader, False)
 
-        self.train()
-
         # Utils
         criterion = nn.MSELoss()
         best_mse = float("inf")
 
         # Internal helper function on pesudo forward
         def _forward(estimators, data):
-            batch_size = data.size()[0]
+            batch_size = data.size(0)
             pred = torch.zeros(batch_size, self.n_outputs).to(self.device)
 
             for estimator in estimators:
@@ -249,6 +250,7 @@ class VotingRegressor(BaseModule):
 
             # Training loop
             for epoch in range(epochs):
+                self.train()
                 rets = parallel(delayed(_parallel_fit_per_epoch)(
                         train_loader,
                         lr,
@@ -264,15 +266,16 @@ class VotingRegressor(BaseModule):
                     )
                     for idx, estimator in enumerate(estimators)
                 )
+                estimators = rets  # update
 
-                estimators = rets
                 # Validation
                 if test_loader:
+                    self.eval()
                     with torch.no_grad():
-                        mse = 0.
+                        mse = 0
                         for _, (data, target) in enumerate(test_loader):
-                            data, target = (data.to(self.device),
-                                            target.to(self.device))
+                            data = data.to(self.device)
+                            target = target.to(self.device)
                             output = _forward(estimators, data)
                             mse += criterion(output, target)
                         mse /= len(test_loader)
@@ -298,13 +301,12 @@ class VotingRegressor(BaseModule):
         "regressor_predict")
     def predict(self, test_loader):
         self.eval()
-        mse = 0.
+        mse = 0
         criterion = nn.MSELoss()
 
         for batch_idx, (data, target) in enumerate(test_loader):
             data, target = data.to(self.device), target.to(self.device)
             output = self.forward(data)
-
             mse += criterion(output, target)
 
         return mse / len(test_loader)

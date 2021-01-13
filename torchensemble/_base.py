@@ -16,10 +16,10 @@ def torchensemble_model_doc(header, item):
     header: string
        An introducion to the decorated class.
     item : string
-       Type of the doc item.
+       The type of the docstring item.
     """
     def get_doc(item):
-        """Return selected item"""
+        """Return the selected item"""
         __doc = {"model": const.__model_doc,
                  "fit": const.__fit_doc,
                  "classifier_forward": const.__classification_forward_doc,
@@ -71,39 +71,47 @@ class BaseModule(abc.ABC, nn.Module):
         return len(self.estimators_)
 
     def __getitem__(self, index):
-        """Return the index-th base estimator in the ensemble."""
+        """Return the `index`-th base estimator in the ensemble."""
         return self.estimators_[index]
 
     def _decide_n_outputs(self, train_loader, is_classification=True):
-        """Determine the number of outputs according to the train_loader."""
-        n_outputs = 0
+        """
+        Decide the number of outputs according to the train_loader.
+
+        - If `is_classification`, the number of outputs equals the number of
+          distinct classes.
+        - If not `is_classification`, the number of outputs equals the number
+          of target dimensions (e.g., 1 in univariate regression).
+        """
         # For Classification: n_outputs = n_classes
         if is_classification:
             if hasattr(train_loader.dataset, "classes"):
                 n_outputs = len(train_loader.dataset.classes)
-            # Infer from the dataloader
+            # Infer `n_outputs` from the dataloader
             else:
                 labels = []
                 for _, (_, target) in enumerate(train_loader):
                     labels.append(target)
                 labels = torch.unique(torch.cat(labels))
-                n_outputs = labels.size()[0]
+                n_outputs = labels.size(0)
         # For Regression: n_outputs = n_target_dimensions
         else:
             for _, (_, target) in enumerate(train_loader):
                 if len(target.size()) == 1:
                     n_outputs = 1
                 else:
-                    n_outputs = target.size()[1]
+                    n_outputs = target.size(1)
                 break
+
         return n_outputs
 
     def _make_estimator(self):
-        """Make and configure a copy of the `base_estimator_`."""
+        """Make and configure a copy of the `self.base_estimator_`."""
         if self.estimator_args is None:
             estimator = self.base_estimator_()
         else:
             estimator = self.base_estimator_(**self.estimator_args)
+
         return estimator.to(self.device)
 
     def _validate_parameters(self, lr, weight_decay, epochs, log_interval):
@@ -134,10 +142,10 @@ class BaseModule(abc.ABC, nn.Module):
             raise ValueError(msg.format(log_interval))
 
     @abc.abstractmethod
-    def forward(self, X):
+    def forward(self, x):
         """
         Implementation on the data forwarding in the ensemble. Notice
-        that the input ``X`` should be a data batch instead of a standalone
+        that the input ``x`` should be a data batch instead of a standalone
         data loader that contains many data batches.
         """
 
