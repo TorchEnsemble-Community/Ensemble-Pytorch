@@ -184,7 +184,7 @@ class _BaseGradientBoosting(BaseModule):
 
     def _staged_forward(self, X, est_idx):
         """
-        Return the summation outputs from the first `est_idx+1` base
+        Return the summation on outputs from the first `est_idx+1` base
         estimators."""
         if est_idx >= self.n_estimators:
             msg = ("est_idx = {} should be an integer smaller than the"
@@ -314,13 +314,13 @@ class GradientBoostingClassifier(_BaseGradientBoosting):
         y_onehot = self._onehot_coding(y)
         output = torch.zeros_like(y_onehot).to(self.device)
 
-        # Before training the first estimator, we assume that GBM returns 0	
-        # for any input (i.e., null output).	
-        if est_idx == 0:	
-            return y_onehot - F.softmax(output, dim=1)	
-        else:	
-            for idx in range(est_idx):	
-                output += self.shrinkage_rate * self.estimators_[idx](X)	
+        # Before training the first estimator, we assume that GBM returns 0
+        # for any input (i.e., null output).
+        if est_idx == 0:
+            return y_onehot - F.softmax(output, dim=1)
+        else:
+            for idx in range(est_idx):
+                output += self.shrinkage_rate * self.estimators_[idx](X)
 
             return y_onehot - F.softmax(output, dim=1)
 
