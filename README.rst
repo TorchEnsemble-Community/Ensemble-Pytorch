@@ -142,3 +142,11 @@ Package dependencies
 -  scikit-learn>=0.23.0
 -  torch>=0.4.1
 -  torchvision>=0.2.2
+
+Statistics
+----------
+
+|hit|_
+
+.. |hit| image:: http://hits.dwyl.com/xuyxu/Ensemble-Pytorch.svg
+.. _hit: http://hits.dwyl.com/xuyxu/Ensemble-Pytorch
