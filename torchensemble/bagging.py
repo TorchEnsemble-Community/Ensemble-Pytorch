@@ -29,8 +29,7 @@ def _parallel_fit_per_epoch(train_loader,
                             estimator,
                             criterion,
                             device,
-                            is_classification,
-                            logger):
+                            is_classification):
     """Private function used to fit base estimators in parallel."""
     optimizer = utils.set_optimizer(estimator, optimizer, lr, weight_decay)
 
@@ -64,7 +63,7 @@ def _parallel_fit_per_epoch(train_loader,
 
                 msg = ("Estimator: {:03d} | Epoch: {:03d} | Batch: {:03d}"
                        " | Loss: {:.5f} | Correct: {:d}/{:d}")
-                logger.info(
+                print(
                     msg.format(
                         idx, epoch, batch_idx, loss, correct, subsample_size
                     )
@@ -72,7 +71,7 @@ def _parallel_fit_per_epoch(train_loader,
             else:
                 msg = ("Estimator: {:03d} | Epoch: {:03d} | Batch: {:03d}"
                        " | Loss: {:.5f}")
-                logger.info(msg.format(idx, epoch, batch_idx, loss))
+                print(msg.format(idx, epoch, batch_idx, loss))
 
     return estimator
 
@@ -147,8 +146,7 @@ class BaggingClassifier(BaseModule):
                         estimator,
                         criterion,
                         self.device,
-                        True,
-                        self.logger
+                        True
                     )
                     for idx, estimator in enumerate(estimators)
                 )
@@ -270,8 +268,7 @@ class BaggingRegressor(BaseModule):
                         estimator,
                         criterion,
                         self.device,
-                        False,
-                        self.logger
+                        False
                     )
                     for idx, estimator in enumerate(estimators)
                 )
