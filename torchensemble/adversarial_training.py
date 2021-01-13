@@ -1,22 +1,80 @@
 """
-  It is known that adversatial training is able to improve the performance of
-  a base estimator by treating adversarial samples as the augmented training
-  data.
+  Adversarial training is able to improve the performance of an ensemble by
+  treating adversarial samples as the augmented training data. The fast
+  gradient sign method (FGSM) is used to generate adversarial samples.
 
   Reference:
-      B. Lakshminarayanan, A. Pritzel, C. Blundell., "Simple and Scalable
-      Predictive Uncertainty Estimation using Deep Ensembles," NIPS 2017.
+      B. Lakshminarayanan, A. Pritzel, C. Blundell., Simple and Scalable
+      Predictive Uncertainty Estimation using Deep Ensembles, NIPS 2017.
 """
 
 
 import torch
-import logging
 import torch.nn as nn
 import torch.nn.functional as F
 from joblib import Parallel, delayed
 
 from ._base import BaseModule, torchensemble_model_doc
 from . import utils
+
+
+__fit_doc = """
+    Parameters
+    ----------
+    train_loader : torch.utils.data.DataLoader
+        A :mod:`DataLoader` container that contains the training data.
+    lr : float, default=1e-3
+        The learning rate of the parameter optimizer.
+    weight_decay : float, default=5e-4
+        The weight decay of the parameter optimizer.
+    epochs : int, default=100
+        The number of training epochs.
+    optimizer : {"SGD", "Adam", "RMSprop"}, default="Adam"
+        The type of parameter optimizer.
+    epsilon : float, defaul=0.01
+        The step used to generate adversarial samples in the fast gradient
+        sign method (FGSM).
+    log_interval : int, default=100
+        The number of batches to wait before printting the training status.
+    test_loader : torch.utils.data.DataLoader, default=None
+        A :mod:`DataLoader` container that contains the evaluating data.
+
+        - If ``None``, no validation is conducted after each training
+          epoch.
+        - If not ``None``, the ensemble will be evaluated on this
+          dataloader after each training epoch.
+    save_model : bool, default=True
+        Whether to save the model.
+
+        - If test_loader is ``None``, the ensemble containing
+          ``n_estimators`` base estimators will be saved.
+        - If test_loader is not ``None``, the ensemble with the best
+          validation performance will be saved.
+    save_dir : string, default=None
+        Specify where to save the model.
+
+        - If ``None``, the model will be saved in the current directory.
+        - If not ``None``, the model will be saved in the specified
+          directory: ``save_dir``.
+"""
+
+
+def _adversarial_training_model_doc(header, item="fit"):
+    """
+    Decorator on obtaining documentation for different adversarial training
+    models.
+    """
+    def get_doc(item):
+        """Return selected item"""
+        __doc = {"fit": __fit_doc}
+        return __doc[item]
+
+    def adddoc(cls):
+        doc = [header + "\n\n"]
+        doc.extend(get_doc(item))
+        cls.__doc__ = "".join(doc)
+        return cls
+    return adddoc
 
 
 def _parallel_fit_per_epoch(train_loader,
@@ -30,8 +88,7 @@ def _parallel_fit_per_epoch(train_loader,
                             estimator,
                             criterion,
                             device,
-                            is_classification,
-                            logger):
+                            is_classification):
     """Private function used to fit base estimators in parallel."""
     optimizer = utils.set_optimizer(estimator, optimizer, lr, weight_decay)
 
@@ -41,9 +98,10 @@ def _parallel_fit_per_epoch(train_loader,
         data, target = data.to(device), target.to(device)
         data.requires_grad = True
 
+        optimizer.zero_grad()
+
         output = estimator(data)
         loss = criterion(output, target)
-        optimizer.zero_grad()
 
         loss.backward()
 
@@ -75,7 +133,7 @@ def _parallel_fit_per_epoch(train_loader,
             else:
                 msg = ("Estimator: {:03d} | Epoch: {:03d} | Batch: {:03d}"
                        " | Loss: {:.5f}")
-                logger.info(msg.format(idx, epoch, batch_idx, loss))
+                print(msg.format(idx, epoch, batch_idx, loss))
 
     return estimator
 
@@ -92,30 +150,6 @@ def _get_fgsm_samples(sample, epsilon, sample_grad):
 
 
 class _BaseAdversarialTraining(BaseModule):
-
-    def __init__(self,
-                 estimator,
-                 n_estimators,
-                 estimator_args=None,
-                 cuda=True,
-                 n_jobs=None):
-        super(BaseModule, self).__init__()
-
-        # Make sure estimator is not an instance
-        if not isinstance(estimator, type):
-            msg = ("The input argument `estimator` should be a class"
-                   " inherited from nn.Module. Perhaps you have passed"
-                   " an instance of that class into the ensemble.")
-            raise RuntimeError(msg)
-
-        self.base_estimator_ = estimator
-        self.n_estimators = n_estimators
-        self.estimator_args = estimator_args
-        self.device = torch.device("cuda" if cuda else "cpu")
-        self.n_jobs = n_jobs
-        self.logger = logging.getLogger()
-
-        self.estimators_ = nn.ModuleList()
 
     def _validate_parameters(self,
                              lr,
@@ -156,6 +190,8 @@ class _BaseAdversarialTraining(BaseModule):
             raise ValueError(msg.format(log_interval))
 
 
+@torchensemble_model_doc("""Implementation on the AdversarialTrainingClassifier.""",  # noqa: E501
+                         "model")
 class AdversarialTrainingClassifier(_BaseAdversarialTraining):
 
     def __init__(self, **kwargs):
@@ -175,6 +211,10 @@ class AdversarialTrainingClassifier(_BaseAdversarialTraining):
 
         return proba
 
+    @_adversarial_training_model_doc(
+        """Implementation on the training stage of AdversarialTrainingClassifier.""",  # noqa: E501
+        "fit"
+    )
     def fit(self,
             train_loader,
             lr=1e-3,
@@ -231,8 +271,7 @@ class AdversarialTrainingClassifier(_BaseAdversarialTraining):
                         estimator,
                         criterion,
                         self.device,
-                        True,
-                        self.logger
+                        True
                     )
                     for idx, estimator in enumerate(estimators)
                 )
