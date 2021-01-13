@@ -12,7 +12,8 @@ all_clf = [torchensemble.FusionClassifier,
            torchensemble.VotingClassifier,
            torchensemble.BaggingClassifier,
            torchensemble.GradientBoostingClassifier,
-           torchensemble.SnapshotEnsembleClassifier]
+           torchensemble.SnapshotEnsembleClassifier,
+           torchensemble.AdversarialTrainingClassifier]
 
 
 all_reg = [torchensemble.FusionRegressor,

@@ -166,9 +166,14 @@ class AdversarialTrainingClassifier(_BaseAdversarialTraining):
         """Implementation on the data forwarding in AdversarialTrainingClassifier.""",  # noqa: E501
         "classifier_forward")
     def forward(self, X):
-        proba = self._forward(X)
+        batch_size = X.size()[0]
+        proba = torch.zeros(batch_size, self.n_outputs).to(self.device)
 
-        return F.softmax(proba, dim=1)
+        # Take the average over class distributions from all base estimators.
+        for estimator in self.estimators_:
+            proba += F.softmax(estimator(X), dim=1) / self.n_estimators
+
+        return proba
 
     def fit(self,
             train_loader,
