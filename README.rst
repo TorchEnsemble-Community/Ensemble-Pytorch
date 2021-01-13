@@ -22,11 +22,21 @@ Implementation of ensemble methods in Pytorch to boost the performance of your m
 List of methods
 ---------------
 
-* Fusion
-* Voting
-* Bagging
-* Gradient Boosting
-* Snapshot Ensemble
++--------+----------------------+-------------------+
+| **ID** |    **Method Name**   | **Ensemble Type** |
++--------+----------------------+-------------------+
+|    1   |        Fusion        |       Mixed       |
++--------+----------------------+-------------------+
+|    2   |        Voting        |      Parallel     |
++--------+----------------------+-------------------+
+|    3   |        Bagging       |      Parallel     |
++--------+----------------------+-------------------+
+|    4   |   Gradient Boosting  |     Sequential    |
++--------+----------------------+-------------------+
+|    5   |   Snapshot Ensemble  |     Sequential    |
++--------+----------------------+-------------------+
+|    6   | Adversarial Training |      Parallel     |
++--------+----------------------+-------------------+
 
 News
 ----
