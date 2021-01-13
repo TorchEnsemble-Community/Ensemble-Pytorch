@@ -38,7 +38,7 @@ __fit_doc = """
         The type of parameter optimizer.
     epsilon : float, defaul=0.01
         The step used to generate adversarial samples in the fast gradient
-        sign method (FGSM).
+        sign method (FGSM), which should be in the range [0, 1].
     log_interval : int, default=100
         The number of batches to wait before printting the training status.
     test_loader : torch.utils.data.DataLoader, default=None

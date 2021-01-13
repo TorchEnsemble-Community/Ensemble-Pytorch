@@ -59,6 +59,16 @@ To obtain snapshots with good performance, snapshot ensemble uses **cyclic annea
 
 Notice that the iteration above indicates the loop on enumerating all batches within each epoch, instead of the loop on iterating over all training epochs.
 
+Adversarial Training [2]_
+-------------------------
+
+Adversarial samples can be used to improve the performance of base estimators, as validated by the authors in [2]. The implemented ``AdversarialTrainingClassifier`` and ``AdversarialTrainingRegressor`` contain :math:`M` independent base estimators, and each of them is fitted independently as in Voting and Bagging.
+
+During the training stage of each base estimator :math:`h^m`, an adversarial sample :math:`\mathbf{x}_i^{adv}` is first generated for each sample :math:`\mathbf{x}_i` in the current data batch, using the fast gradient sign method (FGSM). After then, parameters of the base estimator is optimized to minimize the training loss :math:`\mathcal{L}(\mathbf{o}_i, y_i) + \mathcal{L}(\mathbf{o}_i^{adv}, y_i)`, where :math:`\mathbf{o}_i^{adv}` is the output of :math:`h^m` on the adversarial sample :math:`\mathbf{x}_i^{adv}`. Clearly, this training loss encourages each base estimator to perform well on both original samples and adversarial samples.
+
+Same as Voting and Bagging, the output of ``AdversarialTrainingClassifier`` or ``AdversarialTrainingRegressor`` during the evaluating stage is the average over predictions from all base estimators.
+
 **References**
 
-.. [1] Huang, Gao, et al. "Snapshot ensembles: Train 1, get m for free." ICLR, 2017.
+.. [1] Huang Gao, Sharon Yixuan Li, Geoff Pleisset, et al., "Snapshot ensembles: Train 1, get m for free." ICLR, 2017.
+.. [2] Balaji Lakshminarayanan, Alexander Pritzel, Charles Blundell., "Simple and Scalable Predictive Uncertainty Estimation using Deep Ensembles." NIPS 2017.

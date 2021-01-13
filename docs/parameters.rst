@@ -125,3 +125,9 @@ AdversarialTrainingClassifier
 
 .. autoclass:: torchensemble.adversarial_training.AdversarialTrainingClassifier
     :members:
+
+AdversarialTrainingRegressor
+*****************************
+
+.. autoclass:: torchensemble.adversarial_training.AdversarialTrainingRegressor
+    :members:
