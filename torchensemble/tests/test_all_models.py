@@ -22,7 +22,7 @@ all_reg = [torchensemble.FusionRegressor,
            torchensemble.SnapshotEnsembleRegressor]
 
 
-set_logger("pytest_all_models", "INFO", "DEBUG")
+set_logger("pytest_all_models")
 
 
 # Base estimator

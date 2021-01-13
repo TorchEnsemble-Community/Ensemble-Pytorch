@@ -12,7 +12,7 @@ parallel = [torchensemble.FusionClassifier,
             torchensemble.VotingClassifier,
             torchensemble.BaggingClassifier]
 
-set_logger("pytest_training_params", "INFO", "DEBUG")
+set_logger("pytest_training_params")
 
 
 # Base estimator
@@ -66,6 +66,46 @@ def test_parallel(method):
     with pytest.raises(ValueError) as excinfo:
         model.fit(train_loader, log_interval=-1)
     assert "number of batches to wait" in str(excinfo.value)
+
+
+def test_gradient_boosting():
+    model = torchensemble.GradientBoostingClassifier(estimator=MLP,
+                                                     n_estimators=2,
+                                                     cuda=False)
+
+    # Learning rate
+    with pytest.raises(ValueError) as excinfo:
+        model.fit(train_loader, lr=-1)
+    assert "learning rate of optimizer" in str(excinfo.value)
+
+    # Weight decay
+    with pytest.raises(ValueError) as excinfo:
+        model.fit(train_loader, weight_decay=-1)
+    assert "weight decay of optimizer" in str(excinfo.value)
+
+    # Epochs
+    with pytest.raises(ValueError) as excinfo:
+        model.fit(train_loader, epochs=-1)
+    assert "number of training epochs" in str(excinfo.value)
+
+    # Log interval
+    with pytest.raises(ValueError) as excinfo:
+        model.fit(train_loader, log_interval=-1)
+    assert "number of batches to wait" in str(excinfo.value)
+
+    # Early stoppping round
+    with pytest.raises(ValueError) as excinfo:
+        model.fit(train_loader, early_stopping_rounds=0)
+    assert "number of tolerant rounds" in str(excinfo.value)
+
+    # Shrinkage rate
+    model = torchensemble.GradientBoostingClassifier(estimator=MLP,
+                                                     n_estimators=2,
+                                                     shrinkage_rate=2,
+                                                     cuda=False)
+    with pytest.raises(ValueError) as excinfo:
+        model.fit(train_loader)
+    assert "shrinkage rate should be in the range" in str(excinfo.value)
 
 
 def test_snapshot_ensemble():
