@@ -1,5 +1,6 @@
 import abc
 import torch
+import logging
 import torch.nn as nn
 
 from . import _constants as const
@@ -46,8 +47,7 @@ class BaseModule(abc.ABC, nn.Module):
                  n_estimators,
                  estimator_args=None,
                  cuda=True,
-                 n_jobs=None,
-                 verbose=1):
+                 n_jobs=None):
         super(BaseModule, self).__init__()
 
         # Make sure estimator is not an instance
@@ -62,7 +62,7 @@ class BaseModule(abc.ABC, nn.Module):
         self.estimator_args = estimator_args
         self.device = torch.device("cuda" if cuda else "cpu")
         self.n_jobs = n_jobs
-        self.verbose = verbose
+        self.logger = logging.getLogger()
 
         self.estimators_ = nn.ModuleList()
 
@@ -112,21 +112,25 @@ class BaseModule(abc.ABC, nn.Module):
         if not lr > 0:
             msg = ("The learning rate of optimizer = {} should be strictly"
                    " positive.")
+            self.logger.error(msg.format(lr))
             raise ValueError(msg.format(lr))
 
         if not weight_decay >= 0:
             msg = "The weight decay of optimizer = {} should not be negative."
+            self.logger.error(msg.format(weight_decay))
             raise ValueError(msg.format(weight_decay))
 
         if not epochs > 0:
             msg = ("The number of training epochs = {} should be strictly"
                    " positive.")
+            self.logger.error(msg.format(epochs))
             raise ValueError(msg.format(epochs))
 
         if not log_interval > 0:
             msg = ("The number of batches to wait before printting the"
                    " training status should be strictly positive, but got {}"
                    " instead.")
+            self.logger.error(msg.format(log_interval))
             raise ValueError(msg.format(log_interval))
 
     @abc.abstractmethod

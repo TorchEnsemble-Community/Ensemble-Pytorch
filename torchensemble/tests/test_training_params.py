@@ -5,11 +5,14 @@ import torch.nn as nn
 from torch.utils.data import TensorDataset, DataLoader
 
 import torchensemble
+from torchensemble.utils import set_logger
 
 
 parallel = [torchensemble.FusionClassifier,
             torchensemble.VotingClassifier,
             torchensemble.BaggingClassifier]
+
+set_logger("pytest_training_params", "INFO", "DEBUG")
 
 
 # Base estimator

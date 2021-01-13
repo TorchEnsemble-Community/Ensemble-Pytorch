@@ -1,9 +1,9 @@
 * **[0.1.0]**
     * **Function-related**
-        * [ ] Add ``SnapshotEnsemble``
-        * [ ] Add ``SoftGradientBoostingClassifier`` and ``SoftGradientBoostingRegressor``  
+        * [x] Add ``SnapshotEnsemble``
         * [ ] Add more callbacks to ``predict``
-        * [ ] Add scheduler of parameter optimizer
+        * [ ] Add the scheduler of parameter optimizer
+        * [ ] Improve the efficiency of gradient boosting by storing the output of fitted base estimators
     * **Doc-related**
         * [ ] Finish the documentation
         * [ ] Present complete experiment results

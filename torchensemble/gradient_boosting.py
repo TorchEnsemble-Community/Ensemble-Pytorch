@@ -7,6 +7,7 @@
 
 import abc
 import torch
+import logging
 import torch.nn as nn
 import torch.nn.functional as F
 
@@ -36,13 +37,6 @@ __model_doc = """
 
         - If ``True``, use GPU to train and evaluate the ensemble.
         - If ``False``, use CPU to train and evaluate the ensemble.
-    verbose : int, default=1
-        Control the level on printing logging information.
-
-        - If ``0``, trigger the silent mode
-        - If ``1``, basic logging information on the training and
-          evaluating status is printed.
-        - If ``> 1``, full logging information is printed.
 
     Attributes
     ----------
@@ -160,8 +154,7 @@ class _BaseGradientBoosting(BaseModule):
                  n_estimators,
                  estimator_args=None,
                  shrinkage_rate=1.,
-                 cuda=True,
-                 verbose=1):
+                 cuda=True):
         super(BaseModule, self).__init__()
 
         # Make sure estimator is not an instance
@@ -176,7 +169,7 @@ class _BaseGradientBoosting(BaseModule):
         self.estimator_args = estimator_args
         self.shrinkage_rate = shrinkage_rate
         self.device = torch.device("cuda" if cuda else "cpu")
-        self.verbose = verbose
+        self.logger = logging.getLogger()
 
         self.estimators_ = nn.ModuleList()
 
@@ -191,31 +184,37 @@ class _BaseGradientBoosting(BaseModule):
         if not lr > 0:
             msg = ("The learning rate of optimizer = {} should be strictly"
                    " positive.")
+            self.logger.error(msg.format(lr))
             raise ValueError(msg.format(lr))
 
         if not weight_decay >= 0:
             msg = "The weight decay of optimizer = {} should not be negative."
+            self.logger.error(msg.format(weight_decay))
             raise ValueError(msg.format(weight_decay))
 
         if not epochs > 0:
             msg = ("The number of training epochs = {} should be strictly"
                    " positive.")
+            self.logger.error(msg.format(epochs))
             raise ValueError(msg.format(epochs))
 
         if not log_interval > 0:
             msg = ("The number of batches to wait before printting the"
                    " training status should be strictly positive, but got {}"
                    " instead.")
+            self.logger.error(msg.format(log_interval))
             raise ValueError(msg.format(log_interval))
 
         if not early_stopping_rounds >= 1:
             msg = ("The number of tolerant rounds before triggering the"
                    " early stopping should at least be 1, but got {} instead.")
+            self.logger.error(msg.format(early_stopping_rounds))
             raise ValueError(msg.format(early_stopping_rounds))
 
         if not 0 < self.shrinkage_rate <= 1:
             msg = ("The shrinkage rate should be in the range (0, 1], but got"
                    " {} instead.")
+            self.logger.error(msg.format(self.shrinkage_rate))
             raise ValueError(msg.format(self.shrinkage_rate))
 
     @abc.abstractmethod
@@ -229,6 +228,7 @@ class _BaseGradientBoosting(BaseModule):
         if est_idx >= self.n_estimators:
             msg = ("est_idx = {} should be an integer smaller than the"
                    " number of base estimators = {}.")
+            self.logger.error(msg.format(est_idx, self.n_estimators))
             raise ValueError(msg.format(est_idx, self.n_estimators))
 
         batch_size = X.size()[0]
@@ -300,11 +300,11 @@ class _BaseGradientBoosting(BaseModule):
                     learner_optimizer.step()
 
                     # Print training status
-                    if batch_idx % log_interval == 0 and self.verbose > 0:
-                        msg = ("{} Estimator: {:03d} | Epoch: {:03d} | Batch:"
+                    if batch_idx % log_interval == 0:
+                        msg = ("Estimator: {:03d} | Epoch: {:03d} | Batch:"
                                " {:03d} | RegLoss: {:.5f}")
-                        print(msg.format(utils.ctime(), est_idx, epoch,
-                                         batch_idx, loss))
+                        self.logger.info(msg.format(est_idx, epoch,
+                                                    batch_idx, loss))
 
             # Validation
             if test_loader:
@@ -312,16 +312,13 @@ class _BaseGradientBoosting(BaseModule):
 
                 if flag:
                     n_counter += 1
-                    if self.verbose > 0:
-                        msg = "{} Early stopping counter: {} out of {}"
-                        print(msg.format(
-                            utils.ctime(), n_counter, early_stopping_rounds)
-                        )
+                    msg = "Early stopping counter: {} out of {}"
+                    self.logger.info(msg.format(n_counter,
+                                                early_stopping_rounds))
 
                     if n_counter == early_stopping_rounds:
-                        if self.verbose > 0:
-                            msg = "{} Handling early stopping"
-                            print(msg.format(utils.ctime()))
+                        msg = "Handling early stopping"
+                        self.logger.info(msg)
 
                         # Early stopping
                         offset = est_idx - n_counter
@@ -336,11 +333,10 @@ class _BaseGradientBoosting(BaseModule):
             _train_loader.update(estimator, self.shrinkage_rate, self.device)
 
         # Post-processing
-        if self.verbose > 0:
-            msg = "{} Optimal number of base estimators: {}"
-            print(msg.format(utils.ctime(), len(self.estimators_)))
+        msg = "Optimal number of base estimators: {}"
+        self.logger.info(msg.format(len(self.estimators_)))
         if save_model:
-            utils.save(self, save_dir, self.verbose)
+            utils.save(self, save_dir, self.logger)
 
 
 @_gradient_boosting_model_doc(
@@ -387,9 +383,8 @@ class GradientBoostingClassifier(_BaseGradientBoosting):
             else:
                 flag = True
 
-        if self.verbose > 0:
-            msg = "{} Validation Acc: {:.3f} % | Historical Best: {:.3f} %"
-            print(msg.format(utils.ctime(), acc, self.best_acc))
+        msg = "Validation Acc: {:.3f} % | Historical Best: {:.3f} %"
+        self.logger.info(msg.format(acc, self.best_acc))
 
         return flag
 
@@ -497,9 +492,8 @@ class GradientBoostingRegressor(_BaseGradientBoosting):
             else:
                 flag = True
 
-        if self.verbose > 0:
-            msg = "{} Validation MSE: {:.5f} | Historical Best: {:.5f}"
-            print(msg.format(utils.ctime(), mse, self.best_mse))
+        msg = "Validation MSE: {:.5f} | Historical Best: {:.5f}"
+        self.logger.info(msg.format(mse, self.best_mse))
 
         return flag
 

@@ -13,6 +13,7 @@ Added
 
 Changed
 ~~~~~~~
+* [ENH] Implement the logging module | @zzzzwj
 
 Removed
 ~~~~~~~

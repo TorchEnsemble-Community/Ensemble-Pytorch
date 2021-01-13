@@ -7,13 +7,14 @@ import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 
+from torchensemble.utils import set_logger
 from torchensemble.fusion import FusionClassifier
 from torchensemble.voting import VotingClassifier
 from torchensemble.bagging import BaggingClassifier
 from torchensemble.gradient_boosting import GradientBoostingClassifier
 
 
-def display_records(records):
+def display_records(records, logger):
     msg = (
         "{:<28} | Testing Acc: {:.2f} % | Training Time: {:.2f} s |"
         " Evaluating Time: {:.2f} s"
@@ -21,7 +22,7 @@ def display_records(records):
 
     print("\n")
     for method, training_time, evaluating_time, acc in records:
-        print(msg.format(method, acc, training_time, evaluating_time))
+        logger.info(msg.format(method, acc, training_time, evaluating_time))
 
 
 class LeNet5(nn.Module):
@@ -108,6 +109,8 @@ if __name__ == "__main__":
         shuffle=True,
     )
 
+    logger = set_logger("classification_cifar10_cnn")
+
     # FusionClassifier
     model = FusionClassifier(
         estimator=LeNet5,
@@ -192,4 +195,4 @@ if __name__ == "__main__":
                     evaluating_time, testing_acc))
 
     # Print results on different ensemble methods
-    display_records(records)
+    display_records(records, logger)
