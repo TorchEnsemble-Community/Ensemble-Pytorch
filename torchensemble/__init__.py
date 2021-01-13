@@ -9,6 +9,7 @@ from .gradient_boosting import GradientBoostingRegressor
 from .snapshot_ensemble import SnapshotEnsembleClassifier
 from .snapshot_ensemble import SnapshotEnsembleRegressor
 from .adversarial_training import AdversarialTrainingClassifier
+from .adversarial_training import AdversarialTrainingRegressor
 
 
 __all__ = ["FusionClassifier",
@@ -21,4 +22,5 @@ __all__ = ["FusionClassifier",
            "GradientBoostingRegressor",
            "SnapshotEnsembleClassifier",
            "SnapshotEnsembleRegressor",
-           "AdversarialTrainingClassifier"]
+           "AdversarialTrainingClassifier",
+           "AdversarialTrainingRegressor"]

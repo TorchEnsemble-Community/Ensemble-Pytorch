@@ -20,7 +20,8 @@ all_reg = [torchensemble.FusionRegressor,
            torchensemble.VotingRegressor,
            torchensemble.BaggingRegressor,
            torchensemble.GradientBoostingRegressor,
-           torchensemble.SnapshotEnsembleRegressor]
+           torchensemble.SnapshotEnsembleRegressor,
+           torchensemble.AdversarialTrainingRegressor]
 
 
 set_logger("pytest_all_models")

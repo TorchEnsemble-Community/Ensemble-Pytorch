@@ -18,6 +18,11 @@ from ._base import BaseModule, torchensemble_model_doc
 from . import utils
 
 
+__all__ = ["_BaseAdversarialTraining",
+           "AdversarialTrainingClassifier",
+           "AdversarialTrainingRegressor"]
+
+
 __fit_doc = """
     Parameters
     ----------
@@ -98,20 +103,19 @@ def _parallel_fit_per_epoch(train_loader,
         data, target = data.to(device), target.to(device)
         data.requires_grad = True
 
-        optimizer.zero_grad()
-
-        output = estimator(data)
-        loss = criterion(output, target)
-
-        loss.backward()
-
-        # Also compute the adversarial loss
+        # Get adversarial samples
+        _output = estimator(data)
+        _loss = criterion(_output, target)
+        _loss.backward()
         data_grad = data.grad.data
         adv_data = _get_fgsm_samples(data, epsilon, data_grad)
-        adv_output = estimator(adv_data)
-        adv_loss = criterion(adv_output, target)
-        adv_loss.backward()
 
+        # Compute the training loss
+        optimizer.zero_grad()
+        org_output = estimator(data)
+        adv_output = estimator(adv_data)
+        loss = criterion(org_output, target) + criterion(adv_output, target)
+        loss.backward()
         optimizer.step()
 
         # Print training status
@@ -119,8 +123,8 @@ def _parallel_fit_per_epoch(train_loader,
 
             # Classification
             if is_classification:
-                pred = output.data.max(1)[1]
-                correct = pred.eq(target.view(-1).data).sum()
+                _, predicted = torch.max(org_output.data, 1)
+                correct = (predicted == target).sum().item()
 
                 msg = ("Estimator: {:03d} | Epoch: {:03d} | Batch: {:03d}"
                        " | Loss: {:.5f} | Correct: {:d}/{:d}")
@@ -209,13 +213,13 @@ class AdversarialTrainingClassifier(_BaseAdversarialTraining):
     @torchensemble_model_doc(
         """Implementation on the data forwarding in AdversarialTrainingClassifier.""",  # noqa: E501
         "classifier_forward")
-    def forward(self, X):
-        batch_size = X.size()[0]
+    def forward(self, x):
+        batch_size = x.size(0)
         proba = torch.zeros(batch_size, self.n_outputs).to(self.device)
 
         # Take the average over class distributions from all base estimators.
         for estimator in self.estimators_:
-            proba += F.softmax(estimator(X), dim=1) / self.n_estimators
+            proba += F.softmax(estimator(x), dim=1) / self.n_estimators
 
         return proba
 
@@ -229,7 +233,7 @@ class AdversarialTrainingClassifier(_BaseAdversarialTraining):
             weight_decay=5e-4,
             epochs=100,
             optimizer="Adam",
-            epsilon=0.01,
+            epsilon=0.5,
             log_interval=100,
             test_loader=None,
             save_model=True,
@@ -239,14 +243,12 @@ class AdversarialTrainingClassifier(_BaseAdversarialTraining):
         estimators = []
         for _ in range(self.n_estimators):
             estimators.append(self._make_estimator())
-        self.n_outputs = self._decide_n_outputs(train_loader, True)
         self._validate_parameters(lr,
                                   weight_decay,
                                   epochs,
                                   epsilon,
                                   log_interval)
-
-        self.train()
+        self.n_outputs = self._decide_n_outputs(train_loader, True)
 
         # Utils
         criterion = nn.CrossEntropyLoss()
@@ -267,6 +269,7 @@ class AdversarialTrainingClassifier(_BaseAdversarialTraining):
 
             # Training loop
             for epoch in range(epochs):
+                self.train()
                 rets = parallel(delayed(_parallel_fit_per_epoch)(
                         train_loader,
                         lr,
@@ -288,15 +291,18 @@ class AdversarialTrainingClassifier(_BaseAdversarialTraining):
 
                 # Validation
                 if test_loader:
+                    self.eval()
                     with torch.no_grad():
-                        correct = 0.
+                        correct = 0
+                        total = 0
                         for _, (data, target) in enumerate(test_loader):
-                            data, target = (data.to(self.device),
-                                            target.to(self.device))
+                            data = data.to(self.device)
+                            target = target.to(self.device)
                             output = _forward(estimators, data)
-                            pred = output.data.max(1)[1]
-                            correct += pred.eq(target.view(-1).data).sum()
-                        acc = 100. * float(correct) / len(test_loader.dataset)
+                            _, predicted = torch.max(output.data, 1)
+                            correct += (predicted == target).sum().item()
+                            total += target.size(0)
+                        acc = 100 * correct / total
 
                         if acc > best_acc:
                             best_acc = acc
@@ -320,26 +326,145 @@ class AdversarialTrainingClassifier(_BaseAdversarialTraining):
     def predict(self, test_loader):
         self.eval()
         correct = 0
+        total = 0
 
-        for batch_idx, (data, target) in enumerate(test_loader):
+        for _, (data, target) in enumerate(test_loader):
             data, target = data.to(self.device), target.to(self.device)
             output = self.forward(data)
-            pred = output.data.max(1)[1]
-            correct += pred.eq(target.view(-1).data).sum()
+            _, predicted = torch.max(output.data, 1)
+            correct += (predicted == target).sum().item()
+            total += target.size(0)
 
-        accuracy = 100. * float(correct) / len(test_loader.dataset)
+        acc = 100 * correct / total
 
-        return accuracy
+        return acc
 
 
+@torchensemble_model_doc("""Implementation on the AdversarialTrainingRegressor.""",  # noqa: E501
+                         "model")
 class AdversarialTrainingRegressor(_BaseAdversarialTraining):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.is_classification = False
-        self.criterion = nn.MSELoss()
 
-    def forward(self, X):
-        pred = self._forward(X)
+    @torchensemble_model_doc(
+        """Implementation on the data forwarding in AdversarialTrainingRegressor.""",  # noqa: E501
+        "regressor_forward")
+    def forward(self, x):
+        batch_size = x.size(0)
+        pred = torch.zeros(batch_size, self.n_outputs).to(self.device)
+
+        # Take the average over predictions from all base estimators.
+        for estimator in self.estimators_:
+            pred += estimator(x) / self.n_estimators
 
         return pred
+
+    @_adversarial_training_model_doc(
+        """Implementation on the training stage of AdversarialTrainingRegressor.""",  # noqa: E501
+        "fit"
+    )
+    def fit(self,
+            train_loader,
+            lr=1e-3,
+            weight_decay=5e-4,
+            epochs=100,
+            optimizer="Adam",
+            epsilon=0.5,
+            log_interval=100,
+            test_loader=None,
+            save_model=True,
+            save_dir=None):
+
+        # Instantiate base estimators and set attributes
+        estimators = []
+        for _ in range(self.n_estimators):
+            estimators.append(self._make_estimator())
+        self._validate_parameters(lr,
+                                  weight_decay,
+                                  epochs,
+                                  epsilon,
+                                  log_interval)
+        self.n_outputs = self._decide_n_outputs(train_loader, True)
+
+        # Utils
+        criterion = nn.MSELoss()
+        best_mse = float("inf")
+
+        # Internal helper function on pesudo forward
+        def _forward(estimators, data):
+            batch_size = data.size(0)
+            pred = torch.zeros(batch_size, self.n_outputs).to(self.device)
+
+            for estimator in estimators:
+                pred += estimator(data) / self.n_estimators
+
+            return pred
+
+        # Maintain a pool of workers
+        with Parallel(n_jobs=self.n_jobs) as parallel:
+
+            # Training loop
+            for epoch in range(epochs):
+                self.train()
+                rets = parallel(delayed(_parallel_fit_per_epoch)(
+                        train_loader,
+                        lr,
+                        weight_decay,
+                        epoch,
+                        optimizer,
+                        epsilon,
+                        log_interval,
+                        idx,
+                        estimator,
+                        criterion,
+                        self.device,
+                        False
+                    )
+                    for idx, estimator in enumerate(estimators)
+                )
+                estimators = rets  # update
+
+                # Validation
+                if test_loader:
+                    self.eval()
+                    with torch.no_grad():
+                        mse = 0
+                        for _, (data, target) in enumerate(test_loader):
+                            data = data.to(self.device)
+                            target = target.to(self.device)
+                            output = _forward(estimators, data)
+                            mse += criterion(output, target)
+                        mse /= len(test_loader)
+
+                        if mse < best_mse:
+                            best_mse = mse
+                            self.estimators_ = nn.ModuleList()
+                            self.estimators_.extend(estimators)
+                            if save_model:
+                                utils.save(self, save_dir, self.logger)
+
+                        msg = ("Epoch: {:03d} | Validation MSE:"
+                               " {:.5f} | Historical Best: {:.5f}")
+                        self.logger.info(msg.format(epoch, mse, best_mse))
+
+        self.estimators_ = nn.ModuleList()
+        self.estimators_.extend(rets)
+        if save_model and not test_loader:
+            utils.save(self, save_dir, self.logger)
+
+    @torchensemble_model_doc(
+        """Implementation on the evaluating stage of AdversarialTrainingRegressor.""",  # noqa: E501
+        "regressor_predict")
+    def predict(self, test_loader):
+        self.eval()
+        mse = 0
+        criterion = nn.MSELoss()
+
+        for batch_idx, (data, target) in enumerate(test_loader):
+            data, target = data.to(self.device), target.to(self.device)
+            output = self.forward(data)
+            mse += criterion(output, target)
+
+        return mse / len(test_loader)
