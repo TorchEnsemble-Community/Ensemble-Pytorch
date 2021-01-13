@@ -137,7 +137,7 @@ if __name__ == "__main__":
         estimator=LeNet5,
         n_estimators=n_estimators,
         cuda=True,
-        n_jobs=1
+        n_jobs=2
     )
 
     tic = time.time()
@@ -158,7 +158,7 @@ if __name__ == "__main__":
         estimator=LeNet5,
         n_estimators=n_estimators,
         cuda=True,
-        n_jobs=1
+        n_jobs=2
     )
 
     tic = time.time()

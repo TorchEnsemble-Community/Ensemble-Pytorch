@@ -28,10 +28,11 @@ def _parallel_fit_per_epoch(train_loader,
                             estimator,
                             criterion,
                             device,
-                            is_classification,
-                            logger):
+                            is_classification):
     """Private function used to fit base estimators in parallel."""
     optimizer = utils.set_optimizer(estimator, optimizer, lr, weight_decay)
+
+    msg_list = []
 
     for batch_idx, (data, target) in enumerate(train_loader):
 
@@ -55,15 +56,15 @@ def _parallel_fit_per_epoch(train_loader,
 
                 msg = ("Estimator: {:03d} | Epoch: {:03d} | Batch: {:03d}"
                        " | Loss: {:.5f} | Correct: {:d}/{:d}")
-                logger.info(msg.format(idx, epoch, batch_idx, loss,
-                                       correct, batch_size))
+                msg_list.append(msg.format(idx, epoch, batch_idx, loss,
+                                correct, batch_size))
             # Regression
             else:
                 msg = ("Estimator: {:03d} | Epoch: {:03d} | Batch: {:03d}"
                        " | Loss: {:.5f}")
-                logger.info(msg.format(idx, epoch, batch_idx, loss))
+                msg_list.append(msg.format(idx, epoch, batch_idx, loss))
 
-    return estimator
+    return estimator, msg_list
 
 
 @torchensemble_model_doc("""Implementation on the VotingClassifier.""",
@@ -136,13 +137,16 @@ class VotingClassifier(BaseModule):
                         estimator,
                         criterion,
                         self.device,
-                        True,
-                        self.logger
+                        True
                     )
                     for idx, estimator in enumerate(estimators)
                 )
 
-                estimators = rets
+                estimators = []
+                for ret_val in rets:
+                    estimators.append(ret_val[0])
+                    for msg in ret_val[1]:
+                        self.logger.info(msg)
                 # Validation
                 if test_loader:
                     with torch.no_grad():
@@ -167,7 +171,7 @@ class VotingClassifier(BaseModule):
                         self.logger.info(msg.format(epoch, acc, best_acc))
 
         self.estimators_ = nn.ModuleList()
-        self.estimators_.extend(rets)
+        self.estimators_.extend(estimators)
         if save_model and not test_loader:
             utils.save(self, save_dir, self.logger)
 
@@ -259,13 +263,16 @@ class VotingRegressor(BaseModule):
                         estimator,
                         criterion,
                         self.device,
-                        False,
-                        self.logger
+                        False
                     )
                     for idx, estimator in enumerate(estimators)
                 )
 
-                estimators = rets
+                estimators = []
+                for ret_val in rets:
+                    estimators.append(ret_val[0])
+                    for msg in ret_val[1]:
+                        self.logger.info(msg)
                 # Validation
                 if test_loader:
                     with torch.no_grad():
@@ -289,7 +296,7 @@ class VotingRegressor(BaseModule):
                         self.logger.info(msg.format(epoch, mse, best_mse))
 
         self.estimators_ = nn.ModuleList()
-        self.estimators_.extend(rets)
+        self.estimators_.extend(estimators)
         if save_model and not test_loader:
             utils.save(self, save_dir, self.logger)
 
