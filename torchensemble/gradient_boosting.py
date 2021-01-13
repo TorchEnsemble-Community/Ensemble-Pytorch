@@ -15,7 +15,6 @@ from ._base import BaseModule, torchensemble_model_doc
 from . import utils
 
 
-__author__ = ["Yi-Xuan Xu"]
 __all__ = ["_BaseGradientBoosting",
            "GradientBoostingClassifier",
            "GradientBoostingRegressor"]
@@ -95,7 +94,7 @@ def _gradient_boosting_model_doc(header, item="model"):
     models.
     """
     def get_doc(item):
-        """Return selected item"""
+        """Return the selected item"""
         __doc = {"model": __model_doc,
                  "fit": __fit_doc}
         return __doc[item]
@@ -180,11 +179,11 @@ class _BaseGradientBoosting(BaseModule):
 
     @abc.abstractmethod
     def _handle_early_stopping(self, test_loader, est_idx):
-        """Decide whether to trigger the counter on early stopping."""
+        """Decide whether to trigger the internal counter on early stopping."""
 
-    def _staged_forward(self, X, est_idx):
+    def _staged_forward(self, x, est_idx):
         """
-        Return the summation on outputs from the first `est_idx+1` base
+        Return the accumulated outputs from the first `est_idx+1` base
         estimators."""
         if est_idx >= self.n_estimators:
             msg = ("est_idx = {} should be an integer smaller than the"
@@ -192,11 +191,11 @@ class _BaseGradientBoosting(BaseModule):
             self.logger.error(msg.format(est_idx, self.n_estimators))
             raise ValueError(msg.format(est_idx, self.n_estimators))
 
-        batch_size = X.size()[0]
+        batch_size = x.size(0)
         out = torch.zeros(batch_size, self.n_outputs).to(self.device)
 
         for estimator in self.estimators_[:est_idx+1]:
-            out += self.shrinkage_rate * estimator(X)
+            out += self.shrinkage_rate * estimator(x)
 
         return out
 
@@ -215,19 +214,18 @@ class _BaseGradientBoosting(BaseModule):
         # Instantiate base estimators and set attributes
         for _ in range(self.n_estimators):
             self.estimators_.append(self._make_estimator())
-        self.n_outputs = self._decide_n_outputs(train_loader,
-                                                self.is_classification)
-
-        self.train()
         self._validate_parameters(lr,
                                   weight_decay,
                                   epochs,
                                   log_interval,
                                   early_stopping_rounds)
-        n_counter = 0  # counter on early stopping
-        criterion = nn.MSELoss(reduction="sum")
+        self.n_outputs = self._decide_n_outputs(train_loader,
+                                                self.is_classification)
 
-        # Base estimators are fitted sequentially
+        # Utils
+        criterion = nn.MSELoss(reduction="sum")
+        n_counter = 0  # a counter on early stopping
+
         for est_idx, estimator in enumerate(self.estimators_):
 
             # Initialize an independent optimizer for each base estimator to
@@ -238,6 +236,7 @@ class _BaseGradientBoosting(BaseModule):
                                                     weight_decay)
 
             # Training loop
+            estimator.train()
             for epoch in range(epochs):
                 for batch_idx, (data, target) in enumerate(train_loader):
 
@@ -271,7 +270,7 @@ class _BaseGradientBoosting(BaseModule):
                                                 early_stopping_rounds))
 
                     if n_counter == early_stopping_rounds:
-                        msg = "Handling early stopping"
+                        msg = "Handling early stopping..."
                         self.logger.info(msg)
 
                         # Early stopping
@@ -284,7 +283,7 @@ class _BaseGradientBoosting(BaseModule):
                     n_counter = 0
 
         # Post-processing
-        msg = "Optimal number of base estimators: {}"
+        msg = "The optimal number of base estimators: {}"
         self.logger.info(msg.format(len(self.estimators_)))
         if save_model:
             utils.save(self, save_dir, self.logger)
@@ -303,7 +302,7 @@ class GradientBoostingClassifier(_BaseGradientBoosting):
         """Convert the class label into the one-hot encoded vector."""
         target = target.view(-1)
         target_onehot = torch.FloatTensor(
-            target.size()[0], self.n_outputs).to(self.device)
+            target.size(0), self.n_outputs).to(self.device)
         target_onehot.data.zero_()
         target_onehot.scatter_(1, target.view(-1, 1), 1)
 
@@ -326,15 +325,18 @@ class GradientBoostingClassifier(_BaseGradientBoosting):
 
     def _handle_early_stopping(self, test_loader, est_idx):
         # Compute the validation accuracy of base estimators fitted so far
-        correct = 0.
+        self.eval()
+        correct = 0
+        total = 0
         flag = False
         with torch.no_grad():
             for _, (data, target) in enumerate(test_loader):
                 data, target = data.to(self.device), target.to(self.device)
                 output = F.softmax(self._staged_forward(data, est_idx), dim=1)
-                pred = output.data.max(1)[1]
-                correct += pred.eq(target.view(-1).data).sum()
-        acc = 100. * float(correct) / len(test_loader.dataset)
+                _, predicted = torch.max(output.data, 1)
+                correct += (predicted == target).sum().item()
+                total += target.size(0)
+        acc = 100 * correct / total
 
         if est_idx == 0:
             self.best_acc = acc
@@ -379,12 +381,12 @@ class GradientBoostingClassifier(_BaseGradientBoosting):
     @torchensemble_model_doc(
         """Implementation on the data forwarding in GradientBoostingClassifier.""",  # noqa: E501
         "classifier_forward")
-    def forward(self, X):
-        batch_size = X.size()[0]
+    def forward(self, x):
+        batch_size = x.size(0)
         output = torch.zeros(batch_size, self.n_outputs).to(self.device)
 
         for estimator in self.estimators_:
-            output += self.shrinkage_rate * estimator(X)
+            output += self.shrinkage_rate * estimator(x)
         proba = F.softmax(output, dim=1)
 
         return proba
@@ -394,18 +396,19 @@ class GradientBoostingClassifier(_BaseGradientBoosting):
         "classifier_predict")
     def predict(self, test_loader):
         self.eval()
-        correct = 0.
+        correct = 0
+        total = 0
 
-        for batch_idx, (data, target) in enumerate(test_loader):
-
+        for _, (data, target) in enumerate(test_loader):
             data, target = data.to(self.device), target.to(self.device)
             output = self.forward(data)
-            pred = output.data.max(1)[1]
-            correct += pred.eq(target.view(-1).data).sum()
+            _, predicted = torch.max(output.data, 1)
+            correct += (predicted == target).sum().item()
+            total += target.size(0)
 
-        accuracy = 100. * float(correct) / len(test_loader.dataset)
+        acc = 100 * correct / total
 
-        return accuracy
+        return acc
 
 
 @_gradient_boosting_model_doc(
@@ -433,14 +436,14 @@ class GradientBoostingRegressor(_BaseGradientBoosting):
 
     def _handle_early_stopping(self, test_loader, est_idx):
         # Compute the validation MSE of base estimators fitted so far
-        mse = 0.
+        self.eval()
+        mse = 0
         flag = False
         criterion = nn.MSELoss()
         with torch.no_grad():
             for _, (data, target) in enumerate(test_loader):
                 data, target = data.to(self.device), target.to(self.device)
                 output = self._staged_forward(data, est_idx)
-
                 mse += criterion(output, target)
         mse /= len(test_loader)
 
@@ -488,12 +491,12 @@ class GradientBoostingRegressor(_BaseGradientBoosting):
     @torchensemble_model_doc(
         """Implementation on the data forwarding in GradientBoostingRegressor.""",  # noqa: E501
         "regressor_forward")
-    def forward(self, X):
-        batch_size = X.size()[0]
+    def forward(self, x):
+        batch_size = x.size(0)
         pred = torch.zeros(batch_size, self.n_outputs).to(self.device)
 
         for estimator in self.estimators_:
-            pred += self.shrinkage_rate * estimator(X)
+            pred += self.shrinkage_rate * estimator(x)
 
         return pred
 
@@ -502,13 +505,12 @@ class GradientBoostingRegressor(_BaseGradientBoosting):
         "regressor_predict")
     def predict(self, test_loader):
         self.eval()
-        mse = 0.
+        mse = 0
         criterion = nn.MSELoss()
 
         for batch_idx, (data, target) in enumerate(test_loader):
             data, target = data.to(self.device), target.to(self.device)
             output = self.forward(data)
-
             mse += criterion(output, target)
 
         return mse / len(test_loader)

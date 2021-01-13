@@ -12,7 +12,7 @@ parallel = [torchensemble.FusionClassifier,
             torchensemble.VotingClassifier,
             torchensemble.BaggingClassifier]
 
-set_logger("pytest_training_params", "INFO", "DEBUG")
+set_logger("pytest_training_params")
 
 
 # Base estimator

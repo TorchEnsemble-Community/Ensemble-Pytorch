@@ -21,7 +21,6 @@ from ._base import BaseModule, torchensemble_model_doc
 from . import utils
 
 
-__author__ = ["Yi-Xuan Xu"]
 __all__ = ["_BaseSnapshotEnsemble",
            "SnapshotEnsembleClassifier",
            "SnapshotEnsembleRegressor"]
@@ -171,16 +170,16 @@ class _BaseSnapshotEnsemble(BaseModule):
             self.logger.error(msg.format(epochs, self.n_estimators))
             raise ValueError(msg.format(epochs, self.n_estimators))
 
-    def _forward(self, X):
+    def _forward(self, x):
         """
         Implementation on the internal data forwarding in snapshot ensemble.
         """
-        batch_size = X.size()[0]
+        batch_size = x.size(0)
         output = torch.zeros(batch_size, self.n_outputs).to(self.device)
 
         # Average
         for estimator in self.estimators_:
-            output += estimator(X) / len(self.estimators_)
+            output += estimator(x) / len(self.estimators_)
 
         return output
 
@@ -222,8 +221,8 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble):
     @torchensemble_model_doc(
         """Implementation on the data forwarding in SnapshotEnsembleClassifier.""",  # noqa: E501
         "classifier_forward")
-    def forward(self, X):
-        proba = self._forward(X)
+    def forward(self, x):
+        proba = self._forward(x)
 
         return F.softmax(proba, dim=1)
 
@@ -243,18 +242,19 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble):
             save_model=True,
             save_dir=None):
 
-        self.n_outputs = self._decide_n_outputs(train_loader,
-                                                self.is_classification)
         self._validate_parameters(init_lr,
                                   lr_clip,
                                   weight_decay,
                                   epochs,
                                   log_interval)
 
-        # Model used to generate snapshot ensembles
+        self.n_outputs = self._decide_n_outputs(train_loader,
+                                                self.is_classification)
+
+        # A dummy model used to generate snapshot ensembles
         estimator_ = self._make_estimator()
 
-        # Optimizer and Scheduler
+        # Set the optimizer and scheduler
         optimizer = utils.set_optimizer(estimator_,
                                         optimizer,
                                         init_lr,
@@ -265,7 +265,7 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble):
         # Utils
         criterion = nn.CrossEntropyLoss()
         best_acc = 0.
-        counter = 0  # the counter on generating snapshots
+        counter = 0  # a counter on generating snapshots
         n_iters_per_estimator = epochs * len(train_loader) // self.n_estimators
 
         # Training loop
@@ -273,28 +273,26 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble):
         for epoch in range(epochs):
             for batch_idx, (data, target) in enumerate(train_loader):
 
+                batch_size = data.size(0)
+                data, target = data.to(self.device), target.to(self.device)
+
                 # Clip the learning rate
                 optimizer = self._clip_lr(optimizer, lr_clip)
 
-                batch_size = data.size()[0]
-                data, target = data.to(self.device), target.to(self.device)
-
+                optimizer.zero_grad()
                 output = estimator_(data)
                 loss = criterion(output, target)
-
-                optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
 
                 # Print training status
                 if batch_idx % log_interval == 0:
                     with torch.no_grad():
-                        pred = output.data.max(1)[1]
-                        correct = pred.eq(target.view(-1).data).sum()
+                        _, predicted = torch.max(output.data, 1)
+                        correct = (predicted == target).sum().item()
 
-                        msg = ("lr: {:.5f} | Epoch: {:03d} | Batch:"
-                               " {:03d} | Loss: {:.5f} | Correct: "
-                               "{:d}/{:d}")
+                        msg = ("lr: {:.5f} | Epoch: {:03d} | Batch: {:03d} |"
+                               " Loss: {:.5f} | Correct: {:d}/{:d}")
                         self.logger.info(
                             msg.format(
                                 optimizer.param_groups[0]["lr"],
@@ -312,24 +310,28 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble):
                 counter += 1
 
             if counter % n_iters_per_estimator == 0:
+
                 # Generate and save the snapshot
                 snapshot = copy.deepcopy(estimator_)
                 self.estimators_.append(snapshot)
 
-                msg = "Generate the snapshot with index: {}"
+                msg = "Save the snapshot model with index: {}"
                 self.logger.info(msg.format(len(self.estimators_) - 1))
 
-            # Validation after each snapshot being generated
+            # Validation after each snapshot model being generated
             if test_loader and counter % n_iters_per_estimator == 0:
+                self.eval()
                 with torch.no_grad():
-                    correct = 0.
-                    for batch_idx, (data, target) in enumerate(test_loader):
-                        data, target = (data.to(self.device),
-                                        target.to(self.device))
+                    correct = 0
+                    total = 0
+                    for _, (data, target) in enumerate(test_loader):
+                        data = data.to(self.device)
+                        target = target.to(self.device)
                         output = self.forward(data)
-                        pred = output.data.max(1)[1]
-                        correct += pred.eq(target.view(-1).data).sum()
-                    acc = 100. * float(correct) / len(test_loader.dataset)
+                        _, predicted = torch.max(output.data, 1)
+                        correct += (predicted == target).sum().item()
+                        total += target.size(0)
+                    acc = 100 * correct / total
 
                     if acc > best_acc:
                         best_acc = acc
@@ -355,16 +357,18 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble):
     def predict(self, test_loader):
         self.eval()
         correct = 0
+        total = 0
 
-        for batch_idx, (data, target) in enumerate(test_loader):
+        for _, (data, target) in enumerate(test_loader):
             data, target = data.to(self.device), target.to(self.device)
             output = self.forward(data)
-            pred = output.data.max(1)[1]
-            correct += pred.eq(target.view(-1).data).sum()
+            _, predicted = torch.max(output.data, 1)
+            correct += (predicted == target).sum().item()
+            total += target.size(0)
 
-        accuracy = 100. * float(correct) / len(test_loader.dataset)
+        acc = 100 * correct / total
 
-        return accuracy
+        return acc
 
 
 @torchensemble_model_doc(
@@ -378,8 +382,8 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble):
     @torchensemble_model_doc(
         """Implementation on the data forwarding in SnapshotEnsembleRegressor.""",  # noqa: E501
         "regressor_forward")
-    def forward(self, X):
-        pred = self._forward(X)
+    def forward(self, x):
+        pred = self._forward(x)
         return pred
 
     @_snapshot_ensemble_model_doc(
@@ -398,18 +402,19 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble):
             save_model=True,
             save_dir=None):
 
-        self.n_outputs = self._decide_n_outputs(train_loader,
-                                                self.is_classification)
         self._validate_parameters(init_lr,
                                   lr_clip,
                                   weight_decay,
                                   epochs,
                                   log_interval)
 
-        # Model used to generate snapshot ensembles
+        self.n_outputs = self._decide_n_outputs(train_loader,
+                                                self.is_classification)
+
+        # A dummy model used to generate snapshot ensembles
         estimator_ = self._make_estimator()
 
-        # Optimizer and Scheduler
+        # Set the optimizer and scheduler
         optimizer = utils.set_optimizer(estimator_,
                                         optimizer,
                                         init_lr,
@@ -420,7 +425,7 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble):
         # Utils
         criterion = nn.MSELoss()
         best_mse = float("inf")
-        counter = 0  # the counter on generating snapshots
+        counter = 0  # a counter on generating snapshots
         n_iters_per_estimator = epochs * len(train_loader) // self.n_estimators
 
         # Training loop
@@ -428,15 +433,14 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble):
         for epoch in range(epochs):
             for batch_idx, (data, target) in enumerate(train_loader):
 
+                data, target = data.to(self.device), target.to(self.device)
+
                 # Clip the learning rate
                 optimizer = self._clip_lr(optimizer, lr_clip)
 
-                data, target = data.to(self.device), target.to(self.device)
-
+                optimizer.zero_grad()
                 output = estimator_(data)
                 loss = criterion(output, target)
-
-                optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
 
@@ -463,16 +467,17 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble):
                 snapshot = copy.deepcopy(estimator_)
                 self.estimators_.append(snapshot)
 
-                msg = "Generate the snapshot with index: {}"
+                msg = "Save the snapshot model with index: {}"
                 self.logger.info(msg.format(len(self.estimators_) - 1))
 
-            # Validation after each snapshot being generated
+            # Validation after each snapshot model being generated
             if test_loader and counter % n_iters_per_estimator == 0:
+                self.eval()
                 with torch.no_grad():
-                    mse = 0.
-                    for batch_idx, (data, target) in enumerate(test_loader):
-                        data, target = (data.to(self.device),
-                                        target.to(self.device))
+                    mse = 0
+                    for _, (data, target) in enumerate(test_loader):
+                        data = data.to(self.device)
+                        target = target.to(self.device)
                         output = self.forward(data)
                         mse += criterion(output, target)
                     mse /= len(test_loader)
@@ -500,13 +505,12 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble):
         "regressor_predict")
     def predict(self, test_loader):
         self.eval()
-        mse = 0.
+        mse = 0
         criterion = nn.MSELoss()
 
         for batch_idx, (data, target) in enumerate(test_loader):
             data, target = data.to(self.device), target.to(self.device)
             output = self.forward(data)
-
             mse += criterion(output, target)
 
         return mse / len(test_loader)
