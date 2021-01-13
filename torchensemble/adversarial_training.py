@@ -142,10 +142,18 @@ def _get_fgsm_samples(sample, epsilon, sample_grad):
     """
     Private functions used to generate adversarial samples with fast gradient
     sign method (FGSM)."""
-    sign_sample_grad = sample_grad.sign()
-    perturbed_sample = sample + epsilon*sign_sample_grad
-    perturbed_sample = torch.clamp(perturbed_sample, 0, 1)
 
+    # Check the input range of `sample`
+    min_value, max_value = torch.min(sample), torch.max(sample)
+    if not 0 <= min_value < max_value <= 1:
+        msg = ("The input range of samples passed to adversarial training"
+               " should be in the range [0, 1], but got [{:.3f}, {:.3f}]"
+               " instead.")
+        raise ValueError(msg.format(min_value, max_value))
+
+    sign_sample_grad = sample_grad.sign()
+    perturbed_sample = sample + epsilon * sign_sample_grad
+    perturbed_sample = torch.clamp(perturbed_sample, 0, 1)
     return perturbed_sample
 
 
