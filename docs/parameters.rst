@@ -1,7 +1,7 @@
 Parameters
 ==========
 
-This page gives the API reference of ``torchensemble``, please also refer to `Introduction <./introduction.html>`__ for details.
+This page provides the API reference of ``torchensemble``, please also refer to `Introduction <./introduction.html>`__ for details.
 
 Fusion
 ------
@@ -47,7 +47,7 @@ Bagging
 
 In bagging-based ensemble methods, each base estimator is trained
 independently. In addition, sampling with replacement is conducted on the
-training data to further encourge the diversity between different base
+training data to further encourage the diversity between different base
 estimators in the ensemble model.
 
 BaggingClassifier
@@ -107,4 +107,27 @@ SnapshotEnsembleRegressor
 *************************
 
 .. autoclass:: torchensemble.snapshot_ensemble.SnapshotEnsembleRegressor
+    :members:
+
+Adversarial Training
+--------------------
+
+Adversarial training is able to improve the performance of an ensemble by
+treating adversarial samples as the augmented training data. The fast
+gradient sign method (FGSM) is used to generate adversarial samples.
+
+Reference:
+    B. Lakshminarayanan, A. Pritzel, C. Blundell., Simple and Scalable
+    Predictive Uncertainty Estimation using Deep Ensembles, NIPS 2017.
+
+AdversarialTrainingClassifier
+*****************************
+
+.. autoclass:: torchensemble.adversarial_training.AdversarialTrainingClassifier
+    :members:
+
+AdversarialTrainingRegressor
+*****************************
+
+.. autoclass:: torchensemble.adversarial_training.AdversarialTrainingRegressor
     :members:

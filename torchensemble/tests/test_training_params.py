@@ -149,3 +149,34 @@ def test_snapshot_ensemble():
     with pytest.raises(ValueError) as excinfo:
         model.fit(train_loader, epochs=5)
     assert "should be a multiple of n_estimators" in str(excinfo.value)
+
+
+def test_adversarial_training():
+    model = torchensemble.AdversarialTrainingClassifier(estimator=MLP,
+                                                        n_estimators=2,
+                                                        cuda=False)
+
+    # Learning rate
+    with pytest.raises(ValueError) as excinfo:
+        model.fit(train_loader, lr=-1)
+    assert "learning rate of optimizer" in str(excinfo.value)
+
+    # Weight decay
+    with pytest.raises(ValueError) as excinfo:
+        model.fit(train_loader, weight_decay=-1)
+    assert "weight decay of optimizer" in str(excinfo.value)
+
+    # Epochs
+    with pytest.raises(ValueError) as excinfo:
+        model.fit(train_loader, epochs=-1)
+    assert "number of training epochs" in str(excinfo.value)
+
+    # Epsilon
+    with pytest.raises(ValueError) as excinfo:
+        model.fit(train_loader, epsilon=2)
+    assert "step used to generate adversarial samples" in str(excinfo.value)
+
+    # Log interval
+    with pytest.raises(ValueError) as excinfo:
+        model.fit(train_loader, log_interval=-1)
+    assert "number of batches to wait" in str(excinfo.value)
