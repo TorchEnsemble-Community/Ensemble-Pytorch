@@ -7,4 +7,5 @@ omit =
     */setup.py
 	*/torchensemble/__init__.py
 	*/torchensemble/_constants.py
+	*/torchensemble/utils.py
 	*/torchensemble/tests/*
