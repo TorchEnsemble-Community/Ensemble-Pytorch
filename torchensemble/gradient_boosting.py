@@ -309,10 +309,6 @@ class GradientBoostingClassifier(_BaseGradientBoosting):
 
         return target_onehot
 
-    # TODO: Store the output of fitted base estimators to avoid repeated data
-    # forwarding. Since samples in the data loader can be shuffled, it requires
-    # the index of each sample in the original dataset to be kept in memory.
-
     def _pseudo_residual(self, X, y, est_idx):
         """Compute pseudo residuals in classification."""
         y_onehot = self._onehot_coding(y)
@@ -332,11 +328,12 @@ class GradientBoostingClassifier(_BaseGradientBoosting):
         # Compute the validation accuracy of base estimators fitted so far
         correct = 0.
         flag = False
-        for _, (data, target) in enumerate(test_loader):
-            data, target = data.to(self.device), target.to(self.device)
-            output = self._staged_forward(data, est_idx)
-            pred = output.data.max(1)[1]
-            correct += pred.eq(target.view(-1).data).sum()
+        with torch.no_grad():
+            for _, (data, target) in enumerate(test_loader):
+                data, target = data.to(self.device), target.to(self.device)
+                output = F.softmax(self._staged_forward(data, est_idx), dim=1)
+                pred = output.data.max(1)[1]
+                correct += pred.eq(target.view(-1).data).sum()
         acc = 100. * float(correct) / len(test_loader.dataset)
 
         if est_idx == 0:
@@ -439,11 +436,12 @@ class GradientBoostingRegressor(_BaseGradientBoosting):
         mse = 0.
         flag = False
         criterion = nn.MSELoss()
-        for _, (data, target) in enumerate(test_loader):
-            data, target = data.to(self.device), target.to(self.device)
-            output = self._staged_forward(data, est_idx)
+        with torch.no_grad():
+            for _, (data, target) in enumerate(test_loader):
+                data, target = data.to(self.device), target.to(self.device)
+                output = self._staged_forward(data, est_idx)
 
-            mse += criterion(output, target)
+                mse += criterion(output, target)
         mse /= len(test_loader)
 
         if est_idx == 0:
