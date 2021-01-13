@@ -1,3 +1,7 @@
+.. image:: ./docs/_images/badge_small.png
+   :align: center
+   :width: 400
+
 |github|_ |readthedocs|_ |codecov|_ |python|_
 
 .. |github| image:: https://github.com/xuyxu/Ensemble-Pytorch/workflows/torchensemble-CI/badge.svg
