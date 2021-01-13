@@ -162,6 +162,9 @@ class AdversarialTrainingClassifier(_BaseAdversarialTraining):
         super().__init__(**kwargs)
         self.is_classification = True
 
+    @torchensemble_model_doc(
+        """Implementation on the data forwarding in AdversarialTrainingClassifier.""",  # noqa: E501
+        "classifier_forward")
     def forward(self, X):
         proba = self._forward(X)
 
@@ -259,6 +262,9 @@ class AdversarialTrainingClassifier(_BaseAdversarialTraining):
         if save_model and not test_loader:
             utils.save(self, save_dir, self.logger)
 
+    @torchensemble_model_doc(
+        """Implementation on the evaluating stage of AdversarialTrainingClassifier.""",  # noqa: E501
+        "classifier_predict")
     def predict(self, test_loader):
         self.eval()
         correct = 0
@@ -273,6 +279,7 @@ class AdversarialTrainingClassifier(_BaseAdversarialTraining):
 
         return accuracy
 
+
 class AdversarialTrainingRegressor(_BaseAdversarialTraining):
 
     def __init__(self, **kwargs):
@@ -282,5 +289,5 @@ class AdversarialTrainingRegressor(_BaseAdversarialTraining):
 
     def forward(self, X):
         pred = self._forward(X)
-        
+
         return pred
