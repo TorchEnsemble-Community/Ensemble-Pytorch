@@ -1,6 +1,4 @@
 .. image:: ./docs/_images/badge_small.png
-   :align: center
-   :width: 400
 
 |github|_ |readthedocs|_ |codecov|_ |python|_
 
