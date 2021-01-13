@@ -56,9 +56,8 @@ def set_optimizer(estimator, optimizer_name, lr, weight_decay):
     return optimizer
 
 
-def set_logger(log_console_level, log_file=None, log_file_level=None):
-    """Bind the default logger with console and file stream output,
-       where the info level is defined by user."""
+def set_logger(log_file=None, log_console_level="info", log_file_level=None):
+    """Bind the default logger with console and file stream output."""
 
     def _get_level(level):
         if level.lower() == 'debug':
@@ -72,8 +71,8 @@ def set_logger(log_console_level, log_file=None, log_file_level=None):
         elif level.lower() == 'critical':
             return logging.critical
         else:
-            msg = ("Param level must be a type in [DEBUG, INFO,"
-                   " WARNING, ERROR, CRITICAL], but get {}")
+            msg = ("`log_console_level` must be one of {{DEBUG, INFO,"
+                   " WARNING, ERROR, CRITICAL}}, but got {} instead.")
             raise ValueError(msg.format(level.upper()))
 
     _logger = logging.getLogger()
@@ -98,7 +97,7 @@ def set_logger(log_console_level, log_file=None, log_file_level=None):
             os.mkdir(log_path)
             print('Create folder \'logs/\'')
         log_name = os.path.join(log_path, log_file + '-' + rq + '.log')
-        print('Start logging into file {}'.format(log_name))
+        print('Start logging into file {}...'.format(log_name))
         fh = logging.FileHandler(log_name, mode='w')
         fh.setLevel(logging.DEBUG if log_file_level is None
                     else _get_level(log_file_level))
@@ -108,4 +107,5 @@ def set_logger(log_console_level, log_file=None, log_file_level=None):
         fh.setFormatter(fh_formatter)
         _logger.addHandler(fh)
     _logger.setLevel("DEBUG")
+
     return _logger

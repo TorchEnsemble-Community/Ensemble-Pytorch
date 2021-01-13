@@ -16,14 +16,13 @@ from torchensemble.gradient_boosting import GradientBoostingRegressor
 from torchensemble.utils import set_logger
 
 
-def load_data(batch_size, logger):
+def load_data(batch_size):
 
     # The dataset can be downloaded from:
     #   https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/regression.html#YearPredictionMSD
 
     if not isinstance(batch_size, numbers.Integral):
         msg = "`batch_size` should be an integer, but got {} instead."
-        logger.error(msg.format(batch_size))
         raise ValueError(msg.format(batch_size))
 
     # MODIFY THE PATH IF YOU WANT
@@ -68,42 +67,36 @@ def display_records(records, logger):
 class MLP(nn.Module):
     def __init__(self):
         super(MLP, self).__init__()
-
         self.linear1 = nn.Linear(90, 128)
         self.linear2 = nn.Linear(128, 128)
         self.linear3 = nn.Linear(128, 1)
 
-    def forward(self, X):
-        X = X.view(X.size()[0], -1)
-
-        output = F.relu(self.linear1(X))
-        output = F.dropout(output)
-        output = F.relu(self.linear2(output))
-        output = self.linear3(output)
-
-        return output
+    def forward(self, x):
+        x = x.view(x.size()[0], -1)
+        x = F.relu(self.linear1(x))
+        x = F.relu(self.linear2(x))
+        x = self.linear3(x)
+        return x
 
 
 if __name__ == "__main__":
 
     # Hyper-parameters
-    n_estimators = 1
-    output_dim = 1
+    n_estimators = 10
     lr = 1e-3
     weight_decay = 5e-4
-    epochs = 1
+    epochs = 50
 
     # Utils
-    batch_size = 256
+    batch_size = 512
     records = []
     torch.manual_seed(0)
 
-    logger = set_logger("INFO", "regression_YearPredictionMSD_mlp", "DEBUG")
-
     # Load data
-    train_loader, test_loader = load_data(batch_size, logger)
-    # print("Finish loading data...\n")
-    logger.info("Finish loading data...\n")
+    train_loader, test_loader = load_data(batch_size)
+    print("Finish loading data...\n")
+
+    logger = set_logger("regression_YearPredictionMSD_mlp")
 
     # FusionRegressor
     model = FusionRegressor(

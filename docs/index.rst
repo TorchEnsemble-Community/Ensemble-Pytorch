@@ -1,17 +1,13 @@
 Welcome to Ensemble-PyTorch's documentation!
 ============================================
 
-.. image:: ./_images/badge.png
-   :align: center
-   :width: 400
-
 |github|_ |readthedocs|_ |codecov|_ |python|_
 
-.. |github| image:: https://github.com/AaronX121/Ensemble-Pytorch/workflows/Python%20package/badge.svg
-.. _github: https://github.com/AaronX121/Ensemble-Pytorch/workflows/Python%20package/badge.svg
+.. |github| image:: https://github.com/xuyxu/Ensemble-Pytorch/workflows/torchensemble-CI/badge.svg
+.. _github: https://github.com/xuyxu/Ensemble-Pytorch/actions
 
 .. |readthedocs| image:: https://readthedocs.org/projects/ensemble-pytorch/badge/?version=latest
-.. _readthedocs: https://ensemble-pytorch.readthedocs.io/en/latest/?badge=latest
+.. _readthedocs: https://ensemble-pytorch.readthedocs.io/en/latest/index.html
 
 .. |codecov| image:: https://codecov.io/gh/xuyxu/Ensemble-Pytorch/branch/master/graph/badge.svg?token=2FXCFRIDTV
 .. _codecov: https://codecov.io/gh/xuyxu/Ensemble-Pytorch
@@ -19,11 +15,19 @@ Welcome to Ensemble-PyTorch's documentation!
 .. |python| image:: https://img.shields.io/badge/python-3.6+-blue?logo=python
 .. _python: https://www.python.org/
 
-**Ensemble-PyTorch** provides easy-to-use APIs on improving the performance of your PyTorch models using ensemble methods.
+.. image:: ./_images/badge.png
+   :align: center
+   :width: 400
 
-To get started, please refer to `Quick Start <./quick_start.html>`__. You can also check `Tutorial <./tutorial.html>`__, which contains an example presenting the entire workflow on boosting the performance of your CNN model with Ensemble-PyTorch. To learn more about different ensmeble methods, please refer to `Introduction <./introduction.html>`__.
+Ensemble-PyTorch implements a collection of ensemble methods using PyTorch. It provides:
 
-Please feel free to open an `issue <https://github.com/AaronX121/Ensemble-Pytorch/issues>`__ if your have any problem. In addition, any feature request or `pull request <https://github.com/AaronX121/Ensemble-Pytorch/pulls>`__ is highly welcomed.
+* Easy ways to boost the performance of your deep learning models;
+* Easy-to-use APIs on training and evaluating;
+* High training efficiency.
+
+To get started, please refer to `Quick Start <./quick_start.html>`__. You can also check `Tutorial <./tutorial.html>`__ to walk through an example on the entire workflow of Ensemble-PyTorch. To learn more about ensemble methods currently supported, please refer to `Introduction <./introduction.html>`__.
+
+This package is under active development. Please feel free to open an `issue <https://github.com/AaronX121/Ensemble-Pytorch/issues>`__ if your have any problem. In addition, any feature request or `pull request <https://github.com/AaronX121/Ensemble-Pytorch/pulls>`__ would be highly welcomed.
 
 .. toctree::
    :maxdepth: 2
@@ -34,11 +38,10 @@ Please feel free to open an `issue <https://github.com/AaronX121/Ensemble-Pytorc
    Introduction <introduction>
    Installation <installation>
    Experiment <experiment>
-   Parameters <parameters>
+   API Reference <parameters>
 
 .. toctree::
    :caption: Development
 
    Changelog <changelog>
    Roadmap <roadmap>
-

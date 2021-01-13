@@ -26,47 +26,33 @@ def display_records(records, logger):
 
 
 class LeNet5(nn.Module):
+
     def __init__(self):
         super(LeNet5, self).__init__()
-
-        self.conv1 = nn.Conv2d(3, 6, 5, padding=2)
+        self.conv1 = nn.Conv2d(3, 6, 5)
+        self.pool = nn.MaxPool2d(2, 2)
         self.conv2 = nn.Conv2d(6, 16, 5)
-        self.fc1 = nn.Linear(576, 120)
+        self.fc1 = nn.Linear(400, 120)
         self.fc2 = nn.Linear(120, 84)
         self.fc3 = nn.Linear(84, 10)
 
-    def forward(self, X):
-
-        # CONV layers
-        output = F.max_pool2d(F.relu(self.conv1(X)), (2, 2))
-        output = F.max_pool2d(F.relu(self.conv2(output)), (2, 2))
-        output = output.view(-1, self.num_flat_features(output))
-
-        # FC layers
-        output = F.relu(self.fc1(output))
-        output = F.dropout(output)
-        output = F.relu(self.fc2(output))
-        output = F.dropout(output)
-        output = self.fc3(output)
-
-        return output
-
-    def num_flat_features(self, X):
-        size = X.size()[1:]
-        num_features = 1
-        for s in size:
-            num_features *= s
-
-        return num_features
+    def forward(self, x):
+        x = self.pool(F.relu(self.conv1(x)))
+        x = self.pool(F.relu(self.conv2(x)))
+        x = x.view(-1, 400)
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        x = self.fc3(x)
+        return x
 
 
 if __name__ == "__main__":
 
     # Hyper-parameters
-    n_estimators = 1
+    n_estimators = 10
     lr = 1e-3
     weight_decay = 5e-4
-    epochs = 1
+    epochs = 100
 
     # Utils
     batch_size = 128
@@ -75,7 +61,7 @@ if __name__ == "__main__":
     torch.manual_seed(0)
 
     # Load data
-    transformer = transforms.Compose(
+    train_transformer = transforms.Compose(
         [
             transforms.RandomHorizontalFlip(),
             transforms.RandomCrop(32, 4),
@@ -84,39 +70,35 @@ if __name__ == "__main__":
                                  (0.2023, 0.1994, 0.2010)),
         ]
     )
+    
+    test_transformer = transforms.Compose(
+        [
+            transforms.ToTensor(),
+            transforms.Normalize((0.4914, 0.4822, 0.4465),
+                                 (0.2023, 0.1994, 0.2010)),
+        ]
+    )
 
     train_loader = DataLoader(
         datasets.CIFAR10(data_dir, train=True, download=True,
-                         transform=transformer),
+                         transform=train_transformer),
         batch_size=batch_size,
         shuffle=True,
     )
 
     test_loader = DataLoader(
-        datasets.CIFAR10(
-            data_dir,
-            train=False,
-            transform=transforms.Compose(
-                [
-                    transforms.ToTensor(),
-                    transforms.Normalize(
-                        (0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)
-                    ),
-                ]
-            ),
-        ),
+        datasets.CIFAR10(data_dir, train=False, transform=test_transformer),
         batch_size=batch_size,
         shuffle=True,
     )
 
-    logger = set_logger("INFO", "classification_cifar10_cnn", "DEBUG")
+    logger = set_logger("classification_cifar10_cnn")
 
     # FusionClassifier
     model = FusionClassifier(
         estimator=LeNet5,
         n_estimators=n_estimators,
-        cuda=True,
-        n_jobs=1
+        cuda=True
     )
 
     tic = time.time()
@@ -136,8 +118,7 @@ if __name__ == "__main__":
     model = VotingClassifier(
         estimator=LeNet5,
         n_estimators=n_estimators,
-        cuda=True,
-        n_jobs=2
+        cuda=True
     )
 
     tic = time.time()
@@ -157,8 +138,7 @@ if __name__ == "__main__":
     model = BaggingClassifier(
         estimator=LeNet5,
         n_estimators=n_estimators,
-        cuda=True,
-        n_jobs=2
+        cuda=True
     )
 
     tic = time.time()
