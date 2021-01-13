@@ -16,8 +16,7 @@ from . import utils
 
 
 __author__ = ["Yi-Xuan Xu"]
-__all__ = ["_GBMDataset",
-           "_BaseGradientBoosting",
+__all__ = ["_BaseGradientBoosting",
            "GradientBoostingClassifier",
            "GradientBoostingRegressor"]
 
@@ -109,44 +108,6 @@ def _gradient_boosting_model_doc(header, item="model"):
     return adddoc
 
 
-class _GBMDataset(object):
-    """
-    A wrapper on dataloader for efficient training base estimators in
-    gradient boosting based ensembles."""
-
-    def __init__(self, dataloader, n_outputs, is_classification):
-        self.n_outputs = n_outputs
-        self.is_classification = is_classification
-
-        self.X_batches = []
-        self.y_batches = []
-        self.accumulated_output_batches = []
-
-        for _, (data, target) in enumerate(dataloader):
-            batch_size = data.size()[0]
-            self.X_batches.append(data.clone())
-            self.y_batches.append(target.clone())
-
-            # Pre-allocate the residuals
-            accumulated_output = torch.zeros(batch_size, self.n_outputs)
-            self.accumulated_output_batches.append(accumulated_output)
-
-    def __len__(self):
-        return len(self.X_batches)
-
-    def __getitem__(self, index):
-        return (self.X_batches[index],
-                self.y_batches[index],
-                self.accumulated_output_batches[index])
-
-    def update(self, estimator, shrinkage_rate, device):
-        """Update the accumulated output given a fitted base estimator."""
-        with torch.no_grad():
-            for idx, data in enumerate(self.X_batches):
-                estimator_output = shrinkage_rate * estimator(data.to(device))
-                self.accumulated_output_batches[idx] += estimator_output.cpu()
-
-
 class _BaseGradientBoosting(BaseModule):
 
     def __init__(self,
@@ -223,7 +184,7 @@ class _BaseGradientBoosting(BaseModule):
 
     def _staged_forward(self, X, est_idx):
         """
-        Return the accumulated outputs from the first `est_idx+1` base
+        Return the summation outputs from the first `est_idx+1` base
         estimators."""
         if est_idx >= self.n_estimators:
             msg = ("est_idx = {} should be an integer smaller than the"
@@ -257,11 +218,6 @@ class _BaseGradientBoosting(BaseModule):
         self.n_outputs = self._decide_n_outputs(train_loader,
                                                 self.is_classification)
 
-        # An internal dataloader with batches fixed
-        _train_loader = _GBMDataset(train_loader,
-                                    self.n_outputs,
-                                    self.is_classification)
-
         self.train()
         self._validate_parameters(lr,
                                   weight_decay,
@@ -283,14 +239,12 @@ class _BaseGradientBoosting(BaseModule):
 
             # Training loop
             for epoch in range(epochs):
-                for batch_idx in range(len(_train_loader)):
-                    data, target, out = _train_loader[batch_idx]
-                    data, target, out = (data.to(self.device),
-                                         target.to(self.device),
-                                         out.to(self.device))
+                for batch_idx, (data, target) in enumerate(train_loader):
+
+                    data, target = data.to(self.device), target.to(self.device)
 
                     # Compute the learning target of the current estimator
-                    residual = self._pseudo_residual(target, out)
+                    residual = self._pseudo_residual(data, target, est_idx)
 
                     output = estimator(data)
                     loss = criterion(output, residual)
@@ -329,9 +283,6 @@ class _BaseGradientBoosting(BaseModule):
                     # Reset the counter if the performance improves
                     n_counter = 0
 
-            # Update the accumulated output
-            _train_loader.update(estimator, self.shrinkage_rate, self.device)
-
         # Post-processing
         msg = "Optimal number of base estimators: {}"
         self.logger.info(msg.format(len(self.estimators_)))
@@ -358,10 +309,20 @@ class GradientBoostingClassifier(_BaseGradientBoosting):
 
         return target_onehot
 
-    def _pseudo_residual(self, y, output):
+    def _pseudo_residual(self, X, y, est_idx):
         """Compute pseudo residuals in classification."""
         y_onehot = self._onehot_coding(y)
-        return y_onehot - F.softmax(output, dim=1)
+        output = torch.zeros_like(y_onehot).to(self.device)
+
+        # Before training the first estimator, we assume that GBM returns 0	
+        # for any input (i.e., null output).	
+        if est_idx == 0:	
+            return y_onehot - F.softmax(output, dim=1)	
+        else:	
+            for idx in range(est_idx):	
+                output += self.shrinkage_rate * self.estimators_[idx](X)	
+
+            return y_onehot - F.softmax(output, dim=1)
 
     def _handle_early_stopping(self, test_loader, est_idx):
         # Compute the validation accuracy of base estimators fitted so far
