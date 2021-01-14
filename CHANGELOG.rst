@@ -23,3 +23,4 @@ Removed
 
 Fixed
 ~~~~~
+* [BUG] Fix the bug in logging module when using multi-processing | @zzzzwj
