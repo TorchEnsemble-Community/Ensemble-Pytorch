@@ -77,6 +77,7 @@ def set_logger(log_file=None, log_console_level="info", log_file_level=None):
 
     _logger = logging.getLogger()
 
+    # Reset
     for h in _logger.handlers:
         _logger.removeHandler(h)
 

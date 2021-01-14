@@ -66,11 +66,12 @@ def _parallel_fit_per_epoch(train_loader,
                 msg = ("Estimator: {:03d} | Epoch: {:03d} | Batch: {:03d}"
                        " | Loss: {:.5f} | Correct: {:d}/{:d}")
                 msg_list.append(msg.format(idx, epoch, batch_idx, loss,
-                                           correct, sampling_data.size()[0]))
+                                           correct, subsample_size))
             else:
                 msg = ("Estimator: {:03d} | Epoch: {:03d} | Batch: {:03d}"
                        " | Loss: {:.5f}")
                 msg_list.append(msg.format(idx, epoch, batch_idx, loss))
+
     return estimator, msg_list
 
 
@@ -151,6 +152,7 @@ class BaggingClassifier(BaseModule):
                 estimators = []
                 for ret_val in rets:
                     estimators.append(ret_val[0])
+                    # Write logging info
                     for msg in ret_val[1]:
                         self.logger.info(msg)
 
@@ -282,6 +284,7 @@ class BaggingRegressor(BaseModule):
                 estimators = []
                 for ret_val in rets:
                     estimators.append(ret_val[0])
+                    # Write logging info
                     for msg in ret_val[1]:
                         self.logger.info(msg)
 

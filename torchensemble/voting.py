@@ -143,6 +143,7 @@ class VotingClassifier(BaseModule):
                 estimators = []
                 for ret_val in rets:
                     estimators.append(ret_val[0])
+                    # Write logging info
                     for msg in ret_val[1]:
                         self.logger.info(msg)
 
@@ -274,6 +275,7 @@ class VotingRegressor(BaseModule):
                 estimators = []
                 for ret_val in rets:
                     estimators.append(ret_val[0])
+                    # Write logging info
                     for msg in ret_val[1]:
                         self.logger.info(msg)
 
