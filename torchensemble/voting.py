@@ -11,7 +11,8 @@ import torch.nn.functional as F
 from joblib import Parallel, delayed
 
 from ._base import BaseModule, torchensemble_model_doc
-from . import utils
+from .utils.set_module import set_optimizer
+from .utils.io import save
 
 
 __all__ = ["VotingClassifier",
@@ -30,7 +31,7 @@ def _parallel_fit_per_epoch(train_loader,
                             device,
                             is_classification):
     """Private function used to fit base estimators in parallel."""
-    optimizer = utils.set_optimizer(estimator, optimizer, lr, weight_decay)
+    optimizer = set_optimizer(estimator, optimizer, lr, weight_decay)
 
     msg_list = []
 
@@ -167,7 +168,7 @@ class VotingClassifier(BaseModule):
                             self.estimators_ = nn.ModuleList()
                             self.estimators_.extend(estimators)
                             if save_model:
-                                utils.save(self, save_dir, self.logger)
+                                save(self, save_dir, self.logger)
 
                         msg = ("Epoch: {:03d} | Validation Acc: {:.3f}"
                                " % | Historical Best: {:.3f} %")
@@ -176,7 +177,7 @@ class VotingClassifier(BaseModule):
         self.estimators_ = nn.ModuleList()
         self.estimators_.extend(estimators)
         if save_model and not test_loader:
-            utils.save(self, save_dir, self.logger)
+            save(self, save_dir, self.logger)
 
     @torchensemble_model_doc(
         """Implementation on the evaluating stage of VotingClassifier.""",
@@ -296,7 +297,7 @@ class VotingRegressor(BaseModule):
                             self.estimators_ = nn.ModuleList()
                             self.estimators_.extend(estimators)
                             if save_model:
-                                utils.save(self, save_dir, self.logger)
+                                save(self, save_dir, self.logger)
 
                         msg = ("Epoch: {:03d} | Validation MSE:"
                                " {:.5f} | Historical Best: {:.5f}")
@@ -305,7 +306,7 @@ class VotingRegressor(BaseModule):
         self.estimators_ = nn.ModuleList()
         self.estimators_.extend(estimators)
         if save_model and not test_loader:
-            utils.save(self, save_dir, self.logger)
+            save(self, save_dir, self.logger)
 
     @torchensemble_model_doc(
         """Implementation on the evaluating stage of VotingRegressor.""",

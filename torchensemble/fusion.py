@@ -10,7 +10,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from ._base import BaseModule, torchensemble_model_doc
-from . import utils
+from .utils.set_module import set_optimizer
+from .utils.io import save
 
 
 __all__ = ["FusionClassifier",
@@ -61,7 +62,7 @@ class FusionClassifier(BaseModule):
             self.estimators_.append(self._make_estimator())
         self._validate_parameters(lr, weight_decay, epochs, log_interval)
         self.n_outputs = self._decide_n_outputs(train_loader, True)
-        optimizer = utils.set_optimizer(self, optimizer, lr, weight_decay)
+        optimizer = set_optimizer(self, optimizer, lr, weight_decay)
 
         # Utils
         criterion = nn.CrossEntropyLoss()
@@ -113,14 +114,14 @@ class FusionClassifier(BaseModule):
                     if acc > best_acc:
                         best_acc = acc
                         if save_model:
-                            utils.save(self, save_dir, self.logger)
+                            save(self, save_dir, self.logger)
 
                     msg = ("Epoch: {:03d} | Validation Acc: {:.3f}"
                            " % | Historical Best: {:.3f} %")
                     self.logger.info(msg.format(epoch, acc, best_acc))
 
         if save_model and not test_loader:
-            utils.save(self, save_dir, self.logger)
+            save(self, save_dir, self.logger)
 
     @torchensemble_model_doc(
         """Implementation on the evaluating stage of FusionClassifier.""",
@@ -176,7 +177,7 @@ class FusionRegressor(BaseModule):
             self.estimators_.append(self._make_estimator())
         self._validate_parameters(lr, weight_decay, epochs, log_interval)
         self.n_outputs = self._decide_n_outputs(train_loader, False)
-        optimizer = utils.set_optimizer(self, optimizer, lr, weight_decay)
+        optimizer = set_optimizer(self, optimizer, lr, weight_decay)
 
         # Utils
         criterion = nn.MSELoss()
@@ -216,14 +217,14 @@ class FusionRegressor(BaseModule):
                     if mse < best_mse:
                         best_mse = mse
                         if save_model:
-                            utils.save(self, save_dir, self.logger)
+                            save(self, save_dir, self.logger)
 
                     msg = ("Epoch: {:03d} | Validation MSE: {:.5f} |"
                            " Historical Best: {:.5f}")
                     self.logger.info(msg.format(epoch, mse, best_mse))
 
         if save_model and not test_loader:
-            utils.save(self, save_dir, self.logger)
+            save(self, save_dir, self.logger)
 
     @torchensemble_model_doc(
         """Implementation on the evaluating stage of FusionRegressor.""",
