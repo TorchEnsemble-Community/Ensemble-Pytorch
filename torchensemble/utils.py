@@ -76,6 +76,11 @@ def set_logger(log_file=None, log_console_level="info", log_file_level=None):
             raise ValueError(msg.format(level.upper()))
 
     _logger = logging.getLogger()
+
+    # Reset
+    for h in _logger.handlers:
+        _logger.removeHandler(h)
+
     rq = time.strftime('%Y_%m_%d_%H_%M', time.localtime(time.time()))
     log_path = os.path.join(os.getcwd(), 'logs')
 
