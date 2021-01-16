@@ -258,8 +258,8 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble):
         # Set the optimizer and scheduler
         optimizer = set_module.set_optimizer(estimator_,
                                              optimizer,
-                                             init_lr,
-                                             weight_decay)
+                                             lr=init_lr,
+                                             weight_decay=weight_decay)
 
         scheduler = self._set_scheduler(optimizer, epochs * len(train_loader))
 
@@ -418,8 +418,8 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble):
         # Set the optimizer and scheduler
         optimizer = set_module.set_optimizer(estimator_,
                                              optimizer,
-                                             init_lr,
-                                             weight_decay)
+                                             lr=init_lr,
+                                             weight_decay=weight_decay)
 
         scheduler = self._set_scheduler(optimizer, epochs * len(train_loader))
 

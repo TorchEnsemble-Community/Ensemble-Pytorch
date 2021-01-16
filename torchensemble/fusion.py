@@ -62,7 +62,10 @@ class FusionClassifier(BaseModule):
             self.estimators_.append(self._make_estimator())
         self._validate_parameters(lr, weight_decay, epochs, log_interval)
         self.n_outputs = self._decide_n_outputs(train_loader, True)
-        optimizer = set_module.set_optimizer(self, optimizer, lr, weight_decay)
+        optimizer = set_module.set_optimizer(self,
+                                             optimizer,
+                                             lr=lr,
+                                             weight_decay=weight_decay)
 
         # Utils
         criterion = nn.CrossEntropyLoss()
@@ -177,7 +180,10 @@ class FusionRegressor(BaseModule):
             self.estimators_.append(self._make_estimator())
         self._validate_parameters(lr, weight_decay, epochs, log_interval)
         self.n_outputs = self._decide_n_outputs(train_loader, False)
-        optimizer = set_module.set_optimizer(self, optimizer, lr, weight_decay)
+        optimizer = set_module.set_optimizer(self,
+                                             optimizer,
+                                             lr=lr,
+                                             weight_decay=weight_decay)
 
         # Utils
         criterion = nn.MSELoss()

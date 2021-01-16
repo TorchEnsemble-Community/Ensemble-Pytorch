@@ -233,8 +233,8 @@ class _BaseGradientBoosting(BaseModule):
             # avoid unexpected dependencies.
             learner_optimizer = set_module.set_optimizer(estimator,
                                                          optimizer,
-                                                         lr,
-                                                         weight_decay)
+                                                         lr=lr,
+                                                         weight_decay=weight_decay)  # noqa: E501
 
             # Training loop
             estimator.train()

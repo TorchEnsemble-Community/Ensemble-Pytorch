@@ -34,8 +34,8 @@ def _parallel_fit_per_epoch(train_loader,
     """Private function used to fit base estimators in parallel."""
     optimizer = set_module.set_optimizer(estimator,
                                          optimizer,
-                                         lr,
-                                         weight_decay)
+                                         lr=lr,
+                                         weight_decay=weight_decay)
 
     msg_list = []
 
