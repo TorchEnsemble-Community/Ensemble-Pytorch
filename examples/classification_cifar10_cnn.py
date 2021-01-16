@@ -7,11 +7,11 @@ import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 
-from torchensemble.utils import set_logger
 from torchensemble.fusion import FusionClassifier
 from torchensemble.voting import VotingClassifier
 from torchensemble.bagging import BaggingClassifier
 from torchensemble.gradient_boosting import GradientBoostingClassifier
+from torchensemble.utils.logging import set_logger
 
 
 def display_records(records, logger):
@@ -49,10 +49,10 @@ class LeNet5(nn.Module):
 if __name__ == "__main__":
 
     # Hyper-parameters
-    n_estimators = 10
+    n_estimators = 1
     lr = 1e-3
     weight_decay = 5e-4
-    epochs = 100
+    epochs = 1
 
     # Utils
     batch_size = 128
