@@ -18,7 +18,8 @@ import torch.nn.functional as F
 from torch.optim.lr_scheduler import LambdaLR
 
 from ._base import BaseModule, torchensemble_model_doc
-from . import utils
+from .utils import io
+from .utils import set_module
 
 
 __all__ = ["_BaseSnapshotEnsemble",
@@ -255,10 +256,10 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble):
         estimator_ = self._make_estimator()
 
         # Set the optimizer and scheduler
-        optimizer = utils.set_optimizer(estimator_,
-                                        optimizer,
-                                        init_lr,
-                                        weight_decay)
+        optimizer = set_module.set_optimizer(estimator_,
+                                             optimizer,
+                                             init_lr,
+                                             weight_decay)
 
         scheduler = self._set_scheduler(optimizer, epochs * len(train_loader))
 
@@ -336,7 +337,7 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble):
                     if acc > best_acc:
                         best_acc = acc
                         if save_model:
-                            utils.save(self, save_dir, self.logger)
+                            io.save(self, save_dir, self.logger)
 
                     msg = ("n_estimators: {} | Validation Acc: {:.3f} %"
                            " | Historical Best: {:.3f} %")
@@ -349,7 +350,7 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble):
                     )
 
         if save_model and not test_loader:
-            utils.save(self, save_dir, self.logger)
+            io.save(self, save_dir, self.logger)
 
     @torchensemble_model_doc(
         """Implementation on the evaluating stage of SnapshotEnsembleClassifier.""",  # noqa: E501
@@ -415,10 +416,10 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble):
         estimator_ = self._make_estimator()
 
         # Set the optimizer and scheduler
-        optimizer = utils.set_optimizer(estimator_,
-                                        optimizer,
-                                        init_lr,
-                                        weight_decay)
+        optimizer = set_module.set_optimizer(estimator_,
+                                             optimizer,
+                                             init_lr,
+                                             weight_decay)
 
         scheduler = self._set_scheduler(optimizer, epochs * len(train_loader))
 
@@ -485,7 +486,7 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble):
                     if mse < best_mse:
                         best_mse = mse
                         if save_model:
-                            utils.save(self, save_dir, self.logger)
+                            io.save(self, save_dir, self.logger)
 
                     msg = ("n_estimators: {} | Validation MSE: {:.5f} |"
                            " Historical Best: {:.5f}")
@@ -498,7 +499,7 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble):
                     )
 
         if save_model and not test_loader:
-            utils.save(self, save_dir, self.logger)
+            io.save(self, save_dir, self.logger)
 
     @torchensemble_model_doc(
         """Implementation on the evaluating stage of SnapshotEnsembleRegressor.""",  # noqa: E501

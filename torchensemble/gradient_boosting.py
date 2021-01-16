@@ -12,7 +12,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from ._base import BaseModule, torchensemble_model_doc
-from . import utils
+from .utils import io
+from .utils import set_module
 
 
 __all__ = ["_BaseGradientBoosting",
@@ -230,10 +231,10 @@ class _BaseGradientBoosting(BaseModule):
 
             # Initialize an independent optimizer for each base estimator to
             # avoid unexpected dependencies.
-            learner_optimizer = utils.set_optimizer(estimator,
-                                                    optimizer,
-                                                    lr,
-                                                    weight_decay)
+            learner_optimizer = set_module.set_optimizer(estimator,
+                                                         optimizer,
+                                                         lr,
+                                                         weight_decay)
 
             # Training loop
             estimator.train()
@@ -286,7 +287,7 @@ class _BaseGradientBoosting(BaseModule):
         msg = "The optimal number of base estimators: {}"
         self.logger.info(msg.format(len(self.estimators_)))
         if save_model:
-            utils.save(self, save_dir, self.logger)
+            io.save(self, save_dir, self.logger)
 
 
 @_gradient_boosting_model_doc(

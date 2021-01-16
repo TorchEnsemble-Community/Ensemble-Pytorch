@@ -15,7 +15,8 @@ import torch.nn.functional as F
 from joblib import Parallel, delayed
 
 from ._base import BaseModule, torchensemble_model_doc
-from . import utils
+from .utils import io
+from .utils import set_module
 
 
 __all__ = ["_BaseAdversarialTraining",
@@ -95,7 +96,10 @@ def _parallel_fit_per_epoch(train_loader,
                             device,
                             is_classification):
     """Private function used to fit base estimators in parallel."""
-    optimizer = utils.set_optimizer(estimator, optimizer, lr, weight_decay)
+    optimizer = set_module.set_optimizer(estimator,
+                                         optimizer,
+                                         lr,
+                                         weight_decay)
 
     for batch_idx, (data, target) in enumerate(train_loader):
 
@@ -309,7 +313,7 @@ class AdversarialTrainingClassifier(_BaseAdversarialTraining):
                             self.estimators_ = nn.ModuleList()  # reset
                             self.estimators_.extend(estimators)
                             if save_model:
-                                utils.save(self, save_dir, self.logger)
+                                io.save(self, save_dir, self.logger)
 
                         msg = ("Epoch: {:03d} | Validation Acc: {:.3f}"
                                " % | Historical Best: {:.3f} %")
@@ -318,7 +322,7 @@ class AdversarialTrainingClassifier(_BaseAdversarialTraining):
         self.estimators_ = nn.ModuleList()
         self.estimators_.extend(rets)
         if save_model and not test_loader:
-            utils.save(self, save_dir, self.logger)
+            io.save(self, save_dir, self.logger)
 
     @torchensemble_model_doc(
         """Implementation on the evaluating stage of AdversarialTrainingClassifier.""",  # noqa: E501
@@ -443,7 +447,7 @@ class AdversarialTrainingRegressor(_BaseAdversarialTraining):
                             self.estimators_ = nn.ModuleList()
                             self.estimators_.extend(estimators)
                             if save_model:
-                                utils.save(self, save_dir, self.logger)
+                                io.save(self, save_dir, self.logger)
 
                         msg = ("Epoch: {:03d} | Validation MSE:"
                                " {:.5f} | Historical Best: {:.5f}")
@@ -452,7 +456,7 @@ class AdversarialTrainingRegressor(_BaseAdversarialTraining):
         self.estimators_ = nn.ModuleList()
         self.estimators_.extend(rets)
         if save_model and not test_loader:
-            utils.save(self, save_dir, self.logger)
+            io.save(self, save_dir, self.logger)
 
     @torchensemble_model_doc(
         """Implementation on the evaluating stage of AdversarialTrainingRegressor.""",  # noqa: E501
