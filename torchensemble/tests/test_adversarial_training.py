@@ -5,7 +5,7 @@ import torch.nn as nn
 from torch.utils.data import TensorDataset, DataLoader
 
 import torchensemble
-from torchensemble.utils import set_logger
+from torchensemble.utils.logging import set_logger
 
 
 set_logger("pytest_adversarial_training")
