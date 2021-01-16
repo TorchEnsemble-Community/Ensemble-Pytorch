@@ -260,7 +260,7 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble):
                                              optimizer,
                                              init_lr,
                                              weight_decay)
- 
+
         scheduler = self._set_scheduler(optimizer, epochs * len(train_loader))
 
         # Utils
