@@ -44,14 +44,18 @@ class FusionClassifier(BaseModule):
         return F.softmax(proba, dim=1)
 
     @torchensemble_model_doc(
+        """Set the attributes on optimizer for FusionClassifier.""",
+        "set_optimizer")
+    def set_optimizer(self, optimizer_name, **kwargs):
+        self.optimizer_name = optimizer_name
+        self.optimizer_args = kwargs
+
+    @torchensemble_model_doc(
         """Implementation on the training stage of FusionClassifier.""",
         "fit")
     def fit(self,
             train_loader,
-            lr=1e-3,
-            weight_decay=5e-4,
             epochs=100,
-            optimizer="Adam",
             log_interval=100,
             test_loader=None,
             save_model=True,
@@ -60,12 +64,11 @@ class FusionClassifier(BaseModule):
         # Instantiate base estimators and set attributes
         for _ in range(self.n_estimators):
             self.estimators_.append(self._make_estimator())
-        self._validate_parameters(lr, weight_decay, epochs, log_interval)
+        self._validate_parameters(epochs, log_interval)
         self.n_outputs = self._decide_n_outputs(train_loader, True)
         optimizer = set_module.set_optimizer(self,
-                                             optimizer,
-                                             lr=lr,
-                                             weight_decay=weight_decay)
+                                             self.optimizer_name,
+                                             **self.optimizer_args)
 
         # Utils
         criterion = nn.CrossEntropyLoss()
@@ -163,14 +166,18 @@ class FusionRegressor(BaseModule):
         return pred
 
     @torchensemble_model_doc(
+        """Set the attributes on optimizer for FusionRegressor.""",
+        "set_optimizer")
+    def set_optimizer(self, optimizer_name, **kwargs):
+        self.optimizer_name = optimizer_name
+        self.optimizer_args = kwargs
+
+    @torchensemble_model_doc(
         """Implementation on the training stage of FusionRegressor.""",
         "fit")
     def fit(self,
             train_loader,
-            lr=1e-3,
-            weight_decay=5e-4,
             epochs=100,
-            optimizer="Adam",
             log_interval=100,
             test_loader=None,
             save_model=True,
@@ -178,12 +185,11 @@ class FusionRegressor(BaseModule):
         # Instantiate base estimators and set attributes
         for _ in range(self.n_estimators):
             self.estimators_.append(self._make_estimator())
-        self._validate_parameters(lr, weight_decay, epochs, log_interval)
+        self._validate_parameters(epochs, log_interval)
         self.n_outputs = self._decide_n_outputs(train_loader, False)
         optimizer = set_module.set_optimizer(self,
-                                             optimizer,
-                                             lr=lr,
-                                             weight_decay=weight_decay)
+                                             self.optimizer_name,
+                                             **self.optimizer_args)
 
         # Utils
         criterion = nn.MSELoss()

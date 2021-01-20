@@ -20,21 +20,24 @@ __all__ = ["VotingClassifier",
 
 
 def _parallel_fit_per_epoch(train_loader,
-                            lr,
-                            weight_decay,
                             epoch,
-                            optimizer,
+                            optimizer_name,
+                            optimizer_args,
                             log_interval,
                             idx,
                             estimator,
                             criterion,
                             device,
                             is_classification):
-    """Private function used to fit base estimators in parallel."""
+    """
+    Private function used to fit base estimators in parallel.
+
+    WARNING: Parallelization when fitting large base estimators may instantly
+    cause out-of-memory error.
+    """
     optimizer = set_module.set_optimizer(estimator,
-                                         optimizer,
-                                         lr=lr,
-                                         weight_decay=weight_decay)
+                                         optimizer_name,
+                                         **optimizer_args)
 
     msg_list = []
 
@@ -88,14 +91,18 @@ class VotingClassifier(BaseModule):
         return proba
 
     @torchensemble_model_doc(
+        """Set the attributes on optimizer for VotingClassifier.""",
+        "set_optimizer")
+    def set_optimizer(self, optimizer_name, **kwargs):
+        self.optimizer_name = optimizer_name
+        self.optimizer_args = kwargs
+
+    @torchensemble_model_doc(
         """Implementation on the training stage of VotingClassifier.""",
         "fit")
     def fit(self,
             train_loader,
-            lr=1e-3,
-            weight_decay=5e-4,
             epochs=100,
-            optimizer="Adam",
             log_interval=100,
             test_loader=None,
             save_model=True,
@@ -105,7 +112,7 @@ class VotingClassifier(BaseModule):
         estimators = []
         for _ in range(self.n_estimators):
             estimators.append(self._make_estimator())
-        self._validate_parameters(lr, weight_decay, epochs, log_interval)
+        self._validate_parameters(epochs, log_interval)
         self.n_outputs = self._decide_n_outputs(train_loader, True)
 
         # Utils
@@ -130,10 +137,9 @@ class VotingClassifier(BaseModule):
                 self.train()
                 rets = parallel(delayed(_parallel_fit_per_epoch)(
                         train_loader,
-                        lr,
-                        weight_decay,
                         epoch,
-                        optimizer,
+                        self.optimizer_name,
+                        self.optimizer_args,
                         log_interval,
                         idx,
                         estimator,
@@ -220,14 +226,18 @@ class VotingRegressor(BaseModule):
         return pred
 
     @torchensemble_model_doc(
+        """Set the attributes on optimizer for VotingRegressor.""",
+        "set_optimizer")
+    def set_optimizer(self, optimizer_name, **kwargs):
+        self.optimizer_name = optimizer_name
+        self.optimizer_args = kwargs
+
+    @torchensemble_model_doc(
         """Implementation on the training stage of VotingRegressor.""",
         "fit")
     def fit(self,
             train_loader,
-            lr=1e-3,
-            weight_decay=5e-4,
             epochs=100,
-            optimizer="Adam",
             log_interval=100,
             test_loader=None,
             save_model=True,
@@ -237,7 +247,7 @@ class VotingRegressor(BaseModule):
         estimators = []
         for _ in range(self.n_estimators):
             estimators.append(self._make_estimator())
-        self._validate_parameters(lr, weight_decay, epochs, log_interval)
+        self._validate_parameters(epochs, log_interval)
         self.n_outputs = self._decide_n_outputs(train_loader, False)
 
         # Utils
@@ -262,10 +272,9 @@ class VotingRegressor(BaseModule):
                 self.train()
                 rets = parallel(delayed(_parallel_fit_per_epoch)(
                         train_loader,
-                        lr,
-                        weight_decay,
                         epoch,
-                        optimizer,
+                        self.optimizer_name,
+                        self.optimizer_args,
                         log_interval,
                         idx,
                         estimator,

@@ -27,27 +27,32 @@ __all__ = ["_BaseSnapshotEnsemble",
            "SnapshotEnsembleRegressor"]
 
 
+__set_optimizer_doc = """
+    Parameters
+    ----------
+    optimizer_name : string
+        The name of the optimizer, should be one of {"Adadelta","Adagrad",
+        "Adam","AdamW","SparseAdam","Adamax","ASGD","RMSprop","Rprop","SGD"}.
+    **kwargs : keyword arguments
+        Miscellaneous keyword arguments on setting the optimizer, should be in
+        the form: "lr=1e-3, weight_decay=5e-4, ...". These keyword arguments
+        will be directly passed to the :mod:`torch.optim.Optimizer`.
+"""
+
+
 __fit_doc = """
     Parameters
     ----------
     train_loader : torch.utils.data.DataLoader
         A :mod:`DataLoader` container that contains the training data.
-    init_lr : float, default=1e-1
-        The initial learning rate of the parameter optimizer. Snapshot
-        ensemble will adjust the learning rate based on ``init_lr``,
-        ``epochs``, and ``n_estimators`` automatically.
     lr_clip : list or tuple, default=None
         Specify the accepted range of learning rate. When the learning rate
         determined by the scheduler is out of this range, it will be clipped.
 
         - The first element should be the lower bound of learning rate.
         - The second element should be the upper bound of learning rate.
-    weight_decay : float, default=5e-4
-        The weight decay of the parameter optimizer.
     epochs : int, default=100
         The number of training epochs.
-    optimizer : {"SGD", "Adam", "RMSprop"}, default="Adam"
-        The type of parameter optimizer.
     log_interval : int, default=100
         The number of batches to wait before printting the training status.
     test_loader : torch.utils.data.DataLoader, default=None
@@ -115,19 +120,8 @@ class _BaseSnapshotEnsemble(BaseModule):
 
         self.estimators_ = nn.ModuleList()
 
-    def _validate_parameters(self,
-                             init_lr,
-                             lr_clip,
-                             weight_decay,
-                             epochs,
-                             log_interval):
+    def _validate_parameters(self, lr_clip, epochs, log_interval):
         """Validate hyper-parameters on training the ensemble."""
-
-        if not init_lr > 0:
-            msg = ("The initial learning rate of optimizer = {} should be"
-                   " strictly positive.")
-            self.logger.error(msg.format(init_lr))
-            raise ValueError(msg.format(init_lr))
 
         if lr_clip:
             if not (isinstance(lr_clip, list) or isinstance(lr_clip, tuple)):
@@ -146,11 +140,6 @@ class _BaseSnapshotEnsemble(BaseModule):
                        " second element = {} in lr_clip.")
                 self.logger.error(msg.format(lr_clip[0], lr_clip[1]))
                 raise ValueError(msg.format(lr_clip[0], lr_clip[1]))
-
-        if not weight_decay >= 0:
-            msg = "The weight decay of optimizer = {} should not be negative."
-            self.logger.error(msg.format(weight_decay))
-            raise ValueError(msg.format(weight_decay))
 
         if not epochs > 0:
             msg = ("The number of training epochs = {} should be strictly"
@@ -227,28 +216,26 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble):
 
         return F.softmax(proba, dim=1)
 
+    @torchensemble_model_doc(
+        """Set the attributes on optimizer for SnapshotEnsembleClassifier.""",
+        "set_optimizer")
+    def set_optimizer(self, optimizer_name, **kwargs):
+        self.optimizer_name = optimizer_name
+        self.optimizer_args = kwargs
+
     @_snapshot_ensemble_model_doc(
         """Implementation on the training stage of SnapshotEnsembleClassifier.""",  # noqa: E501
         "fit"
     )
     def fit(self,
             train_loader,
-            init_lr=1e-1,
             lr_clip=None,
-            weight_decay=5e-4,
             epochs=100,
-            optimizer="Adam",
             log_interval=100,
             test_loader=None,
             save_model=True,
             save_dir=None):
-
-        self._validate_parameters(init_lr,
-                                  lr_clip,
-                                  weight_decay,
-                                  epochs,
-                                  log_interval)
-
+        self._validate_parameters(lr_clip, epochs, log_interval)
         self.n_outputs = self._decide_n_outputs(train_loader,
                                                 self.is_classification)
 
@@ -257,9 +244,8 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble):
 
         # Set the optimizer and scheduler
         optimizer = set_module.set_optimizer(estimator_,
-                                             optimizer,
-                                             lr=init_lr,
-                                             weight_decay=weight_decay)
+                                             self.optimizer_name,
+                                             **self.optimizer_args)
 
         scheduler = self._set_scheduler(optimizer, epochs * len(train_loader))
 
@@ -387,28 +373,26 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble):
         pred = self._forward(x)
         return pred
 
+    @torchensemble_model_doc(
+        """Set the attributes on optimizer for SnapshotEnsembleRegressor.""",
+        "set_optimizer")
+    def set_optimizer(self, optimizer_name, **kwargs):
+        self.optimizer_name = optimizer_name
+        self.optimizer_args = kwargs
+
     @_snapshot_ensemble_model_doc(
         """Implementation on the training stage of SnapshotEnsembleRegressor.""",  # noqa: E501
         "fit"
     )
     def fit(self,
             train_loader,
-            init_lr=1e-1,
             lr_clip=None,
-            weight_decay=5e-4,
             epochs=100,
-            optimizer="Adam",
             log_interval=100,
             test_loader=None,
             save_model=True,
             save_dir=None):
-
-        self._validate_parameters(init_lr,
-                                  lr_clip,
-                                  weight_decay,
-                                  epochs,
-                                  log_interval)
-
+        self._validate_parameters(lr_clip, epochs, log_interval)
         self.n_outputs = self._decide_n_outputs(train_loader,
                                                 self.is_classification)
 
@@ -417,9 +401,8 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble):
 
         # Set the optimizer and scheduler
         optimizer = set_module.set_optimizer(estimator_,
-                                             optimizer,
-                                             lr=init_lr,
-                                             weight_decay=weight_decay)
+                                             self.optimizer_name,
+                                             **self.optimizer_args)
 
         scheduler = self._set_scheduler(optimizer, epochs * len(train_loader))
 

@@ -47,16 +47,6 @@ train_loader = DataLoader(train, batch_size=2)
 def test_parallel(method):
     model = method(estimator=MLP, n_estimators=2, cuda=False)
 
-    # Learning rate
-    with pytest.raises(ValueError) as excinfo:
-        model.fit(train_loader, lr=-1)
-    assert "learning rate of optimizer" in str(excinfo.value)
-
-    # Weight decay
-    with pytest.raises(ValueError) as excinfo:
-        model.fit(train_loader, weight_decay=-1)
-    assert "weight decay of optimizer" in str(excinfo.value)
-
     # Epochs
     with pytest.raises(ValueError) as excinfo:
         model.fit(train_loader, epochs=-1)
@@ -72,16 +62,6 @@ def test_gradient_boosting():
     model = torchensemble.GradientBoostingClassifier(estimator=MLP,
                                                      n_estimators=2,
                                                      cuda=False)
-
-    # Learning rate
-    with pytest.raises(ValueError) as excinfo:
-        model.fit(train_loader, lr=-1)
-    assert "learning rate of optimizer" in str(excinfo.value)
-
-    # Weight decay
-    with pytest.raises(ValueError) as excinfo:
-        model.fit(train_loader, weight_decay=-1)
-    assert "weight decay of optimizer" in str(excinfo.value)
 
     # Epochs
     with pytest.raises(ValueError) as excinfo:
@@ -112,10 +92,6 @@ def test_snapshot_ensemble():
     model = torchensemble.SnapshotEnsembleClassifier(estimator=MLP,
                                                      n_estimators=2,
                                                      cuda=False)
-    # Learning rate
-    with pytest.raises(ValueError) as excinfo:
-        model.fit(train_loader, init_lr=-1)
-    assert "initial learning rate" in str(excinfo.value)
 
     # Learning rate clip
     with pytest.raises(ValueError) as excinfo:
@@ -129,11 +105,6 @@ def test_snapshot_ensemble():
     with pytest.raises(ValueError) as excinfo:
         model.fit(train_loader, lr_clip=[1, 0])
     assert "should be smaller than the second" in str(excinfo.value)
-
-    # Weight decay
-    with pytest.raises(ValueError) as excinfo:
-        model.fit(train_loader, weight_decay=-1)
-    assert "weight decay of optimizer" in str(excinfo.value)
 
     # Epochs
     with pytest.raises(ValueError) as excinfo:
@@ -155,16 +126,6 @@ def test_adversarial_training():
     model = torchensemble.AdversarialTrainingClassifier(estimator=MLP,
                                                         n_estimators=2,
                                                         cuda=False)
-
-    # Learning rate
-    with pytest.raises(ValueError) as excinfo:
-        model.fit(train_loader, lr=-1)
-    assert "learning rate of optimizer" in str(excinfo.value)
-
-    # Weight decay
-    with pytest.raises(ValueError) as excinfo:
-        model.fit(train_loader, weight_decay=-1)
-    assert "weight decay of optimizer" in str(excinfo.value)
 
     # Epochs
     with pytest.raises(ValueError) as excinfo:

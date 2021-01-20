@@ -26,19 +26,26 @@ __model_doc = """
 """
 
 
+__set_optimizer_doc = """
+    Parameters
+    ----------
+    optimizer_name : string
+        The name of the optimizer, should be one of {"Adadelta","Adagrad",
+        "Adam","AdamW","SparseAdam","Adamax","ASGD","RMSprop","Rprop","SGD"}.
+    **kwargs : keyword arguments
+        Miscellaneous keyword arguments on setting the optimizer, should be in
+        the form: "lr=1e-3, weight_decay=5e-4, ...". These keyword arguments
+        will be directly passed to the :mod:`torch.optim.Optimizer`.
+"""
+
+
 __fit_doc = """
     Parameters
     ----------
     train_loader : torch.utils.data.DataLoader
         A :mod:`DataLoader` container that contains the training data.
-    lr : float, default=1e-3
-        The learning rate of the parameter optimizer.
-    weight_decay : float, default=5e-4
-        The weight decay of the parameter optimizer.
     epochs : int, default=100
         The number of training epochs.
-    optimizer : {"SGD", "Adam", "RMSprop"}, default="Adam"
-        The type of parameter optimizer.
     log_interval : int, default=100
         The number of batches to wait before printting the training status.
     test_loader : torch.utils.data.DataLoader, default=None

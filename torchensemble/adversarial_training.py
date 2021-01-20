@@ -29,14 +29,8 @@ __fit_doc = """
     ----------
     train_loader : torch.utils.data.DataLoader
         A :mod:`DataLoader` container that contains the training data.
-    lr : float, default=1e-3
-        The learning rate of the parameter optimizer.
-    weight_decay : float, default=5e-4
-        The weight decay of the parameter optimizer.
     epochs : int, default=100
         The number of training epochs.
-    optimizer : {"SGD", "Adam", "RMSprop"}, default="Adam"
-        The type of parameter optimizer.
     epsilon : float, defaul=0.01
         The step used to generate adversarial samples in the fast gradient
         sign method (FGSM), which should be in the range [0, 1].
@@ -84,22 +78,25 @@ def _adversarial_training_model_doc(header, item="fit"):
 
 
 def _parallel_fit_per_epoch(train_loader,
-                            lr,
-                            weight_decay,
-                            epoch,
-                            optimizer,
                             epsilon,
+                            epoch,
+                            optimizer_name,
+                            optimizer_args,
                             log_interval,
                             idx,
                             estimator,
                             criterion,
                             device,
                             is_classification):
-    """Private function used to fit base estimators in parallel."""
+    """
+    Private function used to fit base estimators in parallel.
+
+    WARNING: Parallelization when fitting large base estimators may instantly
+    cause out-of-memory error.
+    """
     optimizer = set_module.set_optimizer(estimator,
-                                         optimizer,
-                                         lr=lr,
-                                         weight_decay=weight_decay)
+                                         optimizer_name,
+                                         **optimizer_args)
 
     for batch_idx, (data, target) in enumerate(train_loader):
 
@@ -167,24 +164,8 @@ def _get_fgsm_samples(sample, epsilon, sample_grad):
 
 class _BaseAdversarialTraining(BaseModule):
 
-    def _validate_parameters(self,
-                             lr,
-                             weight_decay,
-                             epochs,
-                             epsilon,
-                             log_interval):
+    def _validate_parameters(self, epochs, epsilon, log_interval):
         """Validate hyper-parameters on training the ensemble."""
-
-        if not lr > 0:
-            msg = ("The learning rate of optimizer = {} should be strictly"
-                   " positive.")
-            self.logger.error(msg.format(lr))
-            raise ValueError(msg.format(lr))
-
-        if not weight_decay >= 0:
-            msg = "The weight decay of optimizer = {} should not be negative."
-            self.logger.error(msg.format(weight_decay))
-            raise ValueError(msg.format(weight_decay))
 
         if not epochs > 0:
             msg = ("The number of training epochs = {} should be strictly"
@@ -227,16 +208,20 @@ class AdversarialTrainingClassifier(_BaseAdversarialTraining):
 
         return proba
 
+    @torchensemble_model_doc(
+        """Set the attributes on optimizer for AdversarialTrainingClassifier.""",  # noqa: E501
+        "set_optimizer")
+    def set_optimizer(self, optimizer_name, **kwargs):
+        self.optimizer_name = optimizer_name
+        self.optimizer_args = kwargs
+
     @_adversarial_training_model_doc(
         """Implementation on the training stage of AdversarialTrainingClassifier.""",  # noqa: E501
         "fit"
     )
     def fit(self,
             train_loader,
-            lr=1e-3,
-            weight_decay=5e-4,
             epochs=100,
-            optimizer="Adam",
             epsilon=0.5,
             log_interval=100,
             test_loader=None,
@@ -247,11 +232,7 @@ class AdversarialTrainingClassifier(_BaseAdversarialTraining):
         estimators = []
         for _ in range(self.n_estimators):
             estimators.append(self._make_estimator())
-        self._validate_parameters(lr,
-                                  weight_decay,
-                                  epochs,
-                                  epsilon,
-                                  log_interval)
+        self._validate_parameters(epochs, epsilon, log_interval)
         self.n_outputs = self._decide_n_outputs(train_loader, True)
 
         # Utils
@@ -276,11 +257,10 @@ class AdversarialTrainingClassifier(_BaseAdversarialTraining):
                 self.train()
                 rets = parallel(delayed(_parallel_fit_per_epoch)(
                         train_loader,
-                        lr,
-                        weight_decay,
-                        epoch,
-                        optimizer,
                         epsilon,
+                        epoch,
+                        self.optimizer_name,
+                        self.optimizer_args,
                         log_interval,
                         idx,
                         estimator,
@@ -365,16 +345,20 @@ class AdversarialTrainingRegressor(_BaseAdversarialTraining):
 
         return pred
 
+    @torchensemble_model_doc(
+        """Set the attributes on optimizer for AdversarialTrainingRegressor.""",  # noqa: E501
+        "set_optimizer")
+    def set_optimizer(self, optimizer_name, **kwargs):
+        self.optimizer_name = optimizer_name
+        self.optimizer_args = kwargs
+
     @_adversarial_training_model_doc(
         """Implementation on the training stage of AdversarialTrainingRegressor.""",  # noqa: E501
         "fit"
     )
     def fit(self,
             train_loader,
-            lr=1e-3,
-            weight_decay=5e-4,
             epochs=100,
-            optimizer="Adam",
             epsilon=0.5,
             log_interval=100,
             test_loader=None,
@@ -385,11 +369,7 @@ class AdversarialTrainingRegressor(_BaseAdversarialTraining):
         estimators = []
         for _ in range(self.n_estimators):
             estimators.append(self._make_estimator())
-        self._validate_parameters(lr,
-                                  weight_decay,
-                                  epochs,
-                                  epsilon,
-                                  log_interval)
+        self._validate_parameters(epochs, epsilon, log_interval)
         self.n_outputs = self._decide_n_outputs(train_loader, True)
 
         # Utils
@@ -414,11 +394,10 @@ class AdversarialTrainingRegressor(_BaseAdversarialTraining):
                 self.train()
                 rets = parallel(delayed(_parallel_fit_per_epoch)(
                         train_loader,
-                        lr,
-                        weight_decay,
-                        epoch,
-                        optimizer,
                         epsilon,
+                        epoch,
+                        self.optimizer_name,
+                        self.optimizer_args,
                         log_interval,
                         idx,
                         estimator,

@@ -86,6 +86,8 @@ def test_clf(clf):
     model = clf(estimator=MLP_clf, n_estimators=n_estimators,
                 cuda=False)
 
+    model.set_optimizer("Adam", lr=1e-3, weight_decay=5e-4)
+
     # Prepare data
     train = TensorDataset(X_train, y_train_clf)
     train_loader = DataLoader(train, batch_size=2)
@@ -116,6 +118,8 @@ def test_reg(reg):
 
     model = reg(estimator=MLP_reg, n_estimators=n_estimators,
                 cuda=False)
+
+    model.set_optimizer("Adam", lr=1e-3, weight_decay=5e-4)
 
     # Prepare data
     train = TensorDataset(X_train, y_train_reg)
