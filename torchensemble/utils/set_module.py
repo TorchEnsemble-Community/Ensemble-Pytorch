@@ -17,8 +17,6 @@ def set_optimizer(model, optimizer_name, **kwargs):
         optimizer = torch.optim.Adam(model.parameters(), **kwargs)
     elif optimizer_name == "AdamW":
         optimizer = torch.optim.AdamW(model.parameters(), **kwargs)
-    elif optimizer_name == "SparseAdam":
-        optimizer = torch.optim.SparseAdam(model.parameters(), **kwargs)
     elif optimizer_name == "Adamax":
         optimizer = torch.optim.Adamax(model.parameters(), **kwargs)
     elif optimizer_name == "ASGD":
@@ -31,8 +29,8 @@ def set_optimizer(model, optimizer_name, **kwargs):
         optimizer = torch.optim.SGD(model.parameters(), **kwargs)
     else:
         msg = ("Unknown name of the optimizer {}, should be one of"
-               " {{Adadelta, Adagrad, Adam, AdamW, SparseAdam, Adamax,"
-               " ASGD, RMSprop, Rprop, SGD}}.")
+               " {{Adadelta, Adagrad, Adam, AdamW, Adamax, ASGD, RMSprop,"
+               " Rprop, SGD}}.")
         raise NotImplementedError(msg.format(optimizer_name))
 
     return optimizer
