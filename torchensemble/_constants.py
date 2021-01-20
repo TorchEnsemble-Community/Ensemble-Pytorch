@@ -30,11 +30,12 @@ __set_optimizer_doc = """
     Parameters
     ----------
     optimizer_name : string
-        The name of the optimizer, should be one of {"Adadelta","Adagrad",
-        "Adam","AdamW","Adamax","ASGD","RMSprop","Rprop","SGD"}.
+        The name of the optimizer, should be one of {``Adadelta``, ``Adagrad``,
+        ``Adam``, ``AdamW``, ``Adamax``, ``ASGD``, ``RMSprop``, ``Rprop``,
+        ``SGD``}.
     **kwargs : keyword arguments
         Miscellaneous keyword arguments on setting the optimizer, should be in
-        the form: "lr=1e-3, weight_decay=5e-4, ...". These keyword arguments
+        the form: ``lr=1e-3, weight_decay=5e-4, ...``. These keyword arguments
         will be directly passed to the :mod:`torch.optim.Optimizer`.
 """
 
