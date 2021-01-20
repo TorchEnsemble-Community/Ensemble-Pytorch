@@ -31,7 +31,7 @@ __set_optimizer_doc = """
     ----------
     optimizer_name : string
         The name of the optimizer, should be one of {"Adadelta","Adagrad",
-        "Adam","AdamW","SparseAdam","Adamax","ASGD","RMSprop","Rprop","SGD"}.
+        "Adam","AdamW","Adamax","ASGD","RMSprop","Rprop","SGD"}.
     **kwargs : keyword arguments
         Miscellaneous keyword arguments on setting the optimizer, should be in
         the form: "lr=1e-3, weight_decay=5e-4, ...". These keyword arguments
