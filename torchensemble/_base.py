@@ -23,6 +23,7 @@ def torchensemble_model_doc(header, item):
         __doc = {"model": const.__model_doc,
                  "fit": const.__fit_doc,
                  "set_optimizer": const.__set_optimizer_doc,
+                 "set_scheduler": const.__set_scheduler_doc,
                  "classifier_forward": const.__classification_forward_doc,
                  "classifier_predict": const.__classification_predict_doc,
                  "regressor_forward": const.__regression_forward_doc,
@@ -66,6 +67,7 @@ class BaseModule(abc.ABC, nn.Module):
         self.logger = logging.getLogger()
 
         self.estimators_ = nn.ModuleList()
+        self.use_scheduler_ = False
 
     def __len__(self):
         """
@@ -139,6 +141,12 @@ class BaseModule(abc.ABC, nn.Module):
     def set_optimizer(self, optimizer_name, **kwargs):
         """
         Implementation on the process of setting the optimizer.
+        """
+
+    @abc.abstractmethod
+    def set_scheduler(self, scheduler_name, **kwargs):
+        """
+        Implementation on the process of setting the scheduler.
         """
 
     @abc.abstractmethod

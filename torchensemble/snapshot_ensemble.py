@@ -13,6 +13,7 @@ import copy
 import math
 import torch
 import logging
+import warnings
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.optim.lr_scheduler import LambdaLR
@@ -198,6 +199,12 @@ class _BaseSnapshotEnsemble(BaseModule):
         scheduler = LambdaLR(optimizer, lr_lambda=lr_lambda)
 
         return scheduler
+
+    def set_scheduler(self, scheduler_name, **kwargs):
+        msg = ("The learning rate scheduler for Snapshot Ensemble will be"
+               " automatically set. Calling this function has no effect on"
+               " the training stage of Snapshot Ensemble.")
+        warnings.warn(msg, RuntimeWarning)
 
 
 @torchensemble_model_doc(

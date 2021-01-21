@@ -40,7 +40,7 @@ __model_doc = """
     Attributes
     ----------
     estimators_ : torch.nn.ModuleList
-        The internal container that stores all base estimators.
+        An internal container that stores all fitted base estimators.
 """
 
 
@@ -127,6 +127,7 @@ class _BaseGradientBoosting(BaseModule):
         self.logger = logging.getLogger()
 
         self.estimators_ = nn.ModuleList()
+        self.use_scheduler_ = False
 
     def _validate_parameters(self,
                              epochs,
@@ -182,11 +183,19 @@ class _BaseGradientBoosting(BaseModule):
         return out
 
     @torchensemble_model_doc(
-        """Set the attributes on optimizer for FusionClassifier.""",
+        """Set the attributes on optimizer for Gradient Boosting.""",
         "set_optimizer")
     def set_optimizer(self, optimizer_name, **kwargs):
         self.optimizer_name = optimizer_name
         self.optimizer_args = kwargs
+
+    @torchensemble_model_doc(
+        """Set the attributes on scheduler for Gradient Boosting.""",
+        "set_scheduler")
+    def set_scheduler(self, scheduler_name, **kwargs):
+        self.scheduler_name = scheduler_name
+        self.scheduler_args = kwargs
+        self.use_scheduler_ = True
 
     def fit(self,
             train_loader,
@@ -212,11 +221,15 @@ class _BaseGradientBoosting(BaseModule):
 
         for est_idx, estimator in enumerate(self.estimators_):
 
-            # Initialize an independent optimizer for each base estimator to
+            # Initialize a optimizer and scheduler for each base estimator to
             # avoid unexpected dependencies.
-            learner_optimizer = set_module.set_optimizer(estimator,
-                                                         self.optimizer_name,
-                                                         **self.optimizer_args)  # noqa: E501
+            learner_optimizer = set_module.set_optimizer(
+                estimator, self.optimizer_name, **self.optimizer_args)
+
+            if self.use_scheduler_:
+                learner_scheduler = set_module.set_scheduler(
+                    learner_optimizer, self.scheduler_name, **self.scheduler_args  # noqa: E501
+                )
 
             # Training loop
             estimator.train()
@@ -241,6 +254,9 @@ class _BaseGradientBoosting(BaseModule):
                                " {:03d} | RegLoss: {:.5f}")
                         self.logger.info(msg.format(est_idx, epoch,
                                                     batch_idx, loss))
+
+                if self.use_scheduler_:
+                    learner_scheduler.step()
 
             # Validation
             if test_loader:
@@ -340,6 +356,13 @@ class GradientBoostingClassifier(_BaseGradientBoosting):
     def set_optimizer(self, optimizer_name, **kwargs):
         super().set_optimizer(
             optimizer_name=optimizer_name, **kwargs)
+
+    @torchensemble_model_doc(
+        """Set the attributes on scheduler for GradientBoostingClassifier.""",
+        "set_scheduler")
+    def set_scheduler(self, scheduler_name, **kwargs):
+        super().set_scheduler(
+            scheduler_name=scheduler_name, **kwargs)
 
     @_gradient_boosting_model_doc(
         """Implementation on the training stage of GradientBoostingClassifier.""",  # noqa: E501
@@ -451,6 +474,13 @@ class GradientBoostingRegressor(_BaseGradientBoosting):
     def set_optimizer(self, optimizer_name, **kwargs):
         super().set_optimizer(
             optimizer_name=optimizer_name, **kwargs)
+
+    @torchensemble_model_doc(
+        """Set the attributes on scheduler for GradientBoostingRegressor.""",
+        "set_scheduler")
+    def set_scheduler(self, scheduler_name, **kwargs):
+        super().set_scheduler(
+            scheduler_name=scheduler_name, **kwargs)
 
     @_gradient_boosting_model_doc(
         """Implementation on the training stage of GradientBoostingRegressor.""",  # noqa: E501

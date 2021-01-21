@@ -20,24 +20,20 @@ __all__ = ["VotingClassifier",
 
 
 def _parallel_fit_per_epoch(train_loader,
-                            epoch,
-                            optimizer_name,
-                            optimizer_args,
-                            log_interval,
-                            idx,
                             estimator,
+                            optimizer,
                             criterion,
+                            idx,
+                            epoch,
+                            log_interval,
                             device,
                             is_classification):
     """
     Private function used to fit base estimators in parallel.
 
-    WARNING: Parallelization when fitting large base estimators may instantly
-    cause out-of-memory error.
+    WARNING: Parallelization when fitting large base estimators may cause
+    out-of-memory error.
     """
-    optimizer = set_module.set_optimizer(estimator,
-                                         optimizer_name,
-                                         **optimizer_args)
 
     msg_list = []
 
@@ -98,6 +94,14 @@ class VotingClassifier(BaseModule):
         self.optimizer_args = kwargs
 
     @torchensemble_model_doc(
+        """Set the attributes on scheduler for VotingClassifier.""",
+        "set_scheduler")
+    def set_scheduler(self, scheduler_name, **kwargs):
+        self.scheduler_name = scheduler_name
+        self.scheduler_args = kwargs
+        self.use_scheduler_ = True
+
+    @torchensemble_model_doc(
         """Implementation on the training stage of VotingClassifier.""",
         "fit")
     def fit(self,
@@ -108,12 +112,26 @@ class VotingClassifier(BaseModule):
             save_model=True,
             save_dir=None):
 
-        # Instantiate base estimators and set attributes
+        self._validate_parameters(epochs, log_interval)
+        self.n_outputs = self._decide_n_outputs(train_loader, True)
+
+        # Instantiate a pool of base estimators, optimizers, and schedulers.
         estimators = []
         for _ in range(self.n_estimators):
             estimators.append(self._make_estimator())
-        self._validate_parameters(epochs, log_interval)
-        self.n_outputs = self._decide_n_outputs(train_loader, True)
+
+        optimizers = []
+        for i in range(self.n_estimators):
+            optimizers.append(set_module.set_optimizer(estimators[i],
+                                                       self.optimizer_name,
+                                                       **self.optimizer_args))
+
+        if self.use_scheduler_:
+            schedulers = []
+            for i in range(self.n_estimators):
+                schedulers.append(set_module.set_scheduler(optimizers[i],
+                                                           self.scheduler_name,
+                                                           **self.scheduler_args))  # noqa: E501
 
         # Utils
         criterion = nn.CrossEntropyLoss()
@@ -137,17 +155,17 @@ class VotingClassifier(BaseModule):
                 self.train()
                 rets = parallel(delayed(_parallel_fit_per_epoch)(
                         train_loader,
-                        epoch,
-                        self.optimizer_name,
-                        self.optimizer_args,
-                        log_interval,
-                        idx,
                         estimator,
+                        optimizer,
                         criterion,
+                        idx,
+                        epoch,
+                        log_interval,
                         self.device,
                         True
                     )
-                    for idx, estimator in enumerate(estimators)
+                    for idx, (estimator, optimizer) in enumerate(
+                            zip(estimators, optimizers))
                 )
 
                 estimators = []
@@ -182,6 +200,11 @@ class VotingClassifier(BaseModule):
                         msg = ("Epoch: {:03d} | Validation Acc: {:.3f}"
                                " % | Historical Best: {:.3f} %")
                         self.logger.info(msg.format(epoch, acc, best_acc))
+
+                # Update the scheduler
+                if self.use_scheduler_:
+                    for i in range(self.n_estimators):
+                        schedulers[i].step()
 
         self.estimators_ = nn.ModuleList()
         self.estimators_.extend(estimators)
@@ -233,6 +256,14 @@ class VotingRegressor(BaseModule):
         self.optimizer_args = kwargs
 
     @torchensemble_model_doc(
+        """Set the attributes on scheduler for VotingRegressor.""",
+        "set_scheduler")
+    def set_scheduler(self, scheduler_name, **kwargs):
+        self.scheduler_name = scheduler_name
+        self.scheduler_args = kwargs
+        self.use_scheduler_ = True
+
+    @torchensemble_model_doc(
         """Implementation on the training stage of VotingRegressor.""",
         "fit")
     def fit(self,
@@ -243,12 +274,26 @@ class VotingRegressor(BaseModule):
             save_model=True,
             save_dir=None):
 
-        # Instantiate base estimators and set attributes
+        self._validate_parameters(epochs, log_interval)
+        self.n_outputs = self._decide_n_outputs(train_loader, False)
+
+        # Instantiate a pool of base estimators, optimizers, and schedulers.
         estimators = []
         for _ in range(self.n_estimators):
             estimators.append(self._make_estimator())
-        self._validate_parameters(epochs, log_interval)
-        self.n_outputs = self._decide_n_outputs(train_loader, False)
+
+        optimizers = []
+        for i in range(self.n_estimators):
+            optimizers.append(set_module.set_optimizer(estimators[i],
+                                                       self.optimizer_name,
+                                                       **self.optimizer_args))
+
+        if self.use_scheduler_:
+            schedulers = []
+            for i in range(self.n_estimators):
+                schedulers.append(set_module.set_scheduler(optimizers[i],
+                                                           self.scheduler_name,
+                                                           **self.scheduler_args))  # noqa: E501
 
         # Utils
         criterion = nn.MSELoss()
@@ -272,17 +317,17 @@ class VotingRegressor(BaseModule):
                 self.train()
                 rets = parallel(delayed(_parallel_fit_per_epoch)(
                         train_loader,
-                        epoch,
-                        self.optimizer_name,
-                        self.optimizer_args,
-                        log_interval,
-                        idx,
                         estimator,
+                        optimizer,
                         criterion,
+                        idx,
+                        epoch,
+                        log_interval,
                         self.device,
                         False
                     )
-                    for idx, estimator in enumerate(estimators)
+                    for idx, (estimator, optimizer) in enumerate(
+                            zip(estimators, optimizers))
                 )
 
                 estimators = []
@@ -314,6 +359,11 @@ class VotingRegressor(BaseModule):
                         msg = ("Epoch: {:03d} | Validation MSE:"
                                " {:.5f} | Historical Best: {:.5f}")
                         self.logger.info(msg.format(epoch, mse, best_mse))
+
+                # Update the scheduler
+                if self.use_scheduler_:
+                    for i in range(self.n_estimators):
+                        schedulers[i].step()
 
         self.estimators_ = nn.ModuleList()
         self.estimators_.extend(estimators)

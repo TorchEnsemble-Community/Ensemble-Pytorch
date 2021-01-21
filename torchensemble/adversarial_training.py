@@ -79,24 +79,20 @@ def _adversarial_training_model_doc(header, item="fit"):
 
 def _parallel_fit_per_epoch(train_loader,
                             epsilon,
-                            epoch,
-                            optimizer_name,
-                            optimizer_args,
-                            log_interval,
-                            idx,
                             estimator,
+                            optimizer,
                             criterion,
+                            idx,
+                            epoch,
+                            log_interval,
                             device,
                             is_classification):
     """
     Private function used to fit base estimators in parallel.
 
-    WARNING: Parallelization when fitting large base estimators may instantly
-    cause out-of-memory error.
+    WARNING: Parallelization when fitting large base estimators may cause
+    out-of-memory error.
     """
-    optimizer = set_module.set_optimizer(estimator,
-                                         optimizer_name,
-                                         **optimizer_args)
 
     for batch_idx, (data, target) in enumerate(train_loader):
 
@@ -215,6 +211,14 @@ class AdversarialTrainingClassifier(_BaseAdversarialTraining):
         self.optimizer_name = optimizer_name
         self.optimizer_args = kwargs
 
+    @torchensemble_model_doc(
+        """Set the attributes on scheduler for AdversarialTrainingClassifier.""",  # noqa: E501
+        "set_scheduler")
+    def set_scheduler(self, scheduler_name, **kwargs):
+        self.scheduler_name = scheduler_name
+        self.scheduler_args = kwargs
+        self.use_scheduler_ = True
+
     @_adversarial_training_model_doc(
         """Implementation on the training stage of AdversarialTrainingClassifier.""",  # noqa: E501
         "fit"
@@ -228,12 +232,26 @@ class AdversarialTrainingClassifier(_BaseAdversarialTraining):
             save_model=True,
             save_dir=None):
 
-        # Instantiate base estimators and set attributes
+        self._validate_parameters(epochs, epsilon, log_interval)
+        self.n_outputs = self._decide_n_outputs(train_loader, True)
+
+        # Instantiate a pool of base estimators, optimizers, and schedulers.
         estimators = []
         for _ in range(self.n_estimators):
             estimators.append(self._make_estimator())
-        self._validate_parameters(epochs, epsilon, log_interval)
-        self.n_outputs = self._decide_n_outputs(train_loader, True)
+
+        optimizers = []
+        for i in range(self.n_estimators):
+            optimizers.append(set_module.set_optimizer(estimators[i],
+                                                       self.optimizer_name,
+                                                       **self.optimizer_args))
+
+        if self.use_scheduler_:
+            schedulers = []
+            for i in range(self.n_estimators):
+                schedulers.append(set_module.set_scheduler(optimizers[i],
+                                                           self.scheduler_name,
+                                                           **self.scheduler_args))  # noqa: E501
 
         # Utils
         criterion = nn.CrossEntropyLoss()
@@ -258,17 +276,17 @@ class AdversarialTrainingClassifier(_BaseAdversarialTraining):
                 rets = parallel(delayed(_parallel_fit_per_epoch)(
                         train_loader,
                         epsilon,
-                        epoch,
-                        self.optimizer_name,
-                        self.optimizer_args,
-                        log_interval,
-                        idx,
                         estimator,
+                        optimizer,
                         criterion,
+                        idx,
+                        epoch,
+                        log_interval,
                         self.device,
                         True
                     )
-                    for idx, estimator in enumerate(estimators)
+                    for idx, (estimator, optimizer) in enumerate(
+                            zip(estimators, optimizers))
                 )
 
                 estimators = rets  # update
@@ -298,6 +316,11 @@ class AdversarialTrainingClassifier(_BaseAdversarialTraining):
                         msg = ("Epoch: {:03d} | Validation Acc: {:.3f}"
                                " % | Historical Best: {:.3f} %")
                         self.logger.info(msg.format(epoch, acc, best_acc))
+
+                # Update the scheduler
+                if self.use_scheduler_:
+                    for i in range(self.n_estimators):
+                        schedulers[i].step()
 
         self.estimators_ = nn.ModuleList()
         self.estimators_.extend(rets)
@@ -352,6 +375,14 @@ class AdversarialTrainingRegressor(_BaseAdversarialTraining):
         self.optimizer_name = optimizer_name
         self.optimizer_args = kwargs
 
+    @torchensemble_model_doc(
+        """Set the attributes on scheduler for AdversarialTrainingRegressor.""",  # noqa: E501
+        "set_scheduler")
+    def set_scheduler(self, scheduler_name, **kwargs):
+        self.scheduler_name = scheduler_name
+        self.scheduler_args = kwargs
+        self.use_scheduler_ = True
+
     @_adversarial_training_model_doc(
         """Implementation on the training stage of AdversarialTrainingRegressor.""",  # noqa: E501
         "fit"
@@ -365,12 +396,26 @@ class AdversarialTrainingRegressor(_BaseAdversarialTraining):
             save_model=True,
             save_dir=None):
 
-        # Instantiate base estimators and set attributes
+        self._validate_parameters(epochs, epsilon, log_interval)
+        self.n_outputs = self._decide_n_outputs(train_loader, True)
+
+        # Instantiate a pool of base estimators, optimizers, and schedulers.
         estimators = []
         for _ in range(self.n_estimators):
             estimators.append(self._make_estimator())
-        self._validate_parameters(epochs, epsilon, log_interval)
-        self.n_outputs = self._decide_n_outputs(train_loader, True)
+
+        optimizers = []
+        for i in range(self.n_estimators):
+            optimizers.append(set_module.set_optimizer(estimators[i],
+                                                       self.optimizer_name,
+                                                       **self.optimizer_args))
+
+        if self.use_scheduler_:
+            schedulers = []
+            for i in range(self.n_estimators):
+                schedulers.append(set_module.set_scheduler(optimizers[i],
+                                                           self.scheduler_name,
+                                                           **self.scheduler_args))  # noqa: E501
 
         # Utils
         criterion = nn.MSELoss()
@@ -395,18 +440,19 @@ class AdversarialTrainingRegressor(_BaseAdversarialTraining):
                 rets = parallel(delayed(_parallel_fit_per_epoch)(
                         train_loader,
                         epsilon,
-                        epoch,
-                        self.optimizer_name,
-                        self.optimizer_args,
-                        log_interval,
-                        idx,
                         estimator,
+                        optimizer,
                         criterion,
+                        idx,
+                        epoch,
+                        log_interval,
                         self.device,
                         False
                     )
-                    for idx, estimator in enumerate(estimators)
+                    for idx, (estimator, optimizer) in enumerate(
+                            zip(estimators, optimizers))
                 )
+
                 estimators = rets  # update
 
                 # Validation
@@ -431,6 +477,11 @@ class AdversarialTrainingRegressor(_BaseAdversarialTraining):
                         msg = ("Epoch: {:03d} | Validation MSE:"
                                " {:.5f} | Historical Best: {:.5f}")
                         self.logger.info(msg.format(epoch, mse, best_mse))
+
+                # Update the scheduler
+                if self.use_scheduler_:
+                    for i in range(self.n_estimators):
+                        schedulers[i].step()
 
         self.estimators_ = nn.ModuleList()
         self.estimators_.extend(rets)
