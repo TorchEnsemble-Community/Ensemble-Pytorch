@@ -37,7 +37,7 @@ def test_set_optimizer_normal(optimizer_name):
                                                  lr=1e-3)
 
 
-def test_set_optimizer_abnormal():
+def test_set_optimizer_Unknown():
     model = MLP()
     with pytest.raises(NotImplementedError) as excinfo:
         torchensemble.utils.set_module.set_optimizer(model, "Unknown")

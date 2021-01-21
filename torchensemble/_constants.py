@@ -46,8 +46,7 @@ __set_scheduler_doc = """
     scheduler_name : string
         The name of the scheduler, should be one of {``LambdaLR``,
         ``MultiplicativeLR``, ``StepLR``, ``MultiStepLR``, ``ExponentialLR``,
-        ``CosineAnnealingLR``, ``ReduceLROnPlateau``, ``CyclicLR``,
-        ``OneCycleLR``, ``CosineAnnealingWarmRestarts``}.
+        ``CosineAnnealingLR``, ``ReduceLROnPlateau``}.
     **kwargs : keyword arguments
         Keyword arguments on setting the scheduler. These keyword arguments
         will be directly passed to :mod:`torch.optim.lr_scheduler`.

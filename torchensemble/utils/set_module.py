@@ -58,13 +58,6 @@ def set_scheduler(optimizer, scheduler_name, **kwargs):
         scheduler = lr_scheduler.CosineAnnealingLR(optimizer, **kwargs)
     elif scheduler_name == "ReduceLROnPlateau":
         scheduler = lr_scheduler.ReduceLROnPlateau(optimizer, **kwargs)
-    elif scheduler_name == "CyclicLR":
-        scheduler = lr_scheduler.CyclicLR(optimizer, **kwargs)
-    elif scheduler_name == "OneCycleLR":
-        scheduler = lr_scheduler.OneCycleLR(optimizer, **kwargs)
-    elif scheduler_name == "CosineAnnealingWarmRestarts":
-        scheduler = lr_scheduler.CosineAnnealingWarmRestarts(optimizer,
-                                                             **kwargs)
     else:
         msg = ("Unknown name of the scheduler {}, should be one of"
                " {{LambdaLR, MultiplicativeLR, StepLR, MultiStepLR,"
