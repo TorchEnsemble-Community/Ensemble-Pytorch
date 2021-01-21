@@ -1,8 +1,9 @@
 """
-  In voting-based ensemble methods, each base estimator is trained
-  independently, and the final prediction takes the average over predictions
-  from all base estimators.
+  In voting-based ensemble, each base estimator is trained independently,
+  and the final prediction takes the average over predictions from all base
+  estimators.
 """
+
 
 import torch
 import torch.nn as nn

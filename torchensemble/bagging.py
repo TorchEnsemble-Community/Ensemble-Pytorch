@@ -1,9 +1,10 @@
 """
-  In bagging-based ensemble methods, each base estimator is trained
-  independently. In addition, sampling with replacement is conducted on the
-  training data batch to encourge the diversity between different base
-  estimators in the ensemble.
+  In bagging-based ensemble, each base estimator is trained independently.
+  In addition, sampling with replacement is conducted on the training data
+  batch to encourge the diversity between different base estimators in the
+  ensemble.
 """
+
 
 import torch
 import torch.nn as nn

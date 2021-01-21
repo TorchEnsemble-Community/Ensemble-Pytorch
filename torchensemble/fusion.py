@@ -1,9 +1,10 @@
 """
-  In fusion-based ensemble methods, predictions from all base estimators are
+  In fusion-based ensemble, predictions from all base estimators are
   first aggregated as an average output. After then, the training loss is
   computed based on this average output and the ground-truth. The training loss
   is then back-propagated to all base estimators simultaneously.
 """
+
 
 import torch
 import torch.nn as nn
