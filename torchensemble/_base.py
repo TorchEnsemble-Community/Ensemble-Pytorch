@@ -8,18 +8,18 @@ from . import _constants as const
 
 def torchensemble_model_doc(header, item):
     """
-    Decorator on obtaining documentation for different ensemble models,
-    this decorator is modified from sklearn.py in XGBoost.
+    A decorator on obtaining documentation for different methods in the
+    ensemble. This decorator is modified from `sklearn.py` in XGBoost.
 
     Parameters
     ----------
     header: string
-       An introducion to the decorated class.
+       Introduction to the decorated class or method.
     item : string
-       The type of the docstring item.
+       Type of the docstring item.
     """
     def get_doc(item):
-        """Return the selected item"""
+        """Return the selected item."""
         __doc = {"model": const.__model_doc,
                  "fit": const.__fit_doc,
                  "set_optimizer": const.__set_optimizer_doc,
@@ -35,11 +35,12 @@ def torchensemble_model_doc(header, item):
         doc.extend(get_doc(item))
         cls.__doc__ = "".join(doc)
         return cls
+
     return adddoc
 
 
 class BaseModule(abc.ABC, nn.Module):
-    """Base class for ensemble methods.
+    """Base class for all ensembles.
 
     WARNING: This class cannot be used directly.
     Please use the derived classes instead.
@@ -52,10 +53,10 @@ class BaseModule(abc.ABC, nn.Module):
                  n_jobs=None):
         super(BaseModule, self).__init__()
 
-        # Make sure estimator is not an instance
+        # Make sure that `estimator` is not an instance
         if not isinstance(estimator, type):
             msg = ("The input argument `estimator` should be a class"
-                   " inherited from nn.Module. Perhaps you have passed"
+                   " inherited from `nn.Module`. Perhaps you have passed"
                    " an instance of that class into the ensemble.")
             raise RuntimeError(msg)
 
@@ -71,9 +72,9 @@ class BaseModule(abc.ABC, nn.Module):
 
     def __len__(self):
         """
-        Return the number of base estimators in the ensemble. The actual number
-        of base estimators may not match `n_estimators` because of the early
-        stopping stage implemented in several ensembles.
+        Return the number of base estimators in the ensemble. The real number
+        of base estimators may not match `self.n_estimators` because of the
+        early stopping stage in several ensembles.
         """
         return len(self.estimators_)
 
@@ -83,14 +84,13 @@ class BaseModule(abc.ABC, nn.Module):
 
     def _decide_n_outputs(self, train_loader, is_classification=True):
         """
-        Decide the number of outputs according to the train_loader.
+        Decide the number of outputs according to the `train_loader`.
 
-        - If `is_classification`, the number of outputs equals the number of
-          distinct classes.
-        - If not `is_classification`, the number of outputs equals the number
-          of target dimensions (e.g., 1 in univariate regression).
+        - If `is_classification` is True, the number of outputs equals the
+          number of distinct classes.
+        - If `is_classification` is False, the number of outputs equals the
+          number of target variables (e.g., `1` in univariate regression).
         """
-        # For Classification: n_outputs = n_classes
         if is_classification:
             if hasattr(train_loader.dataset, "classes"):
                 n_outputs = len(train_loader.dataset.classes)
@@ -101,7 +101,6 @@ class BaseModule(abc.ABC, nn.Module):
                     labels.append(target)
                 labels = torch.unique(torch.cat(labels))
                 n_outputs = labels.size(0)
-        # For Regression: n_outputs = n_target_dimensions
         else:
             for _, (_, target) in enumerate(train_loader):
                 if len(target.size()) == 1:
@@ -125,13 +124,13 @@ class BaseModule(abc.ABC, nn.Module):
         """Validate hyper-parameters on training the ensemble."""
 
         if not epochs > 0:
-            msg = ("The number of training epochs = {} should be strictly"
-                   " positive.")
+            msg = ("The number of training epochs should be strictly positive"
+                   ", but got {} instead.")
             self.logger.error(msg.format(epochs))
             raise ValueError(msg.format(epochs))
 
         if not log_interval > 0:
-            msg = ("The number of batches to wait before printting the"
+            msg = ("The number of batches to wait before printing the"
                    " training status should be strictly positive, but got {}"
                    " instead.")
             self.logger.error(msg.format(log_interval))
