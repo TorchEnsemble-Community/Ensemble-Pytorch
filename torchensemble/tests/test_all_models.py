@@ -86,7 +86,12 @@ def test_clf(clf):
     model = clf(estimator=MLP_clf, n_estimators=n_estimators,
                 cuda=False)
 
+    # Optimizer
     model.set_optimizer("Adam", lr=1e-3, weight_decay=5e-4)
+
+    # Scheduler (Snapshot Ensemble Excluded)
+    if not isinstance(model, torchensemble.SnapshotEnsembleClassifier):
+        model.set_scheduler("MultiStepLR", milestones=[2, 4])
 
     # Prepare data
     train = TensorDataset(X_train, y_train_clf)
@@ -119,7 +124,12 @@ def test_reg(reg):
     model = reg(estimator=MLP_reg, n_estimators=n_estimators,
                 cuda=False)
 
+    # Optimizer
     model.set_optimizer("Adam", lr=1e-3, weight_decay=5e-4)
+
+    # Scheduler (Snapshot Ensemble Excluded)
+    if not isinstance(model, torchensemble.SnapshotEnsembleRegressor):
+        model.set_scheduler("MultiStepLR", milestones=[2, 4])
 
     # Prepare data
     train = TensorDataset(X_train, y_train_reg)

@@ -22,7 +22,7 @@ class MLP(nn.Module):
 def test_set_scheduler_LambdaLR():
     model = MLP()
     optimizer = torch.optim.Adam(model.parameters())
-    lr_lambda = lambda x: x * 0.1
+    lr_lambda = lambda x: x * 0.1  # noqa: E731
     torchensemble.utils.set_module.set_scheduler(optimizer,
                                                  "LambdaLR",
                                                  lr_lambda=lr_lambda)
@@ -31,7 +31,7 @@ def test_set_scheduler_LambdaLR():
 def test_set_scheduler_MultiplicativeLR():
     model = MLP()
     optimizer = torch.optim.Adam(model.parameters())
-    lr_lambda = lambda x: x * 0.1
+    lr_lambda = lambda x: x * 0.1  # noqa: E731
     torchensemble.utils.set_module.set_scheduler(optimizer,
                                                  "MultiplicativeLR",
                                                  lr_lambda=lr_lambda)
