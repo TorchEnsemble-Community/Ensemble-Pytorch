@@ -73,10 +73,10 @@ Minimal example on how to use
     train_loader = DataLoader(...)
     test_loader = DataLoader(...)
 
-   # Set the optimizer
-   model.set_optimizer("Adam",                          # type of the parameter optimizer
-                       lr=learning_rate,                # learning rate of the parameter optimizer
-                       weight_decay=weight_decay)       # weight decay of the parameter optimizer
+    # Set the optimizer
+    model.set_optimizer("Adam",                         # type of the parameter optimizer
+                        lr=learning_rate,               # learning rate of the parameter optimizer
+                        weight_decay=weight_decay)      # weight decay of the parameter optimizer
 
     # Train
     model.fit(train_loader,                             # training data
