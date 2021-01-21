@@ -50,7 +50,7 @@ Installation
 Installing Ensemble-Pytorch package is simple. Just clone this repo and
 run ``setup.py``.
 
-::
+.. code:: bash
 
     $ git clone https://github.com/AaronX121/Ensemble-Pytorch.git
     $ cd Ensemble-Pytorch
@@ -73,12 +73,14 @@ Minimal example on how to use
     train_loader = DataLoader(...)
     test_loader = DataLoader(...)
 
+   # Set the optimizer
+   model.set_optimizer("Adam",                          # type of the parameter optimizer
+                       lr=learning_rate,                # learning rate of the parameter optimizer
+                       weight_decay=weight_decay)       # weight decay of the parameter optimizer
+
     # Train
     model.fit(train_loader,                             # training data
-              lr=learning_rate,                         # learning rate of the optimizer
-              weight_decay=weight_decay,                # weight decay of model parameters
-              epochs=epochs,                            # number of training epochs
-              optimizer="Adam")                         # type of parameter optimizer
+              epochs=epochs)                            # the number of training epochs
 
     # Evaluate
     accuracy = model.predict(test_loader)
