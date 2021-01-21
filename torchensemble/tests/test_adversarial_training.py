@@ -40,6 +40,8 @@ def test_adversarial_training_range():
                                                         n_estimators=2,
                                                         cuda=False)
 
+    model.set_optimizer("Adam")
+
     # Prepare data
     train = TensorDataset(X_train, y_train_clf)
     train_loader = DataLoader(train, batch_size=2)

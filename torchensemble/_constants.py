@@ -7,22 +7,49 @@ __model_doc = """
         The number of base estimators in the ensemble.
     estimator_args : dict, default=None
         The dictionary of hyper-parameters used to instantiate base
-        estimators.
+        estimators (Optional).
     cuda : bool, default=True
 
         - If ``True``, use GPU to train and evaluate the ensemble.
         - If ``False``, use CPU to train and evaluate the ensemble.
     n_jobs : int, default=None
-        The number of workers for training the ensemble. This
+        The number of workers for training the ensemble. This input
         argument is used for parallel ensemble methods such as
         :mod:`voting` and :mod:`bagging`. Setting it to an integer larger
-        than ``1`` enables a total number of ``n_jobs`` base estimators
-        to be trained simultaneously.
+        than ``1`` enables ``n_jobs`` base estimators to be trained
+        simultaneously.
 
     Attributes
     ----------
     estimators_ : torch.nn.ModuleList
-        The internal container that stores all base estimators.
+        An internal container that stores all fitted base estimators.
+"""
+
+
+__set_optimizer_doc = """
+    Parameters
+    ----------
+    optimizer_name : string
+        The name of the optimizer, should be one of {``Adadelta``, ``Adagrad``,
+        ``Adam``, ``AdamW``, ``Adamax``, ``ASGD``, ``RMSprop``, ``Rprop``,
+        ``SGD``}.
+    **kwargs : keyword arguments
+        Keyword arguments on setting the optimizer, should be in the form:
+        ``lr=1e-3, weight_decay=5e-4, ...``. These keyword arguments
+        will be directly passed to :mod:`torch.optim.Optimizer`.
+"""
+
+
+__set_scheduler_doc = """
+    Parameters
+    ----------
+    scheduler_name : string
+        The name of the scheduler, should be one of {``LambdaLR``,
+        ``MultiplicativeLR``, ``StepLR``, ``MultiStepLR``, ``ExponentialLR``,
+        ``CosineAnnealingLR``, ``ReduceLROnPlateau``}.
+    **kwargs : keyword arguments
+        Keyword arguments on setting the scheduler. These keyword arguments
+        will be directly passed to :mod:`torch.optim.lr_scheduler`.
 """
 
 
@@ -30,37 +57,33 @@ __fit_doc = """
     Parameters
     ----------
     train_loader : torch.utils.data.DataLoader
-        A :mod:`DataLoader` container that contains the training data.
-    lr : float, default=1e-3
-        The learning rate of the parameter optimizer.
-    weight_decay : float, default=5e-4
-        The weight decay of the parameter optimizer.
+        A :mod:`torch.utils.data.DataLoader` container that contains the
+        training data.
     epochs : int, default=100
         The number of training epochs.
-    optimizer : {"SGD", "Adam", "RMSprop"}, default="Adam"
-        The type of parameter optimizer.
     log_interval : int, default=100
-        The number of batches to wait before printting the training status.
+        The number of batches to wait before logging the training status.
     test_loader : torch.utils.data.DataLoader, default=None
-        A :mod:`DataLoader` container that contains the evaluating data.
+        A :mod:`torch.utils.data.DataLoader` container that contains the
+        evaluating data.
 
-        - If ``None``, no validation is conducted after each training
-          epoch.
+        - If ``None``, no validation is conducted during the training
+          stage.
         - If not ``None``, the ensemble will be evaluated on this
           dataloader after each training epoch.
     save_model : bool, default=True
-        Whether to save the model.
+        Specify whether to save the model parameters.
 
-        - If test_loader is ``None``, the ensemble trained over ``epochs``
-          will be saved.
+        - If test_loader is ``None``, the ensemble fully trained will be
+          saved.
         - If test_loader is not ``None``, the ensemble with the best
           validation performance will be saved.
     save_dir : string, default=None
-        Specify where to save the model.
+        Specify where to save the model parameters.
 
         - If ``None``, the model will be saved in the current directory.
         - If not ``None``, the model will be saved in the specified
-          directory: ``save_dir``.
+          directory.
 """
 
 
@@ -68,8 +91,8 @@ __classification_forward_doc = """
     Parameters
     ----------
     X : tensor
-        Input batch of data, which should be a valid input data batch for
-        base estimators.
+        An input batch of data, which should be a valid input data batch
+        for base estimators in the ensemble.
 
     Returns
     -------
@@ -82,12 +105,13 @@ __classification_predict_doc = """
     Parameters
     ----------
     test_loader : torch.utils.data.DataLoader
-        A :mod:`DataLoader` container that contains the testing data.
+        A :mod:`torch.utils.data.DataLoader` container that contains the
+        evaluating data.
 
     Returns
     -------
     accuracy : float
-        The testing accuracy of the fitted ensemble on the ``test_loader``.
+        The testing accuracy of the fitted ensemble on ``test_loader``.
 """
 
 
@@ -95,8 +119,8 @@ __regression_forward_doc = """
     Parameters
     ----------
     X : tensor
-        Input batch of data, which should be a valid input data batch for
-        base estimators.
+        An input batch of data, which should be a valid input data batch
+        for base estimators in the ensemble.
 
     Returns
     -------
@@ -109,11 +133,12 @@ __regression_predict_doc = """
     Parameters
     ----------
     test_loader : torch.utils.data.DataLoader
-        A :mod:`DataLoader` container that contains the testing data.
+        A :mod:`torch.utils.data.DataLoader` container that contains the
+        evaluating data.
 
     Returns
     -------
     mse : float
-        The testing mean squared error of the fitted model on the
+        The testing mean squared error (MSE) of the fitted ensemble on
         ``test_loader``.
 """

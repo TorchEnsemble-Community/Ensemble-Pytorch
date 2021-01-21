@@ -1,9 +1,10 @@
 """
-  In fusion-based ensemble methods, predictions from all base estimators are
+  In fusion-based ensemble, predictions from all base estimators are
   first aggregated as an average output. After then, the training loss is
   computed based on this average output and the ground-truth. The training loss
   is then back-propagated to all base estimators simultaneously.
 """
+
 
 import torch
 import torch.nn as nn
@@ -44,14 +45,26 @@ class FusionClassifier(BaseModule):
         return F.softmax(proba, dim=1)
 
     @torchensemble_model_doc(
+        """Set the attributes on optimizer for FusionClassifier.""",
+        "set_optimizer")
+    def set_optimizer(self, optimizer_name, **kwargs):
+        self.optimizer_name = optimizer_name
+        self.optimizer_args = kwargs
+
+    @torchensemble_model_doc(
+        """Set the attributes on scheduler for FusionClassifier.""",
+        "set_scheduler")
+    def set_scheduler(self, scheduler_name, **kwargs):
+        self.scheduler_name = scheduler_name
+        self.scheduler_args = kwargs
+        self.use_scheduler_ = True
+
+    @torchensemble_model_doc(
         """Implementation on the training stage of FusionClassifier.""",
         "fit")
     def fit(self,
             train_loader,
-            lr=1e-3,
-            weight_decay=5e-4,
             epochs=100,
-            optimizer="Adam",
             log_interval=100,
             test_loader=None,
             save_model=True,
@@ -60,9 +73,17 @@ class FusionClassifier(BaseModule):
         # Instantiate base estimators and set attributes
         for _ in range(self.n_estimators):
             self.estimators_.append(self._make_estimator())
-        self._validate_parameters(lr, weight_decay, epochs, log_interval)
+        self._validate_parameters(epochs, log_interval)
         self.n_outputs = self._decide_n_outputs(train_loader, True)
-        optimizer = set_module.set_optimizer(self, optimizer, lr, weight_decay)
+        optimizer = set_module.set_optimizer(self,
+                                             self.optimizer_name,
+                                             **self.optimizer_args)
+
+        # Set the scheduler if `set_scheduler` was called before
+        if self.use_scheduler_:
+            self.scheduler_ = set_module.set_scheduler(optimizer,
+                                                       self.scheduler_name,
+                                                       **self.scheduler_args)
 
         # Utils
         criterion = nn.CrossEntropyLoss()
@@ -73,7 +94,6 @@ class FusionClassifier(BaseModule):
             self.train()
             for batch_idx, (data, target) in enumerate(train_loader):
 
-                batch_size = data.size(0)
                 data, target = data.to(self.device), target.to(self.device)
 
                 optimizer.zero_grad()
@@ -92,7 +112,7 @@ class FusionClassifier(BaseModule):
                                " {:.5f} | Correct: {:d}/{:d}")
                         self.logger.info(
                             msg.format(
-                                epoch, batch_idx, loss, correct, batch_size
+                                epoch, batch_idx, loss, correct, data.size(0)
                                 )
                             )
 
@@ -119,6 +139,10 @@ class FusionClassifier(BaseModule):
                     msg = ("Epoch: {:03d} | Validation Acc: {:.3f}"
                            " % | Historical Best: {:.3f} %")
                     self.logger.info(msg.format(epoch, acc, best_acc))
+
+            # Update the scheduler
+            if hasattr(self, "scheduler_"):
+                self.scheduler_.step()
 
         if save_model and not test_loader:
             io.save(self, save_dir, self.logger)
@@ -160,14 +184,26 @@ class FusionRegressor(BaseModule):
         return pred
 
     @torchensemble_model_doc(
+        """Set the attributes on optimizer for FusionRegressor.""",
+        "set_optimizer")
+    def set_optimizer(self, optimizer_name, **kwargs):
+        self.optimizer_name = optimizer_name
+        self.optimizer_args = kwargs
+
+    @torchensemble_model_doc(
+        """Set the attributes on scheduler for FusionRegressor.""",
+        "set_scheduler")
+    def set_scheduler(self, scheduler_name, **kwargs):
+        self.scheduler_name = scheduler_name
+        self.scheduler_args = kwargs
+        self.use_scheduler_ = True
+
+    @torchensemble_model_doc(
         """Implementation on the training stage of FusionRegressor.""",
         "fit")
     def fit(self,
             train_loader,
-            lr=1e-3,
-            weight_decay=5e-4,
             epochs=100,
-            optimizer="Adam",
             log_interval=100,
             test_loader=None,
             save_model=True,
@@ -175,9 +211,17 @@ class FusionRegressor(BaseModule):
         # Instantiate base estimators and set attributes
         for _ in range(self.n_estimators):
             self.estimators_.append(self._make_estimator())
-        self._validate_parameters(lr, weight_decay, epochs, log_interval)
+        self._validate_parameters(epochs, log_interval)
         self.n_outputs = self._decide_n_outputs(train_loader, False)
-        optimizer = set_module.set_optimizer(self, optimizer, lr, weight_decay)
+        optimizer = set_module.set_optimizer(self,
+                                             self.optimizer_name,
+                                             **self.optimizer_args)
+
+        # Set the scheduler if `set_scheduler` was called before
+        if self.use_scheduler_:
+            self.scheduler_ = set_module.set_scheduler(optimizer,
+                                                       self.scheduler_name,
+                                                       **self.scheduler_args)
 
         # Utils
         criterion = nn.MSELoss()
@@ -222,6 +266,10 @@ class FusionRegressor(BaseModule):
                     msg = ("Epoch: {:03d} | Validation MSE: {:.5f} |"
                            " Historical Best: {:.5f}")
                     self.logger.info(msg.format(epoch, mse, best_mse))
+
+            # Update the scheduler
+            if hasattr(self, "scheduler_"):
+                self.scheduler_.step()
 
         if save_model and not test_loader:
             io.save(self, save_dir, self.logger)

@@ -5,6 +5,7 @@
   fitted before, using ordinary least square.
 """
 
+
 import abc
 import torch
 import logging
@@ -40,7 +41,7 @@ __model_doc = """
     Attributes
     ----------
     estimators_ : torch.nn.ModuleList
-        The internal container that stores all base estimators.
+        An internal container that stores all fitted base estimators.
 """
 
 
@@ -49,14 +50,8 @@ __fit_doc = """
     ----------
     train_loader : torch.utils.data.DataLoader
         A :mod:`DataLoader` container that contains the training data.
-    lr : float, default=1e-3
-        The learning rate of the parameter optimizer.
-    weight_decay : float, default=5e-4
-        The weight decay of the parameter optimizer.
     epochs : int, default=100
         The number of training epochs.
-    optimizer : {"SGD", "Adam", "RMSprop"}, default="Adam"
-        The type of parameter optimizer.
     log_interval : int, default=100
         The number of batches to wait before printting the training status.
     test_loader : torch.utils.data.DataLoader, default=None
@@ -133,25 +128,13 @@ class _BaseGradientBoosting(BaseModule):
         self.logger = logging.getLogger()
 
         self.estimators_ = nn.ModuleList()
+        self.use_scheduler_ = False
 
     def _validate_parameters(self,
-                             lr,
-                             weight_decay,
                              epochs,
                              log_interval,
                              early_stopping_rounds):
         """Validate hyper-parameters on training the ensemble."""
-
-        if not lr > 0:
-            msg = ("The learning rate of optimizer = {} should be strictly"
-                   " positive.")
-            self.logger.error(msg.format(lr))
-            raise ValueError(msg.format(lr))
-
-        if not weight_decay >= 0:
-            msg = "The weight decay of optimizer = {} should not be negative."
-            self.logger.error(msg.format(weight_decay))
-            raise ValueError(msg.format(weight_decay))
 
         if not epochs > 0:
             msg = ("The number of training epochs = {} should be strictly"
@@ -200,12 +183,24 @@ class _BaseGradientBoosting(BaseModule):
 
         return out
 
+    @torchensemble_model_doc(
+        """Set the attributes on optimizer for Gradient Boosting.""",
+        "set_optimizer")
+    def set_optimizer(self, optimizer_name, **kwargs):
+        self.optimizer_name = optimizer_name
+        self.optimizer_args = kwargs
+
+    @torchensemble_model_doc(
+        """Set the attributes on scheduler for Gradient Boosting.""",
+        "set_scheduler")
+    def set_scheduler(self, scheduler_name, **kwargs):
+        self.scheduler_name = scheduler_name
+        self.scheduler_args = kwargs
+        self.use_scheduler_ = True
+
     def fit(self,
             train_loader,
-            lr=1e-3,
-            weight_decay=5e-4,
             epochs=100,
-            optimizer="Adam",
             log_interval=100,
             test_loader=None,
             early_stopping_rounds=2,
@@ -215,9 +210,7 @@ class _BaseGradientBoosting(BaseModule):
         # Instantiate base estimators and set attributes
         for _ in range(self.n_estimators):
             self.estimators_.append(self._make_estimator())
-        self._validate_parameters(lr,
-                                  weight_decay,
-                                  epochs,
+        self._validate_parameters(epochs,
                                   log_interval,
                                   early_stopping_rounds)
         self.n_outputs = self._decide_n_outputs(train_loader,
@@ -229,12 +222,15 @@ class _BaseGradientBoosting(BaseModule):
 
         for est_idx, estimator in enumerate(self.estimators_):
 
-            # Initialize an independent optimizer for each base estimator to
+            # Initialize a optimizer and scheduler for each base estimator to
             # avoid unexpected dependencies.
-            learner_optimizer = set_module.set_optimizer(estimator,
-                                                         optimizer,
-                                                         lr,
-                                                         weight_decay)
+            learner_optimizer = set_module.set_optimizer(
+                estimator, self.optimizer_name, **self.optimizer_args)
+
+            if self.use_scheduler_:
+                learner_scheduler = set_module.set_scheduler(
+                    learner_optimizer, self.scheduler_name, **self.scheduler_args  # noqa: E501
+                )
 
             # Training loop
             estimator.train()
@@ -259,6 +255,9 @@ class _BaseGradientBoosting(BaseModule):
                                " {:03d} | RegLoss: {:.5f}")
                         self.logger.info(msg.format(est_idx, epoch,
                                                     batch_idx, loss))
+
+                if self.use_scheduler_:
+                    learner_scheduler.step()
 
             # Validation
             if test_loader:
@@ -352,16 +351,27 @@ class GradientBoostingClassifier(_BaseGradientBoosting):
 
         return flag
 
+    @torchensemble_model_doc(
+        """Set the attributes on optimizer for GradientBoostingClassifier.""",
+        "set_optimizer")
+    def set_optimizer(self, optimizer_name, **kwargs):
+        super().set_optimizer(
+            optimizer_name=optimizer_name, **kwargs)
+
+    @torchensemble_model_doc(
+        """Set the attributes on scheduler for GradientBoostingClassifier.""",
+        "set_scheduler")
+    def set_scheduler(self, scheduler_name, **kwargs):
+        super().set_scheduler(
+            scheduler_name=scheduler_name, **kwargs)
+
     @_gradient_boosting_model_doc(
         """Implementation on the training stage of GradientBoostingClassifier.""",  # noqa: E501
         "fit"
     )
     def fit(self,
             train_loader,
-            lr=1e-3,
-            weight_decay=5e-4,
             epochs=100,
-            optimizer="Adam",
             log_interval=100,
             test_loader=None,
             early_stopping_rounds=2,
@@ -369,10 +379,7 @@ class GradientBoostingClassifier(_BaseGradientBoosting):
             save_dir=None):
         super().fit(
             train_loader=train_loader,
-            lr=lr,
-            weight_decay=weight_decay,
             epochs=epochs,
-            optimizer=optimizer,
             log_interval=log_interval,
             test_loader=test_loader,
             early_stopping_rounds=early_stopping_rounds,
@@ -462,16 +469,27 @@ class GradientBoostingRegressor(_BaseGradientBoosting):
 
         return flag
 
+    @torchensemble_model_doc(
+        """Set the attributes on optimizer for GradientBoostingRegressor.""",
+        "set_optimizer")
+    def set_optimizer(self, optimizer_name, **kwargs):
+        super().set_optimizer(
+            optimizer_name=optimizer_name, **kwargs)
+
+    @torchensemble_model_doc(
+        """Set the attributes on scheduler for GradientBoostingRegressor.""",
+        "set_scheduler")
+    def set_scheduler(self, scheduler_name, **kwargs):
+        super().set_scheduler(
+            scheduler_name=scheduler_name, **kwargs)
+
     @_gradient_boosting_model_doc(
         """Implementation on the training stage of GradientBoostingRegressor.""",  # noqa: E501
         "fit"
     )
     def fit(self,
             train_loader,
-            lr=1e-3,
-            weight_decay=5e-4,
             epochs=100,
-            optimizer="Adam",
             log_interval=100,
             test_loader=None,
             early_stopping_rounds=2,
@@ -479,10 +497,7 @@ class GradientBoostingRegressor(_BaseGradientBoosting):
             save_dir=None):
         super().fit(
             train_loader=train_loader,
-            lr=lr,
-            weight_decay=weight_decay,
             epochs=epochs,
-            optimizer=optimizer,
             log_interval=log_interval,
             test_loader=test_loader,
             early_stopping_rounds=early_stopping_rounds,

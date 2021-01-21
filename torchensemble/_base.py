@@ -22,6 +22,8 @@ def torchensemble_model_doc(header, item):
         """Return the selected item"""
         __doc = {"model": const.__model_doc,
                  "fit": const.__fit_doc,
+                 "set_optimizer": const.__set_optimizer_doc,
+                 "set_scheduler": const.__set_scheduler_doc,
                  "classifier_forward": const.__classification_forward_doc,
                  "classifier_predict": const.__classification_predict_doc,
                  "regressor_forward": const.__regression_forward_doc,
@@ -65,9 +67,14 @@ class BaseModule(abc.ABC, nn.Module):
         self.logger = logging.getLogger()
 
         self.estimators_ = nn.ModuleList()
+        self.use_scheduler_ = False
 
     def __len__(self):
-        """Return the number of base estimators in the ensemble."""
+        """
+        Return the number of base estimators in the ensemble. The actual number
+        of base estimators may not match `n_estimators` because of the early
+        stopping stage implemented in several ensembles.
+        """
         return len(self.estimators_)
 
     def __getitem__(self, index):
@@ -114,19 +121,8 @@ class BaseModule(abc.ABC, nn.Module):
 
         return estimator.to(self.device)
 
-    def _validate_parameters(self, lr, weight_decay, epochs, log_interval):
+    def _validate_parameters(self, epochs, log_interval):
         """Validate hyper-parameters on training the ensemble."""
-
-        if not lr > 0:
-            msg = ("The learning rate of optimizer = {} should be strictly"
-                   " positive.")
-            self.logger.error(msg.format(lr))
-            raise ValueError(msg.format(lr))
-
-        if not weight_decay >= 0:
-            msg = "The weight decay of optimizer = {} should not be negative."
-            self.logger.error(msg.format(weight_decay))
-            raise ValueError(msg.format(weight_decay))
 
         if not epochs > 0:
             msg = ("The number of training epochs = {} should be strictly"
@@ -142,6 +138,18 @@ class BaseModule(abc.ABC, nn.Module):
             raise ValueError(msg.format(log_interval))
 
     @abc.abstractmethod
+    def set_optimizer(self, optimizer_name, **kwargs):
+        """
+        Implementation on the process of setting the optimizer.
+        """
+
+    @abc.abstractmethod
+    def set_scheduler(self, scheduler_name, **kwargs):
+        """
+        Implementation on the process of setting the scheduler.
+        """
+
+    @abc.abstractmethod
     def forward(self, x):
         """
         Implementation on the data forwarding in the ensemble. Notice
@@ -152,10 +160,7 @@ class BaseModule(abc.ABC, nn.Module):
     @abc.abstractmethod
     def fit(self,
             train_loader,
-            lr=1e-3,
-            weight_decay=5e-4,
             epochs=100,
-            optimizer="Adam",
             log_interval=100,
             test_loader=None,
             save_model=True,
