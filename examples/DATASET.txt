@@ -1,2 +1,0 @@
-* The YearPredictionMSD dataset can be downloaded from "https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/regression.html#YearPredictionMSD"
-* Please modify the `data_dir` in classification_cifar10_cnn.py, or `train_path` and `test_path` in regression_YearPredictionMSD_mlp.py for personal use

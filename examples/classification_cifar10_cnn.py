@@ -11,6 +11,8 @@ from torchensemble.fusion import FusionClassifier
 from torchensemble.voting import VotingClassifier
 from torchensemble.bagging import BaggingClassifier
 from torchensemble.gradient_boosting import GradientBoostingClassifier
+from torchensemble.snapshot_ensemble import SnapshotEnsembleClassifier
+
 from torchensemble.utils.logging import set_logger
 
 
@@ -49,10 +51,10 @@ class LeNet5(nn.Module):
 if __name__ == "__main__":
 
     # Hyper-parameters
-    n_estimators = 1
+    n_estimators = 10
     lr = 1e-3
     weight_decay = 5e-4
-    epochs = 1
+    epochs = 100
 
     # Utils
     batch_size = 128
@@ -101,11 +103,16 @@ if __name__ == "__main__":
         cuda=True
     )
 
+    # Set the optimizer
+    model.set_optimizer("Adam", lr=lr, weight_decay=weight_decay)
+
+    # Training
     tic = time.time()
-    model.fit(train_loader, lr, weight_decay, epochs, "Adam")
+    model.fit(train_loader, epochs=epochs)
     toc = time.time()
     training_time = toc - tic
 
+    # Evaluating
     tic = time.time()
     testing_acc = model.predict(test_loader)
     toc = time.time()
@@ -121,8 +128,11 @@ if __name__ == "__main__":
         cuda=True
     )
 
+    # Set the optimizer
+    model.set_optimizer("Adam", lr=lr, weight_decay=weight_decay)
+
     tic = time.time()
-    model.fit(train_loader, lr, weight_decay, epochs, "Adam")
+    model.fit(train_loader, epochs=epochs)
     toc = time.time()
     training_time = toc - tic
 
@@ -141,8 +151,11 @@ if __name__ == "__main__":
         cuda=True
     )
 
+    # Set the optimizer
+    model.set_optimizer("Adam", lr=lr, weight_decay=weight_decay)
+
     tic = time.time()
-    model.fit(train_loader, lr, weight_decay, epochs, "Adam")
+    model.fit(train_loader, epochs=epochs)
     toc = time.time()
     training_time = toc - tic
 
@@ -161,8 +174,11 @@ if __name__ == "__main__":
         cuda=True
     )
 
+    # Set the optimizer
+    model.set_optimizer("Adam", lr=lr, weight_decay=weight_decay)
+
     tic = time.time()
-    model.fit(train_loader, lr, weight_decay, epochs, "Adam")
+    model.fit(train_loader, epochs=epochs)
     toc = time.time()
     training_time = toc - tic
 
@@ -172,6 +188,29 @@ if __name__ == "__main__":
     evaluating_time = toc - tic
 
     records.append(("GradientBoostingClassifier", training_time,
+                    evaluating_time, testing_acc))
+    
+    # SnapshotEnsembleClassifier
+    model = SnapshotEnsembleClassifier(
+        estimator=LeNet5,
+        n_estimators=n_estimators,
+        cuda=True
+    )
+
+    # Set the optimizer
+    model.set_optimizer("Adam", lr=lr, weight_decay=weight_decay)
+
+    tic = time.time()
+    model.fit(train_loader, epochs=epochs)
+    toc = time.time()
+    training_time = toc - tic
+
+    tic = time.time()
+    testing_acc = model.predict(test_loader)
+    toc = time.time()
+    evaluating_time = toc - tic
+
+    records.append(("SnapshotEnsembleClassifier", training_time,
                     evaluating_time, testing_acc))
 
     # Print results on different ensemble methods

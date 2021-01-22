@@ -13,7 +13,9 @@ from torchensemble.fusion import FusionRegressor
 from torchensemble.voting import VotingRegressor
 from torchensemble.bagging import BaggingRegressor
 from torchensemble.gradient_boosting import GradientBoostingRegressor
-from torchensemble.utils import set_logger
+from torchensemble.snapshot_ensemble import SnapshotEnsembleRegressor
+
+from torchensemble.utils.logging import set_logger
 
 
 def load_data(batch_size):
@@ -102,12 +104,14 @@ if __name__ == "__main__":
     model = FusionRegressor(
         estimator=MLP,
         n_estimators=n_estimators,
-        cuda=True,
-        n_jobs=1
+        cuda=True
     )
 
+    # Set the optimizer
+    model.set_optimizer("Adam", lr=lr, weight_decay=weight_decay)
+
     tic = time.time()
-    model.fit(train_loader, lr, weight_decay, epochs, "Adam")
+    model.fit(train_loader, epochs=epochs)
     toc = time.time()
     training_time = toc - tic
 
@@ -123,12 +127,14 @@ if __name__ == "__main__":
     model = VotingRegressor(
         estimator=MLP,
         n_estimators=n_estimators,
-        cuda=True,
-        n_jobs=1
+        cuda=True
     )
 
+    # Set the optimizer
+    model.set_optimizer("Adam", lr=lr, weight_decay=weight_decay)
+
     tic = time.time()
-    model.fit(train_loader, lr, weight_decay, epochs, "Adam")
+    model.fit(train_loader, epochs=epochs)
     toc = time.time()
     training_time = toc - tic
 
@@ -144,12 +150,14 @@ if __name__ == "__main__":
     model = BaggingRegressor(
         estimator=MLP,
         n_estimators=n_estimators,
-        cuda=True,
-        n_jobs=1
+        cuda=True
     )
 
+    # Set the optimizer
+    model.set_optimizer("Adam", lr=lr, weight_decay=weight_decay)
+
     tic = time.time()
-    model.fit(train_loader, lr, weight_decay, epochs, "Adam")
+    model.fit(train_loader, epochs=epochs)
     toc = time.time()
     training_time = toc - tic
 
@@ -168,8 +176,11 @@ if __name__ == "__main__":
         cuda=True
     )
 
+    # Set the optimizer
+    model.set_optimizer("Adam", lr=lr, weight_decay=weight_decay)
+
     tic = time.time()
-    model.fit(train_loader, lr, weight_decay, epochs, "Adam")
+    model.fit(train_loader, epochs=epochs)
     toc = time.time()
     training_time = toc - tic
 
@@ -180,6 +191,29 @@ if __name__ == "__main__":
 
     records.append(("GradientBoostingRegressor", training_time,
                     evaluating_time, testing_mse))
+
+    # SnapshotEnsembleRegressor
+    model = SnapshotEnsembleRegressor(
+        estimator=MLP,
+        n_estimators=n_estimators,
+        cuda=True
+    )
+
+    # Set the optimizer
+    model.set_optimizer("Adam", lr=lr, weight_decay=weight_decay)
+
+    tic = time.time()
+    model.fit(train_loader, epochs=epochs)
+    toc = time.time()
+    training_time = toc - tic
+
+    tic = time.time()
+    testing_acc = model.predict(test_loader)
+    toc = time.time()
+    evaluating_time = toc - tic
+
+    records.append(("SnapshotEnsembleRegressor", training_time,
+                    evaluating_time, testing_acc))
 
     # Print results on different ensemble methods
     display_records(records, logger)
