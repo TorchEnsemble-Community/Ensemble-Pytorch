@@ -72,7 +72,7 @@ if __name__ == "__main__":
                                  (0.2023, 0.1994, 0.2010)),
         ]
     )
-    
+
     test_transformer = transforms.Compose(
         [
             transforms.ToTensor(),
@@ -189,7 +189,7 @@ if __name__ == "__main__":
 
     records.append(("GradientBoostingClassifier", training_time,
                     evaluating_time, testing_acc))
-    
+
     # SnapshotEnsembleClassifier
     model = SnapshotEnsembleClassifier(
         estimator=LeNet5,
