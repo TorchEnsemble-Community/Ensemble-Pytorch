@@ -1,3 +1,4 @@
+import os
 import torch
 import pytest
 import numpy as np
@@ -83,8 +84,7 @@ def test_clf(clf):
     epochs = 1
     n_estimators = 2
 
-    model = clf(estimator=MLP_clf, n_estimators=n_estimators,
-                cuda=False)
+    model = clf(estimator=MLP_clf, n_estimators=n_estimators, cuda=False)
 
     # Optimizer
     model.set_optimizer("Adam", lr=1e-3, weight_decay=5e-4)
@@ -107,7 +107,7 @@ def test_clf(clf):
     model.fit(train_loader,
               epochs=epochs,
               test_loader=test_loader,
-              save_model=False)
+              save_model=True)
 
     # Test
     model.predict(test_loader)
@@ -121,8 +121,7 @@ def test_reg(reg):
     epochs = 1
     n_estimators = 2
 
-    model = reg(estimator=MLP_reg, n_estimators=n_estimators,
-                cuda=False)
+    model = reg(estimator=MLP_reg, n_estimators=n_estimators, cuda=False)
 
     # Optimizer
     model.set_optimizer("Adam", lr=1e-3, weight_decay=5e-4)
@@ -145,7 +144,7 @@ def test_reg(reg):
     model.fit(train_loader,
               epochs=epochs,
               test_loader=test_loader,
-              save_model=False)
+              save_model=True)
 
     # Test
     model.predict(test_loader)
