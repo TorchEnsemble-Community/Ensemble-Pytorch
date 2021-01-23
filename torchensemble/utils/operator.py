@@ -13,14 +13,20 @@ __all__ = ["average",
 
 
 def average(outputs):
+    """Compute the average over a list of tensors with the same size."""
     return sum(outputs) / len(outputs)
 
 
 def sum_with_multiplicative(outputs, factor):
-    return sum([output * factor for output in outputs])
+    """
+    Compuate the summation on a list of tensors, and the result is multiplied
+    by a multiplicative factor.
+    """
+    return factor * sum(outputs)
 
 
 def onehot_encoding(label, n_classes):
+    """Conduct one-hot encoding on a label vector."""
     label = label.view(-1)
     onehot = torch.zeros(label.size(0), n_classes).float().to(label.device)
     onehot.scatter_(1, label.view(-1, 1), 1)
