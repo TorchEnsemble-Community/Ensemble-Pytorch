@@ -68,7 +68,7 @@ def _parallel_fit_per_epoch(train_loader,
                        " | Loss: {:.5f}")
                 msg_list.append(msg.format(idx, epoch, batch_idx, loss))
 
-    return estimator, msg_list
+    return estimator, optimizer, msg_list
 
 
 @torchensemble_model_doc("""Implementation on the VotingClassifier.""",
@@ -166,11 +166,12 @@ class VotingClassifier(BaseModule):
                             zip(estimators, optimizers))
                 )
 
-                estimators = []
-                for ret_val in rets:
-                    estimators.append(ret_val[0])
+                estimators, optimizers = [], []
+                for estimator, optimizer, msgs in rets:
+                    estimators.append(estimator)
+                    optimizers.append(optimizer)
                     # Write logging info
-                    for msg in ret_val[1]:
+                    for msg in msgs:
                         self.logger.info(msg)
 
                 # Validation
@@ -323,11 +324,12 @@ class VotingRegressor(BaseModule):
                             zip(estimators, optimizers))
                 )
 
-                estimators = []
-                for ret_val in rets:
-                    estimators.append(ret_val[0])
+                estimators, optimizers = [], []
+                for estimator, optimizer, msgs in rets:
+                    estimators.append(estimator)
+                    optimizers.append(optimizer)
                     # Write logging info
-                    for msg in ret_val[1]:
+                    for msg in msgs:
                         self.logger.info(msg)
 
                 # Validation

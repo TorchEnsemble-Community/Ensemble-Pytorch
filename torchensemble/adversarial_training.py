@@ -137,7 +137,7 @@ def _parallel_fit_per_epoch(train_loader,
                        " | Loss: {:.5f}")
                 print(msg.format(idx, epoch, batch_idx, loss))
 
-    return estimator
+    return estimator, optimizer
 
 
 def _get_fgsm_samples(sample, epsilon, sample_grad):
@@ -280,13 +280,16 @@ class AdversarialTrainingClassifier(_BaseAdversarialTraining):
                         epoch,
                         log_interval,
                         self.device,
-                        True
+                        False
                     )
                     for idx, (estimator, optimizer) in enumerate(
                             zip(estimators, optimizers))
                 )
 
-                estimators = rets  # update
+                estimators, optimizers = [], []
+                for estimator, optimizer in rets:
+                    estimators.append(estimator)
+                    optimizers.append(optimizer)
 
                 # Validation
                 if test_loader:
@@ -320,7 +323,7 @@ class AdversarialTrainingClassifier(_BaseAdversarialTraining):
                         schedulers[i].step()
 
         self.estimators_ = nn.ModuleList()
-        self.estimators_.extend(rets)
+        self.estimators_.extend(estimators)
         if save_model and not test_loader:
             io.save(self, save_dir, self.logger)
 
@@ -438,13 +441,16 @@ class AdversarialTrainingRegressor(_BaseAdversarialTraining):
                         epoch,
                         log_interval,
                         self.device,
-                        False
+                        True
                     )
                     for idx, (estimator, optimizer) in enumerate(
                             zip(estimators, optimizers))
                 )
 
-                estimators = rets  # update
+                estimators, optimizers = [], []
+                for estimator, optimizer in rets:
+                    estimators.append(estimator)
+                    optimizers.append(optimizer)
 
                 # Validation
                 if test_loader:
@@ -475,7 +481,7 @@ class AdversarialTrainingRegressor(_BaseAdversarialTraining):
                         schedulers[i].step()
 
         self.estimators_ = nn.ModuleList()
-        self.estimators_.extend(rets)
+        self.estimators_.extend(estimators)
         if save_model and not test_loader:
             io.save(self, save_dir, self.logger)
 
