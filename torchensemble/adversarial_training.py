@@ -17,6 +17,7 @@ from joblib import Parallel, delayed
 from ._base import BaseModule, torchensemble_model_doc
 from .utils import io
 from .utils import set_module
+from .utils import operator as op
 
 
 __all__ = ["_BaseAdversarialTraining",
@@ -195,12 +196,10 @@ class AdversarialTrainingClassifier(_BaseAdversarialTraining):
         """Implementation on the data forwarding in AdversarialTrainingClassifier.""",  # noqa: E501
         "classifier_forward")
     def forward(self, x):
-        batch_size = x.size(0)
-        proba = torch.zeros(batch_size, self.n_outputs).to(self.device)
-
         # Take the average over class distributions from all base estimators.
-        for estimator in self.estimators_:
-            proba += F.softmax(estimator(x), dim=1) / self.n_estimators
+        outputs = [F.softmax(estimator(x), dim=1)
+                   for estimator in self.estimators_]
+        proba = op.average(outputs)
 
         return proba
 
@@ -259,11 +258,9 @@ class AdversarialTrainingClassifier(_BaseAdversarialTraining):
 
         # Internal helper function on pesudo forward
         def _forward(estimators, data):
-            batch_size = data.size()[0]
-            proba = torch.zeros(batch_size, self.n_outputs).to(self.device)
-
-            for estimator in estimators:
-                proba += F.softmax(estimator(data), dim=1) / self.n_estimators
+            outputs = [F.softmax(estimator(data), dim=1)
+                       for estimator in estimators]
+            proba = op.average(outputs)
 
             return proba
 
@@ -359,12 +356,9 @@ class AdversarialTrainingRegressor(_BaseAdversarialTraining):
         """Implementation on the data forwarding in AdversarialTrainingRegressor.""",  # noqa: E501
         "regressor_forward")
     def forward(self, x):
-        batch_size = x.size(0)
-        pred = torch.zeros(batch_size, self.n_outputs).to(self.device)
-
         # Take the average over predictions from all base estimators.
-        for estimator in self.estimators_:
-            pred += estimator(x) / self.n_estimators
+        outputs = [estimator(x) for estimator in self.estimators_]
+        pred = op.average(outputs)
 
         return pred
 
@@ -423,11 +417,8 @@ class AdversarialTrainingRegressor(_BaseAdversarialTraining):
 
         # Internal helper function on pesudo forward
         def _forward(estimators, data):
-            batch_size = data.size(0)
-            pred = torch.zeros(batch_size, self.n_outputs).to(self.device)
-
-            for estimator in estimators:
-                pred += estimator(data) / self.n_estimators
+            outputs = [estimator(data) for estimator in estimators]
+            pred = op.average(outputs)
 
             return pred
 

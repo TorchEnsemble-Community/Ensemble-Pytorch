@@ -22,6 +22,7 @@ from torch.optim.lr_scheduler import LambdaLR
 from ._base import BaseModule, torchensemble_model_doc
 from .utils import io
 from .utils import set_module
+from .utils import operator as op
 
 
 __all__ = ["_BaseSnapshotEnsemble",
@@ -166,12 +167,9 @@ class _BaseSnapshotEnsemble(BaseModule):
         """
         Implementation on the internal data forwarding in snapshot ensemble.
         """
-        batch_size = x.size(0)
-        output = torch.zeros(batch_size, self.n_outputs).to(self.device)
-
         # Average
-        for estimator in self.estimators_:
-            output += estimator(x) / len(self.estimators_)
+        results = [estimator(x) for estimator in self.estimators_]
+        output = op.average(results)
 
         return output
 
