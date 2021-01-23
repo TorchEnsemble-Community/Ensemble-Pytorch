@@ -6,6 +6,7 @@ Changelog
 
 Added
 ~~~~~
+* [ENH] Add set_scheduler | @xuyxu
 * [ENH] Add AdversarialTrainingClassifier and AdversarialTrainingRegressor | @xuyxu
 * [ENH] Add SnapshotEnsembleClassifier and SnapshotEnsembleRegressor | @zzzzwj and @xuyxu
 * [ENH] Add model validation and serialization | @ghost-ronin and @xuyxu
@@ -15,6 +16,8 @@ Added
 
 Changed
 ~~~~~~~
+* [ENH] Refactor the codes on operating tensors into an independent module | @zzzzwj
+* [ENH] Refactor the set_optimizer into an independent method | @xuyxu
 * [ENH] Improve the logging module | @zzzzwj
 
 Removed
