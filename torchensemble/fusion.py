@@ -13,6 +13,7 @@ import torch.nn.functional as F
 from ._base import BaseModule, torchensemble_model_doc
 from .utils import io
 from .utils import set_module
+from .utils import operator as op
 
 
 __all__ = ["FusionClassifier",
@@ -27,12 +28,9 @@ class FusionClassifier(BaseModule):
         """
         Implementation on the internal data forwarding in FusionClassifier.
         """
-        batch_size = x.size(0)
-        proba = torch.zeros(batch_size, self.n_outputs).to(self.device)
-
         # Average
-        for estimator in self.estimators_:
-            proba += estimator(x) / self.n_estimators
+        outputs = [estimator(x) for estimator in self.estimators_]
+        proba = op.average(outputs)
 
         return proba
 
@@ -175,11 +173,8 @@ class FusionRegressor(BaseModule):
         """Implementation on the data forwarding in FusionRegressor.""",
         "regressor_forward")
     def forward(self, x):
-        batch_size = x.size(0)
-        pred = torch.zeros(batch_size, self.n_outputs).to(self.device)
-
-        for estimator in self.estimators_:
-            pred += estimator(x) / self.n_estimators
+        outputs = [estimator(x) for estimator in self.estimators_]
+        pred = op.average(outputs)
 
         return pred
 

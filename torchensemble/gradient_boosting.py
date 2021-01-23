@@ -15,6 +15,7 @@ import torch.nn.functional as F
 from ._base import BaseModule, torchensemble_model_doc
 from .utils import io
 from .utils import set_module
+from .utils import operator as op
 
 
 __all__ = ["_BaseGradientBoosting",
@@ -175,11 +176,8 @@ class _BaseGradientBoosting(BaseModule):
             self.logger.error(msg.format(est_idx, self.n_estimators))
             raise ValueError(msg.format(est_idx, self.n_estimators))
 
-        batch_size = x.size(0)
-        out = torch.zeros(batch_size, self.n_outputs).to(self.device)
-
-        for estimator in self.estimators_[:est_idx+1]:
-            out += self.shrinkage_rate * estimator(x)
+        outputs = [estimator(x) for estimator in self.estimators_[:est_idx+1]]
+        out = op.summation(outputs, self.shrinkage_rate)
 
         return out
 
@@ -298,30 +296,19 @@ class GradientBoostingClassifier(_BaseGradientBoosting):
         super().__init__(**kwargs)
         self.is_classification = True
 
-    def _onehot_coding(self, target):
-        """Convert the class label into the one-hot encoded vector."""
-        target = target.view(-1)
-        target_onehot = torch.FloatTensor(
-            target.size(0), self.n_outputs).to(self.device)
-        target_onehot.data.zero_()
-        target_onehot.scatter_(1, target.view(-1, 1), 1)
-
-        return target_onehot
-
     def _pseudo_residual(self, X, y, est_idx):
         """Compute pseudo residuals in classification."""
-        y_onehot = self._onehot_coding(y)
+        y_onehot = op.onehot_encoding(y, self.n_outputs).to(self.device)
         output = torch.zeros_like(y_onehot).to(self.device)
 
         # Before training the first estimator, we assume that GBM returns 0
         # for any input (i.e., null output).
-        if est_idx == 0:
-            return y_onehot - F.softmax(output, dim=1)
-        else:
-            for idx in range(est_idx):
-                output += self.shrinkage_rate * self.estimators_[idx](X)
-
-            return y_onehot - F.softmax(output, dim=1)
+        if est_idx > 0:
+            results = [
+                estimator(X) for estimator in self.estimators_[:est_idx]
+            ]
+            output += op.summation(results, self.shrinkage_rate)
+        return y_onehot - F.softmax(output, dim=1)
 
     def _handle_early_stopping(self, test_loader, est_idx):
         # Compute the validation accuracy of base estimators fitted so far
@@ -390,11 +377,8 @@ class GradientBoostingClassifier(_BaseGradientBoosting):
         """Implementation on the data forwarding in GradientBoostingClassifier.""",  # noqa: E501
         "classifier_forward")
     def forward(self, x):
-        batch_size = x.size(0)
-        output = torch.zeros(batch_size, self.n_outputs).to(self.device)
-
-        for estimator in self.estimators_:
-            output += self.shrinkage_rate * estimator(x)
+        output = [estimator(x) for estimator in self.estimators_]
+        output = op.summation(output, self.shrinkage_rate)
         proba = F.softmax(output, dim=1)
 
         return proba
@@ -434,13 +418,12 @@ class GradientBoostingRegressor(_BaseGradientBoosting):
 
         # Before training the first estimator, we assume that GBM returns 0
         # for any input (i.e., null output).
-        if est_idx == 0:
-            return y
-        else:
-            for idx in range(est_idx):
-                output += self.shrinkage_rate * self.estimators_[idx](X)
-
-            return y - output
+        if est_idx > 0:
+            results = [
+                estimator(X) for estimator in self.estimators_[:est_idx]
+            ]
+            output = op.summation(results, self.shrinkage_rate)
+        return y - output
 
     def _handle_early_stopping(self, test_loader, est_idx):
         # Compute the validation MSE of base estimators fitted so far
@@ -508,11 +491,8 @@ class GradientBoostingRegressor(_BaseGradientBoosting):
         """Implementation on the data forwarding in GradientBoostingRegressor.""",  # noqa: E501
         "regressor_forward")
     def forward(self, x):
-        batch_size = x.size(0)
-        pred = torch.zeros(batch_size, self.n_outputs).to(self.device)
-
-        for estimator in self.estimators_:
-            pred += self.shrinkage_rate * estimator(x)
+        outputs = [estimator(x) for estimator in self.estimators_]
+        pred = op.summation(outputs, self.shrinkage_rate)
 
         return pred
 
