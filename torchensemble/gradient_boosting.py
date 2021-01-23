@@ -307,7 +307,9 @@ class GradientBoostingClassifier(_BaseGradientBoosting):
                 estimator(X) for estimator in self.estimators_[:est_idx]
             ]
             output += op.sum_with_multiplicative(results, self.shrinkage_rate)
-        pseudo_residual = op.pesudo_residual_classification(y, output)
+        pseudo_residual = op.pesudo_residual_classification(y,
+                                                            output,
+                                                            self.n_outputs)
 
         return pseudo_residual
 
