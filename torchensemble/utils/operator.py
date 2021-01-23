@@ -2,6 +2,7 @@
 
 
 import torch
+import torch.nn.functional as F
 
 
 __all__ = ["average",
