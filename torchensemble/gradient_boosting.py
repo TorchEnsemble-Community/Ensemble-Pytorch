@@ -177,7 +177,7 @@ class _BaseGradientBoosting(BaseModule):
             raise ValueError(msg.format(est_idx, self.n_estimators))
 
         outputs = [estimator(x) for estimator in self.estimators_[:est_idx+1]]
-        out = op.summation(outputs, self.shrinkage_rate)
+        out = op.sum_with_multiplicative(outputs, self.shrinkage_rate)
 
         return out
 
@@ -298,17 +298,18 @@ class GradientBoostingClassifier(_BaseGradientBoosting):
 
     def _pseudo_residual(self, X, y, est_idx):
         """Compute pseudo residuals in classification."""
-        y_onehot = op.onehot_encoding(y, self.n_outputs).to(self.device)
-        output = torch.zeros_like(y_onehot).to(self.device)
+        output = torch.zeros(X.size(0), self.n_outputs).to(self.device)
 
-        # Before training the first estimator, we assume that GBM returns 0
-        # for any input (i.e., null output).
+        # Before fitting the first estimator, we simply assume that GBM
+        # outputs 0 for any input (i.e., a null output).
         if est_idx > 0:
             results = [
                 estimator(X) for estimator in self.estimators_[:est_idx]
             ]
-            output += op.summation(results, self.shrinkage_rate)
-        return y_onehot - F.softmax(output, dim=1)
+            output += op.sum_with_multiplicative(results, self.shrinkage_rate)
+        pseudo_residual = op.pesudo_residual_classification(y, output)
+
+        return pseudo_residual
 
     def _handle_early_stopping(self, test_loader, est_idx):
         # Compute the validation accuracy of base estimators fitted so far
@@ -378,7 +379,7 @@ class GradientBoostingClassifier(_BaseGradientBoosting):
         "classifier_forward")
     def forward(self, x):
         output = [estimator(x) for estimator in self.estimators_]
-        output = op.summation(output, self.shrinkage_rate)
+        output = op.sum_with_multiplicative(output, self.shrinkage_rate)
         proba = F.softmax(output, dim=1)
 
         return proba
@@ -416,14 +417,14 @@ class GradientBoostingRegressor(_BaseGradientBoosting):
         """Compute pseudo residuals in regression."""
         output = torch.zeros_like(y).to(self.device)
 
-        # Before training the first estimator, we assume that GBM returns 0
-        # for any input (i.e., null output).
         if est_idx > 0:
             results = [
                 estimator(X) for estimator in self.estimators_[:est_idx]
             ]
-            output = op.summation(results, self.shrinkage_rate)
-        return y - output
+            output = op.sum_with_multiplicative(results, self.shrinkage_rate)
+        pseudo_residual = op.pseudo_residual_regression(y, output)
+
+        return pseudo_residual
 
     def _handle_early_stopping(self, test_loader, est_idx):
         # Compute the validation MSE of base estimators fitted so far
@@ -492,7 +493,7 @@ class GradientBoostingRegressor(_BaseGradientBoosting):
         "regressor_forward")
     def forward(self, x):
         outputs = [estimator(x) for estimator in self.estimators_]
-        pred = op.summation(outputs, self.shrinkage_rate)
+        pred = op.sum_with_multiplicative(outputs, self.shrinkage_rate)
 
         return pred
 

@@ -30,17 +30,18 @@ class FusionClassifier(BaseModule):
         """
         # Average
         outputs = [estimator(x) for estimator in self.estimators_]
-        proba = op.average(outputs)
+        output = op.average(outputs)
 
-        return proba
+        return output
 
     @torchensemble_model_doc(
         """Implementation on the data forwarding in FusionClassifier.""",
         "classifier_forward")
     def forward(self, x):
-        proba = self._forward(x)
+        output = self._forward(x)
+        proba = F.softmax(output, dim=1)
 
-        return F.softmax(proba, dim=1)
+        return proba
 
     @torchensemble_model_doc(
         """Set the attributes on optimizer for FusionClassifier.""",
