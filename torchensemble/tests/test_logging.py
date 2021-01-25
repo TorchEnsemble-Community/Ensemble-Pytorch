@@ -2,7 +2,7 @@ import pytest
 from torchensemble.utils.logging import set_logger
 
 
-def record(logger):
+def _record(logger):
     logger.debug("Debug!")
     logger.info("Info!")
     logger.warning("Warning!")
@@ -12,15 +12,16 @@ def record(logger):
 
 def test_logger():
     logger = set_logger("Loglevel_DEBUG", "DEBUG")
-    record(logger)
+    _record(logger)
     logger = set_logger("Loglevel_INFO", "INFO")
-    record(logger)
+    _record(logger)
     logger = set_logger("Loglevel_WARNING", "WARNING")
-    record(logger)
+    _record(logger)
     logger = set_logger("Loglevel_ERROR", "ERROR")
-    record(logger)
+    _record(logger)
     logger = set_logger("Loglevel_CRITICAL", "CRITICAL")
-    record(logger)
+    _record(logger)
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError) as excinfo:
         set_logger("Loglevel_INVALID", "INVALID")
+        assert("INVALID" in str(excinfo.value))
