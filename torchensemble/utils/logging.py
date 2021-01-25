@@ -16,7 +16,7 @@ def set_logger(log_file=None, log_console_level="info", log_file_level=None):
         elif level.lower() == 'error':
             return logging.ERROR
         elif level.lower() == 'critical':
-            return logging.critical
+            return logging.CRITICAL
         else:
             msg = ("`log_console_level` must be one of {{DEBUG, INFO,"
                    " WARNING, ERROR, CRITICAL}}, but got {} instead.")
