@@ -22,6 +22,5 @@ def test_logger():
     logger = set_logger("Loglevel_CRITICAL", "CRITICAL")
     record(logger)
 
-    with pytest.raises(ValueError) as excinfo:
+    with pytest.raises(ValueError):
         set_logger("Loglevel_INVALID", "INVALID")
-
