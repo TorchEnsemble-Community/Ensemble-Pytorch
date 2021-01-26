@@ -19,7 +19,7 @@ sys.path.insert(0, os.path.abspath("../"))
 
 # -- Project information -----------------------------------------------------
 project = 'Ensemble-PyTorch'
-copyright = '2020, Ensemble-PyTorch Developers'
+copyright = '2021, Ensemble-PyTorch Developers'
 author = 'Ensemble-PyTorch Developers'
 
 # The master toctree document.
