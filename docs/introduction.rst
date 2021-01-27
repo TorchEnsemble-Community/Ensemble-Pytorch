@@ -1,14 +1,14 @@
 Introduction
 ============
 
-This page briefly introduces ensemble methods available in Ensemble-PyTorch.
+This page briefly introduces ensemble methods implemented in Ensemble-PyTorch.
 
-To begin with, below are some notations that will be used throughout the page.
+To begin with, below are some notations that will be used throughout the introduction.
 
-- :math:`\mathcal{B} = \{\mathbf{x}_i, y_i\}_{i=1}^B`: A data batch with :math:`B` samples;
+- :math:`\mathcal{B} = \{\mathbf{x}_i, y_i\}_{i=1}^B`: A batch of data with :math:`B` samples;
 - :math:`\{h^1, h^2, \cdots, h^m, \cdots, h^M\}`: A set of :math:`M` base estimators;
 - :math:`\mathbf{o}_i^m`: The output of the base estimator :math:`h^m` on sample :math:`\mathbf{x}_i`. For regression, it is a scalar or a real-valued vector; For classification, it is a class vector with its size the number of distinct classes;
-- :math:`\mathcal{L}(\mathbf{o}_i, y_i)`: Training loss computed upon the output :math:`\mathbf{o}_i` on :math:`\mathbf{x}_i` and the ground-truth :math:`y_i`. For regression, it could be the common mean squared error; For classification, it could be or the cross-entropy loss for binary or multi-class classification.
+- :math:`\mathcal{L}(\mathbf{o}_i, y_i)`: Training loss computed on the output :math:`\mathbf{o}_i` and the ground-truth :math:`y_i`. For regression, it could be the mean squared error; For classification, it could be the cross-entropy loss for binary or multi-class classification.
 
 Fusion
 ------

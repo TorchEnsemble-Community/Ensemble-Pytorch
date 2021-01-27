@@ -8,10 +8,10 @@ You can use the latest version of Ensemble-PyTorch with the following command:
 
 .. code-block:: bash
 
-    git clone https://github.com/xuyxu/Ensemble-Pytorch.git
-    cd Ensemble-Pytorch
-    pip install -r requirements.txt  # Optional
-    python setup.py install
+    $ git clone https://github.com/xuyxu/Ensemble-Pytorch.git
+    $ cd Ensemble-Pytorch
+    $ pip install -r requirements.txt
+    $ python setup.py install
 
 Ensemble-PyTorch is designed to be portable and has very small package dependencies. It is recommended to use the Python environment and PyTorch installed from `Anaconda <https://www.anaconda.com/>`__. In this case, there is no need to run the third command in the code snippet above.
 

@@ -1,5 +1,5 @@
-Welcome to Ensemble-PyTorch's documentation!
-============================================
+Ensemble-PyTorch Documentation
+==============================
 
 |github|_ |readthedocs|_ |codecov|_ |python|_
 
@@ -30,16 +30,11 @@ To get started, please refer to `Quick Start <./quick_start.html>`__. To learn m
 This package is under active development. Please feel free to open an `issue <https://github.com/AaronX121/Ensemble-Pytorch/issues>`__ if your have any problem. In addition, any feature request or `pull request <https://github.com/AaronX121/Ensemble-Pytorch/pulls>`__ would be highly welcomed.
 
 .. toctree::
-   :maxdepth: 2
-   :caption: User
+  :maxdepth: 2
 
    Quick Start <quick_start>
    Introduction <introduction>
    Experiment <experiment>
    API Reference <parameters>
-
-.. toctree::
-   :caption: Development
-
    Changelog <changelog>
    Roadmap <roadmap>

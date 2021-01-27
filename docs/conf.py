@@ -12,13 +12,15 @@
 #
 import os
 import sys
+import guzzle_sphinx_theme
+
 sys.path.insert(0, os.path.abspath("../"))
 
 
 # -- Project information -----------------------------------------------------
 project = 'Ensemble-PyTorch'
-copyright = '2020, Yi-Xuan Xu'
-author = 'Yi-Xuan Xu'
+copyright = '2021, Ensemble-PyTorch Developers'
+author = 'Ensemble-PyTorch Developers'
 
 # The master toctree document.
 master_doc = 'index'
@@ -37,8 +39,8 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
     'sphinx.ext.todo',
-    'sphinx.ext.viewcode',
     'sphinx.ext.napoleon',
+    'sphinx_copybutton'
 ]
 
 autoapi_dirs = ['../torcensemble']
@@ -62,6 +64,7 @@ autodoc_default_options = {
     "members": True,
     "inherited-members": False,
     "show-inheritance": False,
+    "member-order": "bysource"
 }
 
 # Add any paths that contain templates here, relative to this directory.
@@ -80,11 +83,25 @@ pygments_style = "sphinx"
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'sphinx_rtd_theme'
+html_theme_path = guzzle_sphinx_theme.html_theme_path()
+html_theme = 'guzzle_sphinx_theme'
+
+# Register the theme as an extension to generate a sitemap.xml
+extensions.append("guzzle_sphinx_theme")
+
+# Guzzle theme options (see theme.conf for more information)
+html_theme_options = {
+    # Set the name of the project to appear in the sidebar
+    "project_nav_name": "Ensemble-PyTorch",
+}
+
+html_sidebars = {
+  '**': ['logo-text.html', 'globaltoc.html', 'searchbox.html']
+}
 
 html_favicon = './_images/logo.ico'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+# html_static_path = ['_static']

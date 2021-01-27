@@ -59,12 +59,12 @@ setup(
     description=('Implementations of scikit-learn like ensemble methods in'
                  ' Pytorch'),
     license='BSD 3-Clause',
-    url='https://github.com/AaronX121/Ensemble-Pytorch',
+    url='https://github.com/xuyxu/Ensemble-Pytorch',
     project_urls={
-        'Bug Tracker': 'https://github.com/AaronX121/Ensemble-Pytorch/issues',
-        'Documentation': 'https://ensemble-pytorch.readthedocs.io/en/latest/',
-        'Source Code': 'https://github.com/AaronX121/Ensemble-Pytorch'},
-    version='0.0.1',
+        'Bug Tracker': 'https://github.com/xuyxu/Ensemble-Pytorch/issues',
+        'Documentation': 'https://ensemble-pytorch.readthedocs.io',
+        'Source Code': 'https://github.com/xuyxu/Ensemble-Pytorch'},
+    version='0.1.0',
     long_description=long_description,
     classifiers=[
         'Intended Audience :: Science/Research',
