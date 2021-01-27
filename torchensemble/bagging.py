@@ -331,12 +331,9 @@ class BaggingRegressor(BaseModule):
                 )
 
                 estimators, optimizers = [], []
-                for estimator, optimizer, msgs in rets:
+                for estimator, optimizer in rets:
                     estimators.append(estimator)
                     optimizers.append(optimizer)
-                    # Write logging info
-                    for msg in msgs:
-                        self.logger.info(msg)
 
                 # Validation
                 if test_loader:
