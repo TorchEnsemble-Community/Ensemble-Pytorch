@@ -1,27 +1,30 @@
+import time
 import pytest
-from torchensemble.utils.logging import set_logger
+from multiprocessing import Process
+from torchensemble.utils.logging import MPLoggingServer, MPLoggingClient
 
 
-def _record(logger):
-    logger.debug("Debug!")
-    logger.info("Info!")
-    logger.warning("Warning!")
-    logger.error("Error!")
-    logger.critical("Critical!")
+def _record(level):
+    level = level.upper()
+    mp_server = MPLoggingServer("Loglevel_{}".format(level), 
+                                level)
+    log_server = Process(target=mp_server.log)
+    log_server.start()
+    
+    log_client = MPLoggingClient()
+    log_client.debug("Debug!")
+    log_client.info("Info!")
+    log_client.warn("Warn!")
+    log_client.error("Error!")
+    log_client.critical("Critical!")
+    
+    time.sleep(1)
+    log_server.terminate()
 
 
-def test_logger():
-    logger = set_logger("Loglevel_DEBUG", "DEBUG")
-    _record(logger)
-    logger = set_logger("Loglevel_INFO", "INFO")
-    _record(logger)
-    logger = set_logger("Loglevel_WARNING", "WARNING")
-    _record(logger)
-    logger = set_logger("Loglevel_ERROR", "ERROR")
-    _record(logger)
-    logger = set_logger("Loglevel_CRITICAL", "CRITICAL")
-    _record(logger)
-
-    with pytest.raises(ValueError) as excinfo:
-        set_logger("Loglevel_INVALID", "INVALID")
-        assert("INVALID" in str(excinfo.value))
+def test_all_levels():
+    _record("DEBUG")
+    _record("INFO")
+    _record("WARN")
+    _record("ERROR")
+    _record("CRITICAL")

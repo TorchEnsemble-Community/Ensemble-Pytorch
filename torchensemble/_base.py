@@ -1,9 +1,9 @@
 import abc
 import torch
-import logging
 import torch.nn as nn
 
 from . import _constants as const
+from .utils.logging import MPLoggingClient
 
 
 def torchensemble_model_doc(header, item):
@@ -65,7 +65,7 @@ class BaseModule(abc.ABC, nn.Module):
         self.estimator_args = estimator_args
         self.device = torch.device("cuda" if cuda else "cpu")
         self.n_jobs = n_jobs
-        self.logger = logging.getLogger()
+        self.logger = MPLoggingClient()
 
         self.estimators_ = nn.ModuleList()
         self.use_scheduler_ = False

@@ -16,6 +16,7 @@ from ._base import BaseModule, torchensemble_model_doc
 from .utils import io
 from .utils import set_module
 from .utils import operator as op
+from .utils.logging import MPLoggingClient
 
 
 __all__ = ["BaggingClassifier",
@@ -38,7 +39,7 @@ def _parallel_fit_per_epoch(train_loader,
     out-of-memory error.
     """
 
-    msg_list = []
+    mp_client = MPLoggingClient()
 
     for batch_idx, (data, target) in enumerate(train_loader):
 
@@ -70,14 +71,14 @@ def _parallel_fit_per_epoch(train_loader,
 
                 msg = ("Estimator: {:03d} | Epoch: {:03d} | Batch: {:03d}"
                        " | Loss: {:.5f} | Correct: {:d}/{:d}")
-                msg_list.append(msg.format(idx, epoch, batch_idx, loss,
-                                           correct, subsample_size))
+                mp_client.info(msg.format(idx, epoch, batch_idx, loss,
+                                          correct, subsample_size))
             else:
                 msg = ("Estimator: {:03d} | Epoch: {:03d} | Batch: {:03d}"
                        " | Loss: {:.5f}")
-                msg_list.append(msg.format(idx, epoch, batch_idx, loss))
+                mp_client.info(msg.format(idx, epoch, batch_idx, loss))
 
-    return estimator, optimizer, msg_list
+    return estimator, optimizer
 
 
 @torchensemble_model_doc("""Implementation on the BaggingClassifier.""",
@@ -176,12 +177,9 @@ class BaggingClassifier(BaseModule):
                 )
 
                 estimators, optimizers = [], []
-                for estimator, optimizer, msgs in rets:
+                for estimator, optimizer in rets:
                     estimators.append(estimator)
                     optimizers.append(optimizer)
-                    # Write logging info
-                    for msg in msgs:
-                        self.logger.info(msg)
 
                 # Validation
                 if test_loader:

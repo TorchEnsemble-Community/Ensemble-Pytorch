@@ -1,6 +1,12 @@
 import os
 import time
 import logging
+from multiprocessing import Queue
+
+
+_level_dict = {"DEBUG": 0, "INFO": 1, "WARN": 2, "ERROR": 3, "CRITICAL": 4}
+
+_msg_queue = Queue()
 
 
 def set_logger(log_file=None, log_console_level="info", log_file_level=None):
@@ -57,3 +63,61 @@ def set_logger(log_file=None, log_console_level="info", log_file_level=None):
     _logger.setLevel("DEBUG")
 
     return _logger
+
+
+class MPLoggingServer:
+    def __init__(self, file=None, console_level="INFO", file_level="DEBUG"):
+        self.file_writer = None
+        if file is not None:
+            log_path = os.path.join(os.getcwd(), 'logs', file + ".log")
+            print("Log file will be saved in {}".format(log_path))
+            if not os.path.exists(os.path.dirname(log_path)):
+                os.mkdir(os.path.dirname(log_path))
+            self.file_writer = open(log_path, 'wt')
+        self.console_level = _level_dict[console_level.upper()]
+        self.file_level = _level_dict[file_level.upper()]
+
+    def log(self):
+        while True:
+            msg = _msg_queue.get()
+            self._console_log(msg)
+            self._file_log(msg)
+
+    def _console_log(self, msg):
+        level, info = msg
+        if level >= self.console_level:
+            print(info)
+
+    def _file_log(self, msg):
+        level, info = msg
+        if level >= self.file_level and self.file_writer is not None:
+            self.file_writer.write("{}\n".format(info))
+            self.file_writer.flush()
+
+
+class MPLoggingClient:
+    def __init__(self):
+        self.msg_queue = _msg_queue
+
+    def _record(self, level, msg):
+        time_stamp = time.strftime('%Y-%m-%d %H:%M:%S',
+                                   time.localtime(time.time()))
+        self.msg_queue.put((_level_dict[level.upper()],
+                            "{} [{}]:{}".format(time_stamp,
+                                                level.upper(),
+                                                msg)))
+
+    def debug(self, msg):
+        self._record("DEBUG", msg)
+
+    def info(self, msg):
+        self._record("INFO", msg)
+
+    def warn(self, msg):
+        self._record("WARN", msg)
+
+    def error(self, msg):
+        self._record("ERROR", msg)
+
+    def critical(self, msg):
+        self._record("CRITICAL", msg)

@@ -13,7 +13,6 @@
 import copy
 import math
 import torch
-import logging
 import warnings
 import torch.nn as nn
 import torch.nn.functional as F
@@ -23,6 +22,7 @@ from ._base import BaseModule, torchensemble_model_doc
 from .utils import io
 from .utils import set_module
 from .utils import operator as op
+from .utils.logging import MPLoggingClient
 
 
 __all__ = ["_BaseSnapshotEnsemble",
@@ -119,7 +119,7 @@ class _BaseSnapshotEnsemble(BaseModule):
         self.n_estimators = n_estimators
         self.estimator_args = estimator_args
         self.device = torch.device("cuda" if cuda else "cpu")
-        self.logger = logging.getLogger()
+        self.logger = MPLoggingClient()
 
         self.estimators_ = nn.ModuleList()
 
