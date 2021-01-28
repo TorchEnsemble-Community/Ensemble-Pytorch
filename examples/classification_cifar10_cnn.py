@@ -4,7 +4,6 @@ import time
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from multiprocessing import Process
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 
@@ -14,7 +13,7 @@ from torchensemble.bagging import BaggingClassifier
 from torchensemble.gradient_boosting import GradientBoostingClassifier
 from torchensemble.snapshot_ensemble import SnapshotEnsembleClassifier
 
-from torchensemble.utils.logging import MPLoggingServer, MPLoggingClient
+from torchensemble.utils.logging import set_logger
 
 
 def display_records(records, logger):
@@ -95,11 +94,7 @@ if __name__ == "__main__":
         shuffle=True,
     )
 
-    log_server = MPLoggingServer("classification_cifar10_cnn")
-    mp_server = Process(target=log_server.log)
-    mp_server.start()
-
-    log_client = MPLoggingClient()
+    logger = set_logger("classification_cifar10_cnn")
 
     # FusionClassifier
     model = FusionClassifier(
@@ -219,6 +214,4 @@ if __name__ == "__main__":
                     evaluating_time, testing_acc))
 
     # Print results on different ensemble methods
-    display_records(records, log_client)
-
-    mp_server.terminate()
+    display_records(records, logger)
