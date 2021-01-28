@@ -1,7 +1,8 @@
-Ensemble-PyTorch Documentation
-==============================
+.. image:: ./_images/badge.png
+   :align: center
+   :width: 400
 
-|github|_ |readthedocs|_ |codecov|_ |python|_
+|github|_ |readthedocs|_ |codecov|_ |python|_ |license|_
 
 .. |github| image:: https://github.com/xuyxu/Ensemble-Pytorch/workflows/torchensemble-CI/badge.svg
 .. _github: https://github.com/xuyxu/Ensemble-Pytorch/actions
@@ -15,9 +16,11 @@ Ensemble-PyTorch Documentation
 .. |python| image:: https://img.shields.io/badge/python-3.6+-blue?logo=python
 .. _python: https://www.python.org/
 
-.. image:: ./_images/badge.png
-   :align: center
-   :width: 400
+.. |license| image:: https://img.shields.io/github/license/xuyxu/Ensemble-Pytorch
+.. _license: https://github.com/xuyxu/Ensemble-Pytorch/blob/master/LICENSE
+
+Ensemble-PyTorch Documentation
+==============================
 
 Ensemble-PyTorch implements a collection of ensemble methods in PyTorch. It provides:
 
@@ -30,7 +33,7 @@ To get started, please refer to `Quick Start <./quick_start.html>`__. To learn m
 This package is under active development. Please feel free to open an `issue <https://github.com/AaronX121/Ensemble-Pytorch/issues>`__ if your have any problem. In addition, any feature request or `pull request <https://github.com/AaronX121/Ensemble-Pytorch/pulls>`__ would be highly welcomed.
 
 .. toctree::
-  :maxdepth: 2
+  :maxdepth: 1
 
    Quick Start <quick_start>
    Introduction <introduction>
