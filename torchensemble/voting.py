@@ -37,8 +37,6 @@ def _parallel_fit_per_epoch(train_loader,
     out-of-memory error.
     """
 
-    msg_list = []
-
     for batch_idx, (data, target) in enumerate(train_loader):
 
         batch_size = data.size(0)
@@ -60,15 +58,15 @@ def _parallel_fit_per_epoch(train_loader,
 
                 msg = ("Estimator: {:03d} | Epoch: {:03d} | Batch: {:03d}"
                        " | Loss: {:.5f} | Correct: {:d}/{:d}")
-                msg_list.append(msg.format(idx, epoch, batch_idx, loss,
-                                correct, batch_size))
+                print(msg.format(idx, epoch, batch_idx, loss,
+                                 correct, batch_size))
             # Regression
             else:
                 msg = ("Estimator: {:03d} | Epoch: {:03d} | Batch: {:03d}"
                        " | Loss: {:.5f}")
-                msg_list.append(msg.format(idx, epoch, batch_idx, loss))
+                print(msg.format(idx, epoch, batch_idx, loss))
 
-    return estimator, optimizer, msg_list
+    return estimator, optimizer
 
 
 @torchensemble_model_doc("""Implementation on the VotingClassifier.""",
@@ -151,6 +149,11 @@ class VotingClassifier(BaseModule):
             # Training loop
             for epoch in range(epochs):
                 self.train()
+
+                if self.n_jobs and self.n_jobs > 1:
+                    msg = "Parallelization on the training epoch: {:03d}"
+                    self.logger.info(msg.format(epoch))
+
                 rets = parallel(delayed(_parallel_fit_per_epoch)(
                         train_loader,
                         estimator,
@@ -167,12 +170,9 @@ class VotingClassifier(BaseModule):
                 )
 
                 estimators, optimizers = [], []
-                for estimator, optimizer, msgs in rets:
+                for estimator, optimizer in rets:
                     estimators.append(estimator)
                     optimizers.append(optimizer)
-                    # Write logging info
-                    for msg in msgs:
-                        self.logger.info(msg)
 
                 # Validation
                 if test_loader:
@@ -309,6 +309,11 @@ class VotingRegressor(BaseModule):
             # Training loop
             for epoch in range(epochs):
                 self.train()
+
+                if self.n_jobs and self.n_jobs > 1:
+                    msg = "Parallelization on the training epoch: {:03d}"
+                    self.logger.info(msg.format(epoch))
+
                 rets = parallel(delayed(_parallel_fit_per_epoch)(
                         train_loader,
                         estimator,
@@ -325,12 +330,9 @@ class VotingRegressor(BaseModule):
                 )
 
                 estimators, optimizers = [], []
-                for estimator, optimizer, msgs in rets:
+                for estimator, optimizer in rets:
                     estimators.append(estimator)
                     optimizers.append(optimizer)
-                    # Write logging info
-                    for msg in msgs:
-                        self.logger.info(msg)
 
                 # Validation
                 if test_loader:
