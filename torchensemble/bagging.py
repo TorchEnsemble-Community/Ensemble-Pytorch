@@ -16,7 +16,6 @@ from ._base import BaseModule, torchensemble_model_doc
 from .utils import io
 from .utils import set_module
 from .utils import operator as op
-from .utils.logging import MPLoggingClient
 
 
 __all__ = ["BaggingClassifier",
@@ -38,8 +37,6 @@ def _parallel_fit_per_epoch(train_loader,
     WARNING: Parallelization when fitting large base estimators may cause
     out-of-memory error.
     """
-
-    mp_client = MPLoggingClient()
 
     for batch_idx, (data, target) in enumerate(train_loader):
 
@@ -71,12 +68,12 @@ def _parallel_fit_per_epoch(train_loader,
 
                 msg = ("Estimator: {:03d} | Epoch: {:03d} | Batch: {:03d}"
                        " | Loss: {:.5f} | Correct: {:d}/{:d}")
-                mp_client.info(msg.format(idx, epoch, batch_idx, loss,
-                                          correct, subsample_size))
+                print(msg.format(idx, epoch, batch_idx, loss,
+                                 correct, subsample_size))
             else:
                 msg = ("Estimator: {:03d} | Epoch: {:03d} | Batch: {:03d}"
                        " | Loss: {:.5f}")
-                mp_client.info(msg.format(idx, epoch, batch_idx, loss))
+                print(msg.format(idx, epoch, batch_idx, loss))
 
     return estimator, optimizer
 

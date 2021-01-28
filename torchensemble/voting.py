@@ -15,7 +15,6 @@ from ._base import BaseModule, torchensemble_model_doc
 from .utils import io
 from .utils import set_module
 from .utils import operator as op
-from .utils.logging import MPLoggingClient
 
 
 __all__ = ["VotingClassifier",
@@ -38,8 +37,6 @@ def _parallel_fit_per_epoch(train_loader,
     out-of-memory error.
     """
 
-    mp_logger = MPLoggingClient()
-
     for batch_idx, (data, target) in enumerate(train_loader):
 
         batch_size = data.size(0)
@@ -61,13 +58,13 @@ def _parallel_fit_per_epoch(train_loader,
 
                 msg = ("Estimator: {:03d} | Epoch: {:03d} | Batch: {:03d}"
                        " | Loss: {:.5f} | Correct: {:d}/{:d}")
-                mp_logger.info(msg.format(idx, epoch, batch_idx, loss,
-                               correct, batch_size))
+                print(msg.format(idx, epoch, batch_idx, loss,
+                                 correct, batch_size))
             # Regression
             else:
                 msg = ("Estimator: {:03d} | Epoch: {:03d} | Batch: {:03d}"
                        " | Loss: {:.5f}")
-                mp_logger.info(msg.format(idx, epoch, batch_idx, loss))
+                print(msg.format(idx, epoch, batch_idx, loss))
 
     return estimator, optimizer
 
