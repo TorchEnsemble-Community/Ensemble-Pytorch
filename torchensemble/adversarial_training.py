@@ -270,6 +270,11 @@ class AdversarialTrainingClassifier(_BaseAdversarialTraining):
             # Training loop
             for epoch in range(epochs):
                 self.train()
+
+                if self.n_jobs and self.n_jobs > 1:
+                    msg = "Parallelization on the training epoch: {:03d}"
+                    self.logger.info(msg.format(epoch))
+
                 rets = parallel(delayed(_parallel_fit_per_epoch)(
                         train_loader,
                         epsilon,
@@ -431,6 +436,11 @@ class AdversarialTrainingRegressor(_BaseAdversarialTraining):
             # Training loop
             for epoch in range(epochs):
                 self.train()
+
+                if self.n_jobs and self.n_jobs > 1:
+                    msg = "Parallelization on the training epoch: {:03d}"
+                    self.logger.info(msg.format(epoch))
+
                 rets = parallel(delayed(_parallel_fit_per_epoch)(
                         train_loader,
                         epsilon,
