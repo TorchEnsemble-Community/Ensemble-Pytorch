@@ -15,6 +15,9 @@ You can use the latest version of Ensemble-PyTorch with the following command:
 
 Ensemble-PyTorch is designed to be portable and has very small package dependencies. It is recommended to use the Python environment and PyTorch installed from `Anaconda <https://www.anaconda.com/>`__. In this case, there is no need to run the third command in the code snippet above.
 
+.. tip::
+    Ensemble-PyTorch is close to the end of the Beta stage. It will soon be uploaded to `PyPI <https://pypi.org/>`__.
+
 Define Your Base Estimator
 --------------------------
 
@@ -62,8 +65,8 @@ Ensemble-PyTorch uses a global logger to track and print the intermediate inform
 
 Using the logger, all intermediate information will be printed on the command line and saved to the specified text file: classification_mnist_mlp.
 
-Choose the Ensemble Method
---------------------------
+Choose the Ensemble
+-------------------
 
 After defining the base estimator, we can then wrap it using one of ensemble methods available in Ensemble-PyTorch. Different methods have very similar APIs, take the ``VotingClassifier`` as an example:
 

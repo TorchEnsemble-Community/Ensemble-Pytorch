@@ -120,6 +120,9 @@ Reference:
     B. Lakshminarayanan, A. Pritzel, C. Blundell., Simple and Scalable
     Predictive Uncertainty Estimation using Deep Ensembles, NIPS 2017.
 
+.. warning::
+    When your base estimator is under-fit on the dataset, it is not recommended to use the :mod:`AdversarialTrainingClassifier` or :mod:`AdversarialTrainingRegressor`, because they may deteriorate the performance further.
+
 AdversarialTrainingClassifier
 *****************************
 
