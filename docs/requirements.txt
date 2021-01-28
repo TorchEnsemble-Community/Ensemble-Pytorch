@@ -1,4 +1,5 @@
 sphinx==3.2.*
 sphinx-panels==0.5.*
+sphinxemoji==0.1.8
 sphinx-copybutton
 guzzle_sphinx_theme
