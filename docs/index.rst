@@ -32,8 +32,38 @@ To get started, please refer to `Quick Start <./quick_start.html>`__. To learn m
 
 This package is under active development. Please feel free to open an `issue <https://github.com/AaronX121/Ensemble-Pytorch/issues>`__ if your have any problem. In addition, any feature request or `pull request <https://github.com/AaronX121/Ensemble-Pytorch/pulls>`__ would be highly welcomed.
 
+Example on How to Use
+---------------------
+
+.. code:: python
+
+    from torchensemble import ensemble_method           # import ensemble (e.g., VotingClassifier)
+
+    # Load the data
+    train_loader = DataLoader(...)
+    test_loader = DataLoader(...)
+
+    # Define the ensemble
+    model = ensemble_method(estimator=base_estimator,   # your deep learning model
+                            n_estimators=10)            # number of base estimators
+
+    # Set the optimizer
+    model.set_optimizer("Adam",
+                        lr=learning_rate,
+                        weight_decay=weight_decay)
+
+    # Train
+    model.fit(train_loader,
+              epochs=epochs)
+
+    # Evaluate
+    accuracy = model.predict(test_loader)
+
+Contents
+--------
+
 .. toctree::
-  :maxdepth: 1
+  :maxdepth: 2
 
    Quick Start <quick_start>
    Introduction <introduction>

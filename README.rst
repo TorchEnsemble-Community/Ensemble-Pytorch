@@ -65,25 +65,24 @@ Minimal example on how to use
 
 .. code:: python
 
-    from torchensemble import ensemble_method           # import ensemble method (e.g., VotingClassifier)
+    from torchensemble import ensemble_method           # import ensemble (e.g., VotingClassifier)
 
-    # Define the ensemble
-    model = ensemble_method(estimator=base_estimator,   # class of your base estimator
-                            n_estimators=10,            # the number of base estimators              
-                            cuda=True)                  # whether to use GPU            
-
-    # Load data
+    # Load the data
     train_loader = DataLoader(...)
     test_loader = DataLoader(...)
 
+    # Define the ensemble
+    model = ensemble_method(estimator=base_estimator,   # your deep learning model
+                            n_estimators=10)            # number of base estimators
+
     # Set the optimizer
-    model.set_optimizer("Adam",                         # type of the parameter optimizer
-                        lr=learning_rate,               # learning rate of the parameter optimizer
-                        weight_decay=weight_decay)      # weight decay of the parameter optimizer
+    model.set_optimizer("Adam",
+                        lr=learning_rate,
+                        weight_decay=weight_decay)
 
     # Train
-    model.fit(train_loader,                             # training data
-              epochs=epochs)                            # the number of training epochs
+    model.fit(train_loader,
+              epochs=epochs)
 
     # Evaluate
     accuracy = model.predict(test_loader)
