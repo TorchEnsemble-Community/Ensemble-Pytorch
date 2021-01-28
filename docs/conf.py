@@ -40,7 +40,8 @@ extensions = [
     'sphinx.ext.autosummary',
     'sphinx.ext.todo',
     'sphinx.ext.napoleon',
-    'sphinx_copybutton'
+    'sphinx_copybutton',
+    'sphinx_panels'
 ]
 
 autoapi_dirs = ['../torcensemble']
