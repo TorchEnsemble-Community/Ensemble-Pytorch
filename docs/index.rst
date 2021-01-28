@@ -19,7 +19,7 @@ Ensemble-PyTorch Documentation
    :align: center
    :width: 400
 
-Ensemble-PyTorch implements a collection of ensemble methods using PyTorch. It provides:
+Ensemble-PyTorch implements a collection of ensemble methods in PyTorch. It provides:
 
 * Easy ways to boost the performance of your deep learning models;
 * Easy-to-use APIs on training and evaluating;
