@@ -16,7 +16,7 @@ Changelog
 * |Enhancement| Improve the logging module | @zzzzwj
 * |API| Remove the input argument ``output_dim`` from all methods | @xuyxu
 * |Fix| Fix the bug in logging module when using multi-processing | @zzzzwj
-
+* |Fix| Fix the binding problem on scheduler and optimizer when using parallelization | @Alex-Medium and @xuyxi
 
 .. role:: raw-html(raw)
    :format: html
