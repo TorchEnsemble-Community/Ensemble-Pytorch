@@ -9,6 +9,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+import warnings
 from joblib import Parallel, delayed
 
 from ._base import BaseModule, torchensemble_model_doc
@@ -23,6 +24,7 @@ __all__ = ["VotingClassifier",
 
 def _parallel_fit_per_epoch(train_loader,
                             estimator,
+                            cur_lr,
                             optimizer,
                             criterion,
                             idx,
@@ -36,6 +38,10 @@ def _parallel_fit_per_epoch(train_loader,
     WARNING: Parallelization when fitting large base estimators may cause
     out-of-memory error.
     """
+
+    if cur_lr:
+        # Parallelization corrupts the binding between optimizer and scheduler
+        set_module.update_lr(optimizer, cur_lr)
 
     for batch_idx, (data, target) in enumerate(train_loader):
 
@@ -125,11 +131,9 @@ class VotingClassifier(BaseModule):
                                                        **self.optimizer_args))
 
         if self.use_scheduler_:
-            schedulers = []
-            for i in range(self.n_estimators):
-                schedulers.append(set_module.set_scheduler(optimizers[i],
-                                                           self.scheduler_name,
-                                                           **self.scheduler_args))  # noqa: E501
+            scheduler_ = set_module.set_scheduler(optimizers[0],
+                                                  self.scheduler_name,
+                                                  **self.scheduler_args)
 
         # Utils
         criterion = nn.CrossEntropyLoss()
@@ -150,6 +154,11 @@ class VotingClassifier(BaseModule):
             for epoch in range(epochs):
                 self.train()
 
+                if self.use_scheduler_:
+                    cur_lr = scheduler_.get_last_lr()[0]
+                else:
+                    cur_lr = None
+
                 if self.n_jobs and self.n_jobs > 1:
                     msg = "Parallelization on the training epoch: {:03d}"
                     self.logger.info(msg.format(epoch))
@@ -157,6 +166,7 @@ class VotingClassifier(BaseModule):
                 rets = parallel(delayed(_parallel_fit_per_epoch)(
                         train_loader,
                         estimator,
+                        cur_lr,
                         optimizer,
                         criterion,
                         idx,
@@ -201,9 +211,14 @@ class VotingClassifier(BaseModule):
                         self.logger.info(msg.format(epoch, acc, best_acc))
 
                 # Update the scheduler
-                if self.use_scheduler_:
-                    for i in range(self.n_estimators):
-                        schedulers[i].step()
+                with warnings.catch_warnings():
+
+                    # UserWarning raised by PyTorch is ignored because
+                    # scheduler does not have a real effect on the optimier.
+                    warnings.simplefilter("ignore", UserWarning)
+
+                    if self.use_scheduler_:
+                        scheduler_.step()
 
         self.estimators_ = nn.ModuleList()
         self.estimators_.extend(estimators)
@@ -286,11 +301,9 @@ class VotingRegressor(BaseModule):
                                                        **self.optimizer_args))
 
         if self.use_scheduler_:
-            schedulers = []
-            for i in range(self.n_estimators):
-                schedulers.append(set_module.set_scheduler(optimizers[i],
-                                                           self.scheduler_name,
-                                                           **self.scheduler_args))  # noqa: E501
+            scheduler_ = set_module.set_scheduler(optimizers[0],
+                                                  self.scheduler_name,
+                                                  **self.scheduler_args)
 
         # Utils
         criterion = nn.MSELoss()
@@ -310,6 +323,11 @@ class VotingRegressor(BaseModule):
             for epoch in range(epochs):
                 self.train()
 
+                if self.use_scheduler_:
+                    cur_lr = scheduler_.get_last_lr()[0]
+                else:
+                    cur_lr = None
+
                 if self.n_jobs and self.n_jobs > 1:
                     msg = "Parallelization on the training epoch: {:03d}"
                     self.logger.info(msg.format(epoch))
@@ -317,6 +335,7 @@ class VotingRegressor(BaseModule):
                 rets = parallel(delayed(_parallel_fit_per_epoch)(
                         train_loader,
                         estimator,
+                        cur_lr,
                         optimizer,
                         criterion,
                         idx,
@@ -358,9 +377,11 @@ class VotingRegressor(BaseModule):
                         self.logger.info(msg.format(epoch, mse, best_mse))
 
                 # Update the scheduler
-                if self.use_scheduler_:
-                    for i in range(self.n_estimators):
-                        schedulers[i].step()
+                with warnings.catch_warnings():
+                    warnings.simplefilter("ignore", UserWarning)
+
+                    if self.use_scheduler_:
+                        scheduler_.step()
 
         self.estimators_ = nn.ModuleList()
         self.estimators_.extend(estimators)

@@ -42,3 +42,29 @@ def test_set_optimizer_Unknown():
     with pytest.raises(NotImplementedError) as excinfo:
         torchensemble.utils.set_module.set_optimizer(model, "Unknown")
     assert "Unknown name of the optimizer" in str(excinfo.value)
+
+
+def test_update_lr():
+    cur_lr = 1e-4
+    model = MLP()
+    optimizer = torchensemble.utils.set_module.set_optimizer(model,
+                                                             "Adam",
+                                                             lr=1e-3)
+
+    optimizer = torchensemble.utils.set_module.update_lr(optimizer, cur_lr)
+
+    for group in optimizer.param_groups:
+        assert group["lr"] == cur_lr
+
+
+def test_update_lr_invalid():
+    cur_lr = 0
+    model = MLP()
+    optimizer = torchensemble.utils.set_module.set_optimizer(model,
+                                                             "Adam",
+                                                             lr=1e-3)
+
+    err_msg = ("The learning rate should be strictly positive, but got"
+               " {} instead.").format(cur_lr)
+    with pytest.raises(ValueError, match=err_msg):
+        torchensemble.utils.set_module.update_lr(optimizer, cur_lr)

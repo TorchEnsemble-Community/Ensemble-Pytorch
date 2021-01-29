@@ -36,6 +36,24 @@ def set_optimizer(model, optimizer_name, **kwargs):
     return optimizer
 
 
+def update_lr(optimizer, lr):
+    """
+    Manually update the learning rate of the optimizer. This function is used
+    when the parallelization corrupts the bindings between the optimizer and
+    the scheduler.
+    """
+
+    if not lr > 0:
+        msg = ("The learning rate should be strictly positive, but got"
+               " {} instead.")
+        raise ValueError(msg.format(lr))
+
+    for group in optimizer.param_groups:
+        group["lr"] = lr
+
+    return optimizer
+
+
 def set_scheduler(optimizer, scheduler_name, **kwargs):
     """
     Set the scheduler on learning rate for the optimizer.
