@@ -11,10 +11,10 @@ Changelog
 * |Enhancement| Add CI and maintenance tools | @xuyxu
 * |Enhancement| Add the code coverage on codecov | @xuyxu
 * |Enhancement| Add the version numbers to requirements.txt | @zackhardtoname and @xuyxu
-* |Enhancement| Refactor the codes on operating tensors into an independent module | @zzzzwj
-* |Enhancement| Refactor the set_optimizer into an independent method | @xuyxu
-* |Enhancement| Improve the logging module | @zzzzwj
+* |Enhancement| Improve the logging module using :class:`logging` | @zzzzwj
 * |API| Remove the input argument ``output_dim`` from all methods | @xuyxu
+* |API| Refactor the setup on optimizer into :meth:`set_optimizer` | @xuyxu
+* |API| Refactor the codes on operating tensors into an independent module | @zzzzwj
 * |Fix| Fix the bug in logging module when using multi-processing | @zzzzwj
 * |Fix| Fix the binding problem on scheduler and optimizer when using parallelization | @Alex-Medium and @xuyxi
 
