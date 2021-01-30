@@ -22,23 +22,28 @@
 Ensemble-PyTorch Documentation
 ==============================
 
+.. rst-class:: center
+
+| |:homes:| `GitHub <https://github.com/xuyxu/Ensemble-Pytorch>`__ | |:book:| `Documentation <https://readthedocs.org/projects/ensemble-pytorch/>`__ | |:hammer_and_wrench:| `Codecov <https://codecov.io/gh/xuyxu/Ensemble-Pytorch>`__
+|
+
 **Ensemble-PyTorch** implements a collection of ensemble methods in PyTorch. It provides:
 
-* |:chart_with_upwards_trend:| Easy ways to boost the performance of your deep learning models;
-* |:baby:| Easy-to-use APIs on training and evaluating;
+* |:arrow_up_small:| Easy ways to boost the performance of your deep learning models.
+* |:eyes:| Easy-to-use APIs on training and evaluating.
 * |:zap:| High training efficiency with parallelization.
 
 This package is under active development. Please feel free to open an `issue <https://github.com/AaronX121/Ensemble-Pytorch/issues>`__ if your have any problem. In addition, any feature request or `pull request <https://github.com/AaronX121/Ensemble-Pytorch/pulls>`__ would be highly welcomed.
 
-|:triangular_flag_on_post:| Guidepost
--------------------------------------
+Guidepost
+---------
 
 * To get started, please refer to `Quick Start <./quick_start.html>`__;
 * To learn more about ensemble methods supported, please refer to `Introduction <./introduction.html>`__;
 * If you are confused on which ensemble method to use, instructions in `Guidance <./guide.html>`__ may be helpful.
 
-|:woman_teacher:| Example
--------------------------
+How tu Use
+----------
 
 .. code:: python
 
@@ -64,8 +69,8 @@ This package is under active development. Please feel free to open an `issue <ht
     # Evaluate
     accuracy = model.predict(test_loader)
 
-|:book:| Content
-----------------
+Content
+-------
 
 .. toctree::
   :maxdepth: 2
