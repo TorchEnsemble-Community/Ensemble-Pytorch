@@ -43,3 +43,7 @@ Over-fit
 
 Large Training Costs
 --------------------
+
+Training an ensemble of large deep learning models could take prohibitively long time and easily run out of the memory. If you are suffering from large training costs when using Ensemble-PyTorch, the recommended ensemble method would be :class:`Snapshot Ensemble`. The training costs on :class:`Snapshot Ensemble` are approximately the same as that on training a single base estimator. Please refer to the related section in `Introduction <./introduction.html>`__ for details on :class:`Snapshot Ensemble`.
+
+However, :class:`Snapshot Ensemble` does not work well across all deep learning models. To reduce the costs on using other parallel ensemble methods (i.e., :class:`Voting`, :class:`Bagging`, :class:`Adversarial Training`), you can set ``n_jobs`` to ``None`` or ``1``, which disables the parallelization conducted internally.
