@@ -223,7 +223,7 @@ class BaggingClassifier(BaseModule):
                 with warnings.catch_warnings():
 
                     # UserWarning raised by PyTorch is ignored because
-                    # scheduler does not have a real effect on the optimier.
+                    # scheduler does not have a real effect on the optimizer.
                     warnings.simplefilter("ignore", UserWarning)
 
                     if self.use_scheduler_:
