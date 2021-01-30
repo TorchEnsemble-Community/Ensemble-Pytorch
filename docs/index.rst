@@ -33,7 +33,7 @@ Ensemble-PyTorch Documentation
 * |:eyes:| Easy-to-use APIs on training and evaluating.
 * |:zap:| High training efficiency with parallelization.
 
-This package is under active development. Please feel free to open an `issue <https://github.com/AaronX121/Ensemble-Pytorch/issues>`__ if your have any problem. In addition, any feature request or `pull request <https://github.com/AaronX121/Ensemble-Pytorch/pulls>`__ would be highly welcomed.
+| This package is under active development. Please feel free to open an `issue <https://github.com/xuyxu/Ensemble-Pytorch/issues>`__ if your have any problem. In addition, any feature request or `pull request <https://github.com/xuyxu/Ensemble-Pytorch/pulls>`__ would be highly welcomed.
 
 Guidepost
 ---------
