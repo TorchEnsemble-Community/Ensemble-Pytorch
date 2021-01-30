@@ -24,7 +24,7 @@ Ensemble-PyTorch Documentation
 
 .. rst-class:: center
 
-| |:homes:| `GitHub <https://github.com/xuyxu/Ensemble-Pytorch>`__ | |:book:| `Documentation <https://readthedocs.org/projects/ensemble-pytorch/>`__ | |:hammer_and_wrench:| `Codecov <https://codecov.io/gh/xuyxu/Ensemble-Pytorch>`__
+| |:homes:| `GitHub <https://github.com/xuyxu/Ensemble-Pytorch>`__ | |:book:| `ReadtheDocs <https://readthedocs.org/projects/ensemble-pytorch/>`__ | |:hammer_and_wrench:| `Codecov <https://codecov.io/gh/xuyxu/Ensemble-Pytorch>`__
 |
 
 **Ensemble-PyTorch** implements a collection of ensemble methods in PyTorch. It provides:
@@ -42,7 +42,7 @@ Guidepost
 * To learn more about ensemble methods supported, please refer to `Introduction <./introduction.html>`__;
 * If you are confused on which ensemble method to use, instructions in `Guidance <./guide.html>`__ may be helpful.
 
-How tu Use
+How to Use
 ----------
 
 .. code:: python
