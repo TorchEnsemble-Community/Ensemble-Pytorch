@@ -152,7 +152,8 @@ def _parallel_fit_per_epoch(train_loader,
 def _get_fgsm_samples(sample, epsilon, sample_grad):
     """
     Private functions used to generate adversarial samples with fast gradient
-    sign method (FGSM)."""
+    sign method (FGSM).
+    """
 
     # Check the input range of `sample`
     min_value, max_value = torch.min(sample), torch.max(sample)
@@ -165,6 +166,7 @@ def _get_fgsm_samples(sample, epsilon, sample_grad):
     sign_sample_grad = sample_grad.sign()
     perturbed_sample = sample + epsilon * sign_sample_grad
     perturbed_sample = torch.clamp(perturbed_sample, 0, 1)
+
     return perturbed_sample
 
 
