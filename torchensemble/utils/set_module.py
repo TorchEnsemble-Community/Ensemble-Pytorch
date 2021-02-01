@@ -28,7 +28,7 @@ def set_optimizer(model, optimizer_name, **kwargs):
     elif optimizer_name == "SGD":
         optimizer = torch.optim.SGD(model.parameters(), **kwargs)
     else:
-        msg = ("Unknown name of the optimizer {}, should be one of"
+        msg = ("Unrecognized optimizer: {}, should be one of"
                " {{Adadelta, Adagrad, Adam, AdamW, Adamax, ASGD, RMSprop,"
                " Rprop, SGD}}.")
         raise NotImplementedError(msg.format(optimizer_name))
@@ -77,7 +77,7 @@ def set_scheduler(optimizer, scheduler_name, **kwargs):
     elif scheduler_name == "ReduceLROnPlateau":
         scheduler = lr_scheduler.ReduceLROnPlateau(optimizer, **kwargs)
     else:
-        msg = ("Unknown name of the scheduler {}, should be one of"
+        msg = ("Unrecognized scheduler: {}, should be one of"
                " {{LambdaLR, MultiplicativeLR, StepLR, MultiStepLR,"
                " ExponentialLR, CosineAnnealingLR, ReduceLROnPlateau,"
                " CyclicLR, OneCycleLR, CosineAnnealingWarmRestarts}}.")

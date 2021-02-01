@@ -39,9 +39,12 @@ def test_set_optimizer_normal(optimizer_name):
 
 def test_set_optimizer_Unknown():
     model = MLP()
-    with pytest.raises(NotImplementedError) as excinfo:
+
+    err_msg = ("Unrecognized optimizer: {}, should be one of"
+               " {{Adadelta, Adagrad, Adam, AdamW, Adamax, ASGD, RMSprop,"
+               " Rprop, SGD}}.").format("Unknown")
+    with pytest.raises(NotImplementedError, match=err_msg):
         torchensemble.utils.set_module.set_optimizer(model, "Unknown")
-    assert "Unknown name of the optimizer" in str(excinfo.value)
 
 
 def test_update_lr():
