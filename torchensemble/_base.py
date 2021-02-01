@@ -74,7 +74,7 @@ class BaseModule(abc.ABC, nn.Module):
         """
         Return the number of base estimators in the ensemble. The real number
         of base estimators may not match `self.n_estimators` because of the
-        early stopping stage in several ensembles.
+        early stopping stage in several ensembles such as Gradient Boosting.
         """
         return len(self.estimators_)
 

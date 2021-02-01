@@ -83,7 +83,7 @@ __fit_doc = """
 
         - If ``None``, the model will be saved in the current directory.
         - If not ``None``, the model will be saved in the specified
-          directory.
+          directory: ``save_dir``.
 """
 
 

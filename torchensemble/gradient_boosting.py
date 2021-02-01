@@ -31,9 +31,10 @@ __model_doc = """
     n_estimators : int
         The number of base estimators in the ensemble.
     estimator_args : dict, default=None
-        The dictionary of parameters used to instantiate base estimators.
+        The dictionary of hyper-parameters used to instantiate base
+        estimators (Optional).
     shrinkage_rate : float, default=1
-        The shrinkage rate in gradient boosting.
+        The shrinkage rate used in gradient boosting.
     cuda : bool, default=True
 
         - If ``True``, use GPU to train and evaluate the ensemble.
@@ -50,34 +51,36 @@ __fit_doc = """
     Parameters
     ----------
     train_loader : torch.utils.data.DataLoader
-        A :mod:`DataLoader` container that contains the training data.
+        A :mod:`torch.utils.data.DataLoader` container that contains the
+        training data.
     epochs : int, default=100
-        The number of training epochs.
+        The number of training epochs per base estimator.
     log_interval : int, default=100
-        The number of batches to wait before printting the training status.
+        The number of batches to wait before logging the training status.
     test_loader : torch.utils.data.DataLoader, default=None
-        A :mod:`DataLoader` container that contains the evaluating data.
+        A :mod:`torch.utils.data.DataLoader` container that contains the
+        evaluating data.
 
-        - If ``None``, no validation is conducted after each training
-          epoch.
+        - If ``None``, no validation is conducted after each base
+          estimator being trained.
         - If not ``None``, the ensemble will be evaluated on this
-          dataloader after each training epoch.
+          dataloader after each base estimator being trained.
     early_stopping_rounds : int, default=2
         Specify the number of tolerant rounds for early stopping. When the
         validation performance of the ensemble does not improve after
         adding the base estimator fitted in current iteration, the internal
         counter on early stopping will increase by one. When the value of
         the internal counter reaches ``early_stopping_rounds``, the
-        training stage  will terminate early.
+        training stage  will terminate instantly.
     save_model : bool, default=True
-        Whether to save the model.
+        Specify whether to save the model parameters.
 
         - If test_loader is ``None``, the ensemble containing
           ``n_estimators`` base estimators will be saved.
         - If test_loader is not ``None``, the ensemble with the best
           validation performance will be saved.
     save_dir : string, default=None
-        Specify where to save the model.
+        Specify where to save the model parameters.
 
         - If ``None``, the model will be saved in the current directory.
         - If not ``None``, the model will be saved in the specified
