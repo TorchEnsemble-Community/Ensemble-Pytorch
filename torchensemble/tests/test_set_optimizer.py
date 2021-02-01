@@ -39,7 +39,7 @@ def test_set_optimizer_normal(optimizer_name):
 
 def test_set_optimizer_Unknown():
     model = MLP()
-    
+
     err_msg = ("Unrecognized optimizer: {}, should be one of"
                " {{Adadelta, Adagrad, Adam, AdamW, Adamax, ASGD, RMSprop,"
                " Rprop, SGD}}.").format("Unknown")

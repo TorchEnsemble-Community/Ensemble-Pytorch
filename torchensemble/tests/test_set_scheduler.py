@@ -79,7 +79,7 @@ def test_set_scheduler_ReduceLROnPlateau():
 def test_set_scheduler_Unknown():
     model = MLP()
     optimizer = torch.optim.Adam(model.parameters())
-    
+
     err_msg = ("Unrecognized scheduler: {}, should be one of"
                " {{LambdaLR, MultiplicativeLR, StepLR, MultiStepLR,"
                " ExponentialLR, CosineAnnealingLR, ReduceLROnPlateau,"
