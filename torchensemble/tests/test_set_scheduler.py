@@ -79,6 +79,11 @@ def test_set_scheduler_ReduceLROnPlateau():
 def test_set_scheduler_Unknown():
     model = MLP()
     optimizer = torch.optim.Adam(model.parameters())
-    with pytest.raises(NotImplementedError) as excinfo:
+    
+    err_msg = ("Unrecognized scheduler: {}, should be one of"
+               " {{LambdaLR, MultiplicativeLR, StepLR, MultiStepLR,"
+               " ExponentialLR, CosineAnnealingLR, ReduceLROnPlateau,"
+               " CyclicLR, OneCycleLR, CosineAnnealingWarmRestarts}}.")
+    err_msg = err_msg.format("Unknown")
+    with pytest.raises(NotImplementedError, match=err_msg):
         torchensemble.utils.set_module.set_scheduler(optimizer, "Unknown")
-    assert "Unknown name of the scheduler" in str(excinfo.value)
