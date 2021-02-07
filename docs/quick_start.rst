@@ -1,22 +1,16 @@
 Get started
 ===========
 
-Install from Source
--------------------
+Install the Stable Version
+--------------------------
 
-You can use the latest version of Ensemble-PyTorch with the following command:
+You can use the stable version of Ensemble-PyTorch with the following command:
 
 .. code-block:: bash
 
-    $ git clone https://github.com/xuyxu/Ensemble-Pytorch.git
-    $ cd Ensemble-Pytorch
-    $ pip install -r requirements.txt
-    $ python setup.py install
+    $ pip install torchensemble
 
-Ensemble-PyTorch is designed to be portable and has very small package dependencies. It is recommended to use the Python environment and PyTorch installed from `Anaconda <https://www.anaconda.com/>`__. In this case, there is no need to run the third command in the code snippet above.
-
-.. tip::
-    Ensemble-PyTorch is close to the end of the Beta stage. It will soon be uploaded to `PyPI <https://pypi.org/>`__.
+Ensemble-PyTorch is designed to be portable and has very small package dependencies. It is recommended to use the package environment and PyTorch installed from `Anaconda <https://www.anaconda.com/>`__.
 
 Define Your Base Estimator
 --------------------------

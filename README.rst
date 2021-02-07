@@ -22,6 +22,13 @@ Ensemble Pytorch
 
 Implementation of ensemble methods in Pytorch to boost the performance of your model.
 
+News
+----
+
+- The package has been uploaded to PyPI. You can now install it using ``pip install torchensemble``
+-  A pre-released version of documentation is available at
+   https://ensemble-pytorch.readthedocs.io/en/latest/
+
 List of methods
 ---------------
 
@@ -40,12 +47,6 @@ List of methods
 +--------+----------------------+-------------------+
 |    6   | Adversarial Training |      Parallel     |
 +--------+----------------------+-------------------+
-
-News
-----
-
--  A pre-released version of documentation is available at
-   https://ensemble-pytorch.readthedocs.io/en/latest/.
 
 Installation
 ------------
