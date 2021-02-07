@@ -1,6 +1,6 @@
 .. image:: ./docs/_images/badge_small.png
 
-|github|_ |readthedocs|_ |codecov|_ |python|_ |license|_
+|github|_ |readthedocs|_ |codecov|_ |python|_ |pypi|_ |license|_
 
 .. |github| image:: https://github.com/xuyxu/Ensemble-Pytorch/workflows/torchensemble-CI/badge.svg
 .. _github: https://github.com/xuyxu/Ensemble-Pytorch/actions
@@ -13,6 +13,9 @@
 
 .. |python| image:: https://img.shields.io/badge/python-3.6+-blue?logo=python
 .. _python: https://www.python.org/
+
+.. |pypi| image:: https://img.shields.io/pypi/v/torchensemble
+.. _pypi: https://pypi.org/project/torchensemble/
 
 .. |license| image:: https://img.shields.io/github/license/xuyxu/Ensemble-Pytorch
 .. _license: https://github.com/xuyxu/Ensemble-Pytorch/blob/master/LICENSE
