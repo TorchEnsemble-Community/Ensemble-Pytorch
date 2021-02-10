@@ -4,7 +4,7 @@ Changelog
 [Ver 0.1.*]
 -----------
 
-* |MajorFeature| Add methods on model serialization :meth:`load()` for all ensembles | `@mttgdd <https://github.com/mttgdd>`__
+* |MajorFeature| Add methods on model deserialization :meth:`load()` for all ensembles | `@mttgdd <https://github.com/mttgdd>`__
 
 [Beta]
 ------
