@@ -23,3 +23,19 @@ def save(model, save_dir, logger):
     torch.save(state, save_dir)
 
     return
+
+def load(model, save_dir="./", logger=None):
+    if not os.path.exists(save_dir):
+        raise FileExistsError("`{}` does not exist".format(save_dir))
+
+    # {Ensemble_Method_Name}_{Base_Estimator_Name}_{n_estimators}
+    filename = "{}_{}_{}_ckpt.pth".format(type(model).__name__,
+                                          model.base_estimator_.__name__,
+                                          model.n_estimators)
+    save_dir = os.path.join(save_dir, filename)
+
+    if logger:
+        logger.info("Loading the model from `{}`".format(save_dir))
+
+
+    model.load_state_dict(torch.load(save_dir)["model"])
