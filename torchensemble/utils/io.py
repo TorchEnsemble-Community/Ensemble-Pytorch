@@ -24,7 +24,9 @@ def save(model, save_dir, logger):
 
     return
 
+
 def load(model, save_dir="./", logger=None):
+    """Implement model deserialization from the specified directory."""
     if not os.path.exists(save_dir):
         raise FileExistsError("`{}` does not exist".format(save_dir))
 
@@ -36,6 +38,5 @@ def load(model, save_dir="./", logger=None):
 
     if logger:
         logger.info("Loading the model from `{}`".format(save_dir))
-
 
     model.load_state_dict(torch.load(save_dir)["model"])
