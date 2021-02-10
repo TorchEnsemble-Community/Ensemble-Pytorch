@@ -1,6 +1,11 @@
 Changelog
 =========
 
+[Ver 0.1.*]
+-----------
+
+* |MajorFeature| Add methods on model serialization :meth:`load()` for all ensembles | @mttgdd
+
 [Beta]
 ------
 
