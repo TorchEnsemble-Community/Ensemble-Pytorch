@@ -4,24 +4,24 @@ Changelog
 [Ver 0.1.*]
 -----------
 
-* |MajorFeature| Add methods on model serialization :meth:`load()` for all ensembles | @mttgdd
+* |MajorFeature| Add methods on model serialization :meth:`load()` for all ensembles | `@mttgdd <https://github.com/mttgdd>`__
 
 [Beta]
 ------
 
-* |MajorFeature| Add :meth:`set_scheduler` for all ensembles | @xuyxu
-* |MajorFeature| Add :class:`AdversarialTrainingClassifier` and :class:`AdversarialTrainingRegressor` | @xuyxu
-* |MajorFeature| Add :class:`SnapshotEnsembleClassifier` and :class:`SnapshotEnsembleRegressor` | @xuyxu
-* |MajorFeature| Add model validation and serialization | @ghost-ronin and @xuyxu
-* |Enhancement| Add CI and maintenance tools | @xuyxu
-* |Enhancement| Add the code coverage on codecov | @xuyxu
-* |Enhancement| Add the version numbers to requirements.txt | @zackhardtoname and @xuyxu
-* |Enhancement| Improve the logging module using :class:`logging` | @zzzzwj
-* |API| Remove the input argument ``output_dim`` from all methods | @xuyxu
-* |API| Refactor the setup on optimizer into :meth:`set_optimizer` | @xuyxu
-* |API| Refactor the codes on operating tensors into an independent module | @zzzzwj
-* |Fix| Fix the bug in logging module when using multi-processing | @zzzzwj
-* |Fix| Fix the binding problem on scheduler and optimizer when using parallelization | @Alex-Medium and @xuyxi
+* |MajorFeature| Add :meth:`set_scheduler` for all ensembles | `@xuyxu <https://github.com/xuyxu>`__
+* |MajorFeature| Add :class:`AdversarialTrainingClassifier` and :class:`AdversarialTrainingRegressor` | `@xuyxu <https://github.com/xuyxu>`__
+* |MajorFeature| Add :class:`SnapshotEnsembleClassifier` and :class:`SnapshotEnsembleRegressor` | `@xuyxu <https://github.com/xuyxu>`__
+* |MajorFeature| Add model validation and serialization | `@ozanpkr <https://github.com/ozanpkr>`__ and `@xuyxu <https://github.com/xuyxu>`__
+* |Enhancement| Add CI and maintenance tools | `@xuyxu <https://github.com/xuyxu>`__
+* |Enhancement| Add the code coverage on codecov | `@xuyxu <https://github.com/xuyxu>`__
+* |Enhancement| Add the version numbers to requirements.txt | `@zackhardtoname <https://github.com/zackhardtoname>`__ and `@xuyxu <https://github.com/xuyxu>`__
+* |Enhancement| Improve the logging module using :class:`logging` | `@zzzzwj <https://github.com/zzzzwj>`__
+* |API| Remove the input argument ``output_dim`` from all methods | `@xuyxu <https://github.com/xuyxu>`__
+* |API| Refactor the setup on optimizer into :meth:`set_optimizer` | `@xuyxu <https://github.com/xuyxu>`__
+* |API| Refactor the codes on operating tensors into an independent module | `@zzzzwj <https://github.com/zzzzwj>`__
+* |Fix| Fix the bug in logging module when using multi-processing | `@zzzzwj <https://github.com/zzzzwj>`__
+* |Fix| Fix the binding problem on scheduler and optimizer when using parallelization | `@Alex-Medium <https://github.com/Alex-Medium>`__ and `@xuyxu <https://github.com/xuyxu>`__
 
 .. role:: raw-html(raw)
    :format: html
