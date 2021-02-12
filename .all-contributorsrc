@@ -1,0 +1,44 @@
+{
+  "files": ["CONTRIBUTORS.md"],
+  "imageSize": 100,
+  "contributorsPerLine": 7,
+  "contributorsSortAlphabetically": false,
+  "badgeTemplate": "[![All Contributors](https://img.shields.io/badge/all_contributors-<%= contributors.length %>-orange.svg?style=flat-square)](#contributors)",
+  "skipCi": "true",
+  "contributors": [
+    {
+	  "login": "xuyxu",
+	  "name": "Yi-Xuan Xu",
+	  "avatar_url": "https://avatars.githubusercontent.com/u/22359569?s=400&u=9bb18ef27fee8b561a7be585d3b96d74e0398eac&v=4",
+	  "profile": "https://github.com/xuyxu",
+	  "contributions": [
+        "code",
+        "doc",
+        "test"
+      ]
+    },
+	{
+	  "login": "zzzzwj",
+	  "name": "Wen-Jie Zhang",
+	  "avatar_url": "https://avatars.githubusercontent.com/u/23235538?s=400&v=4",
+	  "profile": "https://github.com/zzzzwj",
+	  "contributions": [
+        "code",
+        "test"
+	  ]
+	},
+	{
+	  "login": "mttgdd",
+	  "name": "Matt Gadd",
+	  "avatar_url": "https://avatars.githubusercontent.com/u/3154919?s=400&u=3e6287b0c4a2c83e2db98d86980cee89ed218d32&v=4",
+	  "profile": "https://github.com/mttgdd",
+	  "contributions": [
+        "code"
+	  ]
+	}
+  ],
+  "projectName": "Ensemble-PyTorch",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "commitConvention": "none"
+}
