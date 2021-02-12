@@ -6,6 +6,7 @@
 *.xml
 .DS_Store
 .coverage
+package-lock.json
 
 .idea/
 .vscode/
@@ -14,4 +15,5 @@ build/
 _build/
 dist/
 logs/
+node_modules/
 torchensemble.egg-info
