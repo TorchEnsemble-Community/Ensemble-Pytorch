@@ -25,6 +25,10 @@ all_reg = [torchensemble.FusionRegressor,
            torchensemble.AdversarialTrainingRegressor]
 
 
+# Remove randomness
+np.random.seed(0)
+torch.manual_seed(0)
+
 set_logger("pytest_all_models")
 
 
@@ -67,12 +71,10 @@ y_train_reg = y_train_reg.view(-1, 1)
 
 # Testing data
 X_test = torch.Tensor(np.array(([0.5, 0.5],
-                                [0.6, 0.6],
-                                [0.7, 0.7],
-                                [0.8, 0.8])))
+                                [0.6, 0.6])))
 
-y_test_clf = torch.LongTensor(np.array(([1, 1, 0, 0])))
-y_test_reg = torch.FloatTensor(np.array(([0.5, 0.6, 0.7, 0.8])))
+y_test_clf = torch.LongTensor(np.array(([1, 0])))
+y_test_reg = torch.FloatTensor(np.array(([0.5, 0.6])))
 y_test_reg = y_test_reg.view(-1, 1)
 
 
@@ -106,6 +108,7 @@ def test_clf(clf):
     # Train
     model.fit(train_loader,
               epochs=epochs,
+              test_loader=test_loader,
               save_model=True)
 
     # Test
@@ -150,6 +153,7 @@ def test_reg(reg):
     # Train
     model.fit(train_loader,
               epochs=epochs,
+              test_loader=test_loader,
               save_model=True)
 
     # Test
