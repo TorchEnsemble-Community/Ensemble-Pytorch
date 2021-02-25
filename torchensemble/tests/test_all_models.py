@@ -106,7 +106,6 @@ def test_clf(clf):
     # Train
     model.fit(train_loader,
               epochs=epochs,
-              test_loader=test_loader,
               save_model=True)
 
     # Test
@@ -151,7 +150,6 @@ def test_reg(reg):
     # Train
     model.fit(train_loader,
               epochs=epochs,
-              test_loader=test_loader,
               save_model=True)
 
     # Test
