@@ -4,6 +4,7 @@ Changelog
 [Ver 0.1.*]
 -----------
 
+* |Fix| Fix missing base estimators when calling :meth:`load()` for all ensembles | `@xuyxu <https://github.com/xuyxu>`__
 * |MajorFeature| Add methods on model deserialization :meth:`load()` for all ensembles | `@mttgdd <https://github.com/mttgdd>`__
 
 [Beta]

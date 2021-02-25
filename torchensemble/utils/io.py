@@ -14,7 +14,11 @@ def save(model, save_dir, logger):
     filename = "{}_{}_{}_ckpt.pth".format(type(model).__name__,
                                           model.base_estimator_.__name__,
                                           model.n_estimators)
-    state = {"model": model.state_dict()}
+
+    # The real number of base estimators in some ensembles is not same as
+    # `n_estimators`.
+    state = {"n_estimators": len(model.estimators_),
+             "model": model.state_dict()}
     save_dir = os.path.join(save_dir, filename)
 
     logger.info("Saving the model to `{}`".format(save_dir))
@@ -39,4 +43,11 @@ def load(model, save_dir="./", logger=None):
     if logger:
         logger.info("Loading the model from `{}`".format(save_dir))
 
-    model.load_state_dict(torch.load(save_dir)["model"])
+    state = torch.load(save_dir)
+    n_estimators = state["n_estimators"]
+    model_params = state["model"]
+
+    # Pre-allocate and load all base estimators
+    for _ in range(n_estimators):
+        model.estimators_.append(model._make_estimator())
+    model.load_state_dict(model_params)
