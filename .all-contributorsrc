@@ -1,5 +1,5 @@
 {
-  "projectName": "Ensemble-PyTorch",
+  "projectName": "Ensemble-Pytorch",
   "projectOwner": "xuyxu",
   "repoType": "github",
   "repoHost": "https://github.com",
@@ -39,7 +39,17 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "Xiaohui9607",
+      "name": "Xiaohui Chen",
+      "avatar_url": "https://avatars.githubusercontent.com/u/37996225?v=4",
+      "profile": "https://github.com/Xiaohui9607",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
-  "contributorsPerLine": 7
+  "contributorsPerLine": 7,
+  "skipCi": true
 }
