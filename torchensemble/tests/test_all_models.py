@@ -5,6 +5,7 @@ import torch.nn as nn
 from torch.utils.data import TensorDataset, DataLoader
 
 import torchensemble
+from torchensemble.utils import io
 from torchensemble.utils.logging import set_logger
 
 
@@ -23,6 +24,10 @@ all_reg = [torchensemble.FusionRegressor,
            torchensemble.SnapshotEnsembleRegressor,
            torchensemble.AdversarialTrainingRegressor]
 
+
+# Remove randomness
+np.random.seed(0)
+torch.manual_seed(0)
 
 set_logger("pytest_all_models")
 
@@ -66,12 +71,10 @@ y_train_reg = y_train_reg.view(-1, 1)
 
 # Testing data
 X_test = torch.Tensor(np.array(([0.5, 0.5],
-                                [0.6, 0.6],
-                                [0.7, 0.7],
-                                [0.8, 0.8])))
+                                [0.6, 0.6])))
 
-y_test_clf = torch.LongTensor(np.array(([1, 1, 0, 0])))
-y_test_reg = torch.FloatTensor(np.array(([0.5, 0.6, 0.7, 0.8])))
+y_test_clf = torch.LongTensor(np.array(([1, 0])))
+y_test_reg = torch.FloatTensor(np.array(([0.5, 0.6])))
 y_test_reg = y_test_reg.view(-1, 1)
 
 
@@ -94,9 +97,9 @@ def test_clf(clf):
 
     # Prepare data
     train = TensorDataset(X_train, y_train_clf)
-    train_loader = DataLoader(train, batch_size=2)
+    train_loader = DataLoader(train, batch_size=2, shuffle=False)
     test = TensorDataset(X_test, y_test_clf)
-    test_loader = DataLoader(test, batch_size=2)
+    test_loader = DataLoader(test, batch_size=2, shuffle=False)
 
     # Snapshot ensemble needs more epochs
     if isinstance(model, torchensemble.SnapshotEnsembleClassifier):
@@ -109,7 +112,15 @@ def test_clf(clf):
               save_model=True)
 
     # Test
-    model.predict(test_loader)
+    prev_acc = model.predict(test_loader)
+
+    # Reload
+    new_model = clf(estimator=MLP_clf, n_estimators=n_estimators, cuda=False)
+    io.load(new_model)
+
+    post_acc = new_model.predict(test_loader)
+
+    assert prev_acc == post_acc  # ensure the same performance
 
 
 @pytest.mark.parametrize("reg", all_reg)
@@ -131,9 +142,9 @@ def test_reg(reg):
 
     # Prepare data
     train = TensorDataset(X_train, y_train_reg)
-    train_loader = DataLoader(train, batch_size=2)
+    train_loader = DataLoader(train, batch_size=2, shuffle=False)
     test = TensorDataset(X_test, y_test_reg)
-    test_loader = DataLoader(test, batch_size=2)
+    test_loader = DataLoader(test, batch_size=2, shuffle=False)
 
     # Snapshot ensemble needs more epochs
     if isinstance(model, torchensemble.SnapshotEnsembleRegressor):
@@ -146,7 +157,15 @@ def test_reg(reg):
               save_model=True)
 
     # Test
-    model.predict(test_loader)
+    prev_mse = model.predict(test_loader)
+
+    # Reload
+    new_model = reg(estimator=MLP_reg, n_estimators=n_estimators, cuda=False)
+    io.load(new_model)
+
+    post_mse = new_model.predict(test_loader)
+
+    assert prev_mse == post_mse  # ensure the same performance
 
 
 @pytest.mark.parametrize("method", all_clf + all_reg)
