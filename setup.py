@@ -64,7 +64,7 @@ setup(
         'Bug Tracker': 'https://github.com/xuyxu/Ensemble-Pytorch/issues',
         'Documentation': 'https://ensemble-pytorch.readthedocs.io',
         'Source Code': 'https://github.com/xuyxu/Ensemble-Pytorch'},
-    version='0.1.0',
+    version='0.1.1',
     long_description=long_description,
     classifiers=[
         'Intended Audience :: Science/Research',
@@ -83,5 +83,6 @@ setup(
     keywords=['PyTorch', 'Ensemble Learning'],
     packages=find_packages(),
     cmdclass=cmdclass,
+    python_requires=">=3.6",
     install_requires=install_requires,
 )
