@@ -2,7 +2,7 @@
    :align: center
    :width: 400
 
-|github|_ |readthedocs|_ |codecov|_ |python|_ |pypi|_ |license|_
+|github|_ |readthedocs|_ |codecov|_ |python|_ |pypi|_ |license|_ |style|_
 
 .. |github| image:: https://github.com/xuyxu/Ensemble-Pytorch/workflows/torchensemble-CI/badge.svg
 .. _github: https://github.com/xuyxu/Ensemble-Pytorch/actions
@@ -21,6 +21,9 @@
 
 .. |license| image:: https://img.shields.io/github/license/xuyxu/Ensemble-Pytorch
 .. _license: https://github.com/xuyxu/Ensemble-Pytorch/blob/master/LICENSE
+
+.. |style| image:: https://img.shields.io/badge/code%20style-black-000000.svg
+.. _style: https://github.com/psf/black
 
 Ensemble-PyTorch Documentation
 ==============================
