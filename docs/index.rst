@@ -84,4 +84,5 @@ Content
    Experiment <experiment>
    API Reference <parameters>
    Changelog <changelog>
+   Contributors <contributors>
    Roadmap <roadmap>
