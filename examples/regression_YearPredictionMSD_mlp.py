@@ -102,9 +102,7 @@ if __name__ == "__main__":
 
     # FusionRegressor
     model = FusionRegressor(
-        estimator=MLP,
-        n_estimators=n_estimators,
-        cuda=True
+        estimator=MLP, n_estimators=n_estimators, cuda=True
     )
 
     # Set the optimizer
@@ -120,14 +118,13 @@ if __name__ == "__main__":
     toc = time.time()
     evaluating_time = toc - tic
 
-    records.append(("FusionRegressor", training_time, evaluating_time,
-                    testing_mse))
+    records.append(
+        ("FusionRegressor", training_time, evaluating_time, testing_mse)
+    )
 
     # VotingRegressor
     model = VotingRegressor(
-        estimator=MLP,
-        n_estimators=n_estimators,
-        cuda=True
+        estimator=MLP, n_estimators=n_estimators, cuda=True
     )
 
     # Set the optimizer
@@ -143,14 +140,13 @@ if __name__ == "__main__":
     toc = time.time()
     evaluating_time = toc - tic
 
-    records.append(("VotingRegressor", training_time, evaluating_time,
-                    testing_mse))
+    records.append(
+        ("VotingRegressor", training_time, evaluating_time, testing_mse)
+    )
 
     # BaggingRegressor
     model = BaggingRegressor(
-        estimator=MLP,
-        n_estimators=n_estimators,
-        cuda=True
+        estimator=MLP, n_estimators=n_estimators, cuda=True
     )
 
     # Set the optimizer
@@ -166,14 +162,13 @@ if __name__ == "__main__":
     toc = time.time()
     evaluating_time = toc - tic
 
-    records.append(("BaggingRegressor", training_time, evaluating_time,
-                    testing_mse))
+    records.append(
+        ("BaggingRegressor", training_time, evaluating_time, testing_mse)
+    )
 
     # GradientBoostingRegressor
     model = GradientBoostingRegressor(
-        estimator=MLP,
-        n_estimators=n_estimators,
-        cuda=True
+        estimator=MLP, n_estimators=n_estimators, cuda=True
     )
 
     # Set the optimizer
@@ -189,14 +184,18 @@ if __name__ == "__main__":
     toc = time.time()
     evaluating_time = toc - tic
 
-    records.append(("GradientBoostingRegressor", training_time,
-                    evaluating_time, testing_mse))
+    records.append(
+        (
+            "GradientBoostingRegressor",
+            training_time,
+            evaluating_time,
+            testing_mse,
+        )
+    )
 
     # SnapshotEnsembleRegressor
     model = SnapshotEnsembleRegressor(
-        estimator=MLP,
-        n_estimators=n_estimators,
-        cuda=True
+        estimator=MLP, n_estimators=n_estimators, cuda=True
     )
 
     # Set the optimizer
@@ -212,8 +211,14 @@ if __name__ == "__main__":
     toc = time.time()
     evaluating_time = toc - tic
 
-    records.append(("SnapshotEnsembleRegressor", training_time,
-                    evaluating_time, testing_acc))
+    records.append(
+        (
+            "SnapshotEnsembleRegressor",
+            training_time,
+            evaluating_time,
+            testing_acc,
+        )
+    )
 
     # Print results on different ensemble methods
     display_records(records, logger)

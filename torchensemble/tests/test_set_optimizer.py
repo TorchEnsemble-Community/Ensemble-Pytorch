@@ -3,20 +3,21 @@ import torchensemble
 import torch.nn as nn
 
 
-optimizer_list = ["Adadelta",
-                  "Adagrad",
-                  "Adam",
-                  "AdamW",
-                  "Adamax",
-                  "ASGD",
-                  "RMSprop",
-                  "Rprop",
-                  "SGD"]
+optimizer_list = [
+    "Adadelta",
+    "Adagrad",
+    "Adam",
+    "AdamW",
+    "Adamax",
+    "ASGD",
+    "RMSprop",
+    "Rprop",
+    "SGD",
+]
 
 
 # Base estimator
 class MLP(nn.Module):
-
     def __init__(self):
         super(MLP, self).__init__()
         self.linear1 = nn.Linear(2, 2)
@@ -32,17 +33,19 @@ class MLP(nn.Module):
 @pytest.mark.parametrize("optimizer_name", optimizer_list)
 def test_set_optimizer_normal(optimizer_name):
     model = MLP()
-    torchensemble.utils.set_module.set_optimizer(model,
-                                                 optimizer_name,
-                                                 lr=1e-3)
+    torchensemble.utils.set_module.set_optimizer(
+        model, optimizer_name, lr=1e-3
+    )
 
 
 def test_set_optimizer_Unknown():
     model = MLP()
 
-    err_msg = ("Unrecognized optimizer: {}, should be one of"
-               " {{Adadelta, Adagrad, Adam, AdamW, Adamax, ASGD, RMSprop,"
-               " Rprop, SGD}}.").format("Unknown")
+    err_msg = (
+        "Unrecognized optimizer: {}, should be one of"
+        " {{Adadelta, Adagrad, Adam, AdamW, Adamax, ASGD, RMSprop,"
+        " Rprop, SGD}}."
+    ).format("Unknown")
     with pytest.raises(NotImplementedError, match=err_msg):
         torchensemble.utils.set_module.set_optimizer(model, "Unknown")
 
@@ -50,9 +53,9 @@ def test_set_optimizer_Unknown():
 def test_update_lr():
     cur_lr = 1e-4
     model = MLP()
-    optimizer = torchensemble.utils.set_module.set_optimizer(model,
-                                                             "Adam",
-                                                             lr=1e-3)
+    optimizer = torchensemble.utils.set_module.set_optimizer(
+        model, "Adam", lr=1e-3
+    )
 
     optimizer = torchensemble.utils.set_module.update_lr(optimizer, cur_lr)
 
@@ -63,11 +66,12 @@ def test_update_lr():
 def test_update_lr_invalid():
     cur_lr = 0
     model = MLP()
-    optimizer = torchensemble.utils.set_module.set_optimizer(model,
-                                                             "Adam",
-                                                             lr=1e-3)
+    optimizer = torchensemble.utils.set_module.set_optimizer(
+        model, "Adam", lr=1e-3
+    )
 
-    err_msg = ("The learning rate should be strictly positive, but got"
-               " {} instead.").format(cur_lr)
+    err_msg = (
+        "The learning rate should be strictly positive, but got" " {} instead."
+    ).format(cur_lr)
     with pytest.raises(ValueError, match=err_msg):
         torchensemble.utils.set_module.update_lr(optimizer, cur_lr)

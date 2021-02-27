@@ -7,9 +7,11 @@ from numpy.testing import assert_array_almost_equal
 from torchensemble.utils import operator as op
 
 
-outputs = [torch.FloatTensor(np.array(([1, 1], [1, 1]))),
-           torch.FloatTensor(np.array(([2, 2], [2, 2]))),
-           torch.FloatTensor(np.array(([3, 3], [3, 3])))]
+outputs = [
+    torch.FloatTensor(np.array(([1, 1], [1, 1]))),
+    torch.FloatTensor(np.array(([2, 2], [2, 2]))),
+    torch.FloatTensor(np.array(([3, 3], [3, 3]))),
+]
 
 label = torch.LongTensor(np.array(([0, 1, 2, 1])))
 n_classes = 3
@@ -38,6 +40,6 @@ def test_residual_regression_invalid_shape():
     with pytest.raises(ValueError) as excinfo:
         op.pseudo_residual_regression(
             torch.FloatTensor(np.array(([1, 1], [1, 1]))),  # 2 * 2
-            label.view(-1, 1)  # 4 * 1
+            label.view(-1, 1),  # 4 * 1
         )
     assert "should be the same as output" in str(excinfo.value)

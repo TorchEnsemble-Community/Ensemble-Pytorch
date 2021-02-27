@@ -18,9 +18,11 @@ from .utils import set_module
 from .utils import operator as op
 
 
-__all__ = ["_BaseGradientBoosting",
-           "GradientBoostingClassifier",
-           "GradientBoostingRegressor"]
+__all__ = [
+    "_BaseGradientBoosting",
+    "GradientBoostingClassifier",
+    "GradientBoostingRegressor",
+]
 
 
 __model_doc = """
@@ -93,10 +95,10 @@ def _gradient_boosting_model_doc(header, item="model"):
     Decorator on obtaining documentation for different gradient boosting
     models.
     """
+
     def get_doc(item):
         """Return the selected item"""
-        __doc = {"model": __model_doc,
-                 "fit": __fit_doc}
+        __doc = {"model": __model_doc, "fit": __fit_doc}
         return __doc[item]
 
     def adddoc(cls):
@@ -104,24 +106,28 @@ def _gradient_boosting_model_doc(header, item="model"):
         doc.extend(get_doc(item))
         cls.__doc__ = "".join(doc)
         return cls
+
     return adddoc
 
 
 class _BaseGradientBoosting(BaseModule):
-
-    def __init__(self,
-                 estimator,
-                 n_estimators,
-                 estimator_args=None,
-                 shrinkage_rate=1.,
-                 cuda=True):
+    def __init__(
+        self,
+        estimator,
+        n_estimators,
+        estimator_args=None,
+        shrinkage_rate=1.0,
+        cuda=True,
+    ):
         super(BaseModule, self).__init__()
 
         # Make sure estimator is not an instance
         if not isinstance(estimator, type):
-            msg = ("The input argument `estimator` should be a class"
-                   " inherited from nn.Module. Perhaps you have passed"
-                   " an instance of that class into the ensemble.")
+            msg = (
+                "The input argument `estimator` should be a class"
+                " inherited from nn.Module. Perhaps you have passed"
+                " an instance of that class into the ensemble."
+            )
             raise RuntimeError(msg)
 
         self.base_estimator_ = estimator
@@ -134,34 +140,41 @@ class _BaseGradientBoosting(BaseModule):
         self.estimators_ = nn.ModuleList()
         self.use_scheduler_ = False
 
-    def _validate_parameters(self,
-                             epochs,
-                             log_interval,
-                             early_stopping_rounds):
+    def _validate_parameters(
+        self, epochs, log_interval, early_stopping_rounds
+    ):
         """Validate hyper-parameters on training the ensemble."""
 
         if not epochs > 0:
-            msg = ("The number of training epochs = {} should be strictly"
-                   " positive.")
+            msg = (
+                "The number of training epochs = {} should be strictly"
+                " positive."
+            )
             self.logger.error(msg.format(epochs))
             raise ValueError(msg.format(epochs))
 
         if not log_interval > 0:
-            msg = ("The number of batches to wait before printting the"
-                   " training status should be strictly positive, but got {}"
-                   " instead.")
+            msg = (
+                "The number of batches to wait before printting the"
+                " training status should be strictly positive, but got {}"
+                " instead."
+            )
             self.logger.error(msg.format(log_interval))
             raise ValueError(msg.format(log_interval))
 
         if not early_stopping_rounds >= 1:
-            msg = ("The number of tolerant rounds before triggering the"
-                   " early stopping should at least be 1, but got {} instead.")
+            msg = (
+                "The number of tolerant rounds before triggering the"
+                " early stopping should at least be 1, but got {} instead."
+            )
             self.logger.error(msg.format(early_stopping_rounds))
             raise ValueError(msg.format(early_stopping_rounds))
 
         if not 0 < self.shrinkage_rate <= 1:
-            msg = ("The shrinkage rate should be in the range (0, 1], but got"
-                   " {} instead.")
+            msg = (
+                "The shrinkage rate should be in the range (0, 1], but got"
+                " {} instead."
+            )
             self.logger.error(msg.format(self.shrinkage_rate))
             raise ValueError(msg.format(self.shrinkage_rate))
 
@@ -174,48 +187,55 @@ class _BaseGradientBoosting(BaseModule):
         Return the accumulated outputs from the first `est_idx+1` base
         estimators."""
         if est_idx >= self.n_estimators:
-            msg = ("est_idx = {} should be an integer smaller than the"
-                   " number of base estimators = {}.")
+            msg = (
+                "est_idx = {} should be an integer smaller than the"
+                " number of base estimators = {}."
+            )
             self.logger.error(msg.format(est_idx, self.n_estimators))
             raise ValueError(msg.format(est_idx, self.n_estimators))
 
-        outputs = [estimator(x) for estimator in self.estimators_[:est_idx+1]]
+        outputs = [
+            estimator(x) for estimator in self.estimators_[: est_idx + 1]
+        ]
         out = op.sum_with_multiplicative(outputs, self.shrinkage_rate)
 
         return out
 
     @torchensemble_model_doc(
         """Set the attributes on optimizer for Gradient Boosting.""",
-        "set_optimizer")
+        "set_optimizer",
+    )
     def set_optimizer(self, optimizer_name, **kwargs):
         self.optimizer_name = optimizer_name
         self.optimizer_args = kwargs
 
     @torchensemble_model_doc(
         """Set the attributes on scheduler for Gradient Boosting.""",
-        "set_scheduler")
+        "set_scheduler",
+    )
     def set_scheduler(self, scheduler_name, **kwargs):
         self.scheduler_name = scheduler_name
         self.scheduler_args = kwargs
         self.use_scheduler_ = True
 
-    def fit(self,
-            train_loader,
-            epochs=100,
-            log_interval=100,
-            test_loader=None,
-            early_stopping_rounds=2,
-            save_model=True,
-            save_dir=None):
+    def fit(
+        self,
+        train_loader,
+        epochs=100,
+        log_interval=100,
+        test_loader=None,
+        early_stopping_rounds=2,
+        save_model=True,
+        save_dir=None,
+    ):
 
         # Instantiate base estimators and set attributes
         for _ in range(self.n_estimators):
             self.estimators_.append(self._make_estimator())
-        self._validate_parameters(epochs,
-                                  log_interval,
-                                  early_stopping_rounds)
-        self.n_outputs = self._decide_n_outputs(train_loader,
-                                                self.is_classification)
+        self._validate_parameters(epochs, log_interval, early_stopping_rounds)
+        self.n_outputs = self._decide_n_outputs(
+            train_loader, self.is_classification
+        )
 
         # Utils
         criterion = nn.MSELoss(reduction="sum")
@@ -226,11 +246,14 @@ class _BaseGradientBoosting(BaseModule):
             # Initialize a optimizer and scheduler for each base estimator to
             # avoid unexpected dependencies.
             learner_optimizer = set_module.set_optimizer(
-                estimator, self.optimizer_name, **self.optimizer_args)
+                estimator, self.optimizer_name, **self.optimizer_args
+            )
 
             if self.use_scheduler_:
                 learner_scheduler = set_module.set_scheduler(
-                    learner_optimizer, self.scheduler_name, **self.scheduler_args  # noqa: E501
+                    learner_optimizer,
+                    self.scheduler_name,
+                    **self.scheduler_args  # noqa: E501
                 )
 
             # Training loop
@@ -252,10 +275,13 @@ class _BaseGradientBoosting(BaseModule):
 
                     # Print training status
                     if batch_idx % log_interval == 0:
-                        msg = ("Estimator: {:03d} | Epoch: {:03d} | Batch:"
-                               " {:03d} | RegLoss: {:.5f}")
-                        self.logger.info(msg.format(est_idx, epoch,
-                                                    batch_idx, loss))
+                        msg = (
+                            "Estimator: {:03d} | Epoch: {:03d} | Batch:"
+                            " {:03d} | RegLoss: {:.5f}"
+                        )
+                        self.logger.info(
+                            msg.format(est_idx, epoch, batch_idx, loss)
+                        )
 
                 if self.use_scheduler_:
                     learner_scheduler.step()
@@ -267,8 +293,9 @@ class _BaseGradientBoosting(BaseModule):
                 if flag:
                     n_counter += 1
                     msg = "Early stopping counter: {} out of {}"
-                    self.logger.info(msg.format(n_counter,
-                                                early_stopping_rounds))
+                    self.logger.info(
+                        msg.format(n_counter, early_stopping_rounds)
+                    )
 
                     if n_counter == early_stopping_rounds:
                         msg = "Handling early stopping..."
@@ -276,7 +303,7 @@ class _BaseGradientBoosting(BaseModule):
 
                         # Early stopping
                         offset = est_idx - n_counter
-                        self.estimators_ = self.estimators_[:offset+1]
+                        self.estimators_ = self.estimators_[: offset + 1]
                         self.n_estimators = len(self.estimators_)
                         break
                 else:
@@ -294,7 +321,6 @@ class _BaseGradientBoosting(BaseModule):
     """Implementation on the GradientBoostingClassifier.""", "model"
 )
 class GradientBoostingClassifier(_BaseGradientBoosting):
-
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.is_classification = True
@@ -310,9 +336,9 @@ class GradientBoostingClassifier(_BaseGradientBoosting):
                 estimator(X) for estimator in self.estimators_[:est_idx]
             ]
             output += op.sum_with_multiplicative(results, self.shrinkage_rate)
-        pseudo_residual = op.pesudo_residual_classification(y,
-                                                            output,
-                                                            self.n_outputs)
+        pseudo_residual = op.pesudo_residual_classification(
+            y, output, self.n_outputs
+        )
 
         return pseudo_residual
 
@@ -346,30 +372,32 @@ class GradientBoostingClassifier(_BaseGradientBoosting):
 
     @torchensemble_model_doc(
         """Set the attributes on optimizer for GradientBoostingClassifier.""",
-        "set_optimizer")
+        "set_optimizer",
+    )
     def set_optimizer(self, optimizer_name, **kwargs):
-        super().set_optimizer(
-            optimizer_name=optimizer_name, **kwargs)
+        super().set_optimizer(optimizer_name=optimizer_name, **kwargs)
 
     @torchensemble_model_doc(
         """Set the attributes on scheduler for GradientBoostingClassifier.""",
-        "set_scheduler")
+        "set_scheduler",
+    )
     def set_scheduler(self, scheduler_name, **kwargs):
-        super().set_scheduler(
-            scheduler_name=scheduler_name, **kwargs)
+        super().set_scheduler(scheduler_name=scheduler_name, **kwargs)
 
     @_gradient_boosting_model_doc(
         """Implementation on the training stage of GradientBoostingClassifier.""",  # noqa: E501
-        "fit"
+        "fit",
     )
-    def fit(self,
-            train_loader,
-            epochs=100,
-            log_interval=100,
-            test_loader=None,
-            early_stopping_rounds=2,
-            save_model=True,
-            save_dir=None):
+    def fit(
+        self,
+        train_loader,
+        epochs=100,
+        log_interval=100,
+        test_loader=None,
+        early_stopping_rounds=2,
+        save_model=True,
+        save_dir=None,
+    ):
         super().fit(
             train_loader=train_loader,
             epochs=epochs,
@@ -377,11 +405,13 @@ class GradientBoostingClassifier(_BaseGradientBoosting):
             test_loader=test_loader,
             early_stopping_rounds=early_stopping_rounds,
             save_model=save_model,
-            save_dir=save_dir)
+            save_dir=save_dir,
+        )
 
     @torchensemble_model_doc(
         """Implementation on the data forwarding in GradientBoostingClassifier.""",  # noqa: E501
-        "classifier_forward")
+        "classifier_forward",
+    )
     def forward(self, x):
         output = [estimator(x) for estimator in self.estimators_]
         output = op.sum_with_multiplicative(output, self.shrinkage_rate)
@@ -391,7 +421,8 @@ class GradientBoostingClassifier(_BaseGradientBoosting):
 
     @torchensemble_model_doc(
         """Implementation on the evaluating stage of GradientBoostingClassifier.""",  # noqa: E501
-        "classifier_predict")
+        "classifier_predict",
+    )
     def predict(self, test_loader):
         self.eval()
         correct = 0
@@ -413,7 +444,6 @@ class GradientBoostingClassifier(_BaseGradientBoosting):
     """Implementation on the GradientBoostingRegressor.""", "model"
 )
 class GradientBoostingRegressor(_BaseGradientBoosting):
-
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.is_classification = False
@@ -460,30 +490,32 @@ class GradientBoostingRegressor(_BaseGradientBoosting):
 
     @torchensemble_model_doc(
         """Set the attributes on optimizer for GradientBoostingRegressor.""",
-        "set_optimizer")
+        "set_optimizer",
+    )
     def set_optimizer(self, optimizer_name, **kwargs):
-        super().set_optimizer(
-            optimizer_name=optimizer_name, **kwargs)
+        super().set_optimizer(optimizer_name=optimizer_name, **kwargs)
 
     @torchensemble_model_doc(
         """Set the attributes on scheduler for GradientBoostingRegressor.""",
-        "set_scheduler")
+        "set_scheduler",
+    )
     def set_scheduler(self, scheduler_name, **kwargs):
-        super().set_scheduler(
-            scheduler_name=scheduler_name, **kwargs)
+        super().set_scheduler(scheduler_name=scheduler_name, **kwargs)
 
     @_gradient_boosting_model_doc(
         """Implementation on the training stage of GradientBoostingRegressor.""",  # noqa: E501
-        "fit"
+        "fit",
     )
-    def fit(self,
-            train_loader,
-            epochs=100,
-            log_interval=100,
-            test_loader=None,
-            early_stopping_rounds=2,
-            save_model=True,
-            save_dir=None):
+    def fit(
+        self,
+        train_loader,
+        epochs=100,
+        log_interval=100,
+        test_loader=None,
+        early_stopping_rounds=2,
+        save_model=True,
+        save_dir=None,
+    ):
         super().fit(
             train_loader=train_loader,
             epochs=epochs,
@@ -491,11 +523,13 @@ class GradientBoostingRegressor(_BaseGradientBoosting):
             test_loader=test_loader,
             early_stopping_rounds=early_stopping_rounds,
             save_model=save_model,
-            save_dir=save_dir)
+            save_dir=save_dir,
+        )
 
     @torchensemble_model_doc(
         """Implementation on the data forwarding in GradientBoostingRegressor.""",  # noqa: E501
-        "regressor_forward")
+        "regressor_forward",
+    )
     def forward(self, x):
         outputs = [estimator(x) for estimator in self.estimators_]
         pred = op.sum_with_multiplicative(outputs, self.shrinkage_rate)
@@ -504,7 +538,8 @@ class GradientBoostingRegressor(_BaseGradientBoosting):
 
     @torchensemble_model_doc(
         """Implementation on the evaluating stage of GradientBoostingRegressor.""",  # noqa: E501
-        "regressor_predict")
+        "regressor_predict",
+    )
     def predict(self, test_loader):
         self.eval()
         mse = 0

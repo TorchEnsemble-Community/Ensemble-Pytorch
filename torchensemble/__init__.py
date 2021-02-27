@@ -12,15 +12,17 @@ from .adversarial_training import AdversarialTrainingClassifier
 from .adversarial_training import AdversarialTrainingRegressor
 
 
-__all__ = ["FusionClassifier",
-           "FusionRegressor",
-           "VotingClassifier",
-           "VotingRegressor",
-           "BaggingClassifier",
-           "BaggingRegressor",
-           "GradientBoostingClassifier",
-           "GradientBoostingRegressor",
-           "SnapshotEnsembleClassifier",
-           "SnapshotEnsembleRegressor",
-           "AdversarialTrainingClassifier",
-           "AdversarialTrainingRegressor"]
+__all__ = [
+    "FusionClassifier",
+    "FusionRegressor",
+    "VotingClassifier",
+    "VotingRegressor",
+    "BaggingClassifier",
+    "BaggingRegressor",
+    "GradientBoostingClassifier",
+    "GradientBoostingRegressor",
+    "SnapshotEnsembleClassifier",
+    "SnapshotEnsembleRegressor",
+    "AdversarialTrainingClassifier",
+    "AdversarialTrainingRegressor",
+]

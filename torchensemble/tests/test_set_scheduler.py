@@ -6,7 +6,6 @@ import torch.nn as nn
 
 # Base estimator
 class MLP(nn.Module):
-
     def __init__(self):
         super(MLP, self).__init__()
         self.linear1 = nn.Linear(2, 2)
@@ -23,67 +22,70 @@ def test_set_scheduler_LambdaLR():
     model = MLP()
     optimizer = torch.optim.Adam(model.parameters())
     lr_lambda = lambda x: x * 0.1  # noqa: E731
-    torchensemble.utils.set_module.set_scheduler(optimizer,
-                                                 "LambdaLR",
-                                                 lr_lambda=lr_lambda)
+    torchensemble.utils.set_module.set_scheduler(
+        optimizer, "LambdaLR", lr_lambda=lr_lambda
+    )
 
 
 def test_set_scheduler_MultiplicativeLR():
     model = MLP()
     optimizer = torch.optim.Adam(model.parameters())
     lr_lambda = lambda x: x * 0.1  # noqa: E731
-    torchensemble.utils.set_module.set_scheduler(optimizer,
-                                                 "MultiplicativeLR",
-                                                 lr_lambda=lr_lambda)
+    torchensemble.utils.set_module.set_scheduler(
+        optimizer, "MultiplicativeLR", lr_lambda=lr_lambda
+    )
 
 
 def test_set_scheduler_StepLR():
     model = MLP()
     optimizer = torch.optim.Adam(model.parameters())
-    torchensemble.utils.set_module.set_scheduler(optimizer,
-                                                 "StepLR",
-                                                 step_size=50)
+    torchensemble.utils.set_module.set_scheduler(
+        optimizer, "StepLR", step_size=50
+    )
 
 
 def test_set_scheduler_MultiStepLR():
     model = MLP()
     optimizer = torch.optim.Adam(model.parameters())
-    torchensemble.utils.set_module.set_scheduler(optimizer,
-                                                 "MultiStepLR",
-                                                 milestones=[50, 100])
+    torchensemble.utils.set_module.set_scheduler(
+        optimizer, "MultiStepLR", milestones=[50, 100]
+    )
 
 
 def test_set_scheduler_ExponentialLR():
     model = MLP()
     optimizer = torch.optim.Adam(model.parameters())
-    torchensemble.utils.set_module.set_scheduler(optimizer,
-                                                 "ExponentialLR",
-                                                 gamma=0.1)
+    torchensemble.utils.set_module.set_scheduler(
+        optimizer, "ExponentialLR", gamma=0.1
+    )
 
 
 def test_set_scheduler_CosineAnnealingLR():
     model = MLP()
     optimizer = torch.optim.Adam(model.parameters())
-    torchensemble.utils.set_module.set_scheduler(optimizer,
-                                                 "CosineAnnealingLR",
-                                                 T_max=100)
+    torchensemble.utils.set_module.set_scheduler(
+        optimizer, "CosineAnnealingLR", T_max=100
+    )
 
 
 def test_set_scheduler_ReduceLROnPlateau():
     model = MLP()
     optimizer = torch.optim.Adam(model.parameters())
-    torchensemble.utils.set_module.set_scheduler(optimizer,
-                                                 "ReduceLROnPlateau")
+    torchensemble.utils.set_module.set_scheduler(
+        optimizer, "ReduceLROnPlateau"
+    )
 
 
 def test_set_scheduler_Unknown():
     model = MLP()
     optimizer = torch.optim.Adam(model.parameters())
 
-    err_msg = ("Unrecognized scheduler: {}, should be one of"
-               " {{LambdaLR, MultiplicativeLR, StepLR, MultiStepLR,"
-               " ExponentialLR, CosineAnnealingLR, ReduceLROnPlateau,"
-               " CyclicLR, OneCycleLR, CosineAnnealingWarmRestarts}}.")
+    err_msg = (
+        "Unrecognized scheduler: {}, should be one of"
+        " {{LambdaLR, MultiplicativeLR, StepLR, MultiStepLR,"
+        " ExponentialLR, CosineAnnealingLR, ReduceLROnPlateau,"
+        " CyclicLR, OneCycleLR, CosineAnnealingWarmRestarts}}."
+    )
     err_msg = err_msg.format("Unknown")
     with pytest.raises(NotImplementedError, match=err_msg):
         torchensemble.utils.set_module.set_scheduler(optimizer, "Unknown")

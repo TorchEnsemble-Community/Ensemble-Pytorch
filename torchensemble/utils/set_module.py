@@ -28,9 +28,11 @@ def set_optimizer(model, optimizer_name, **kwargs):
     elif optimizer_name == "SGD":
         optimizer = torch.optim.SGD(model.parameters(), **kwargs)
     else:
-        msg = ("Unrecognized optimizer: {}, should be one of"
-               " {{Adadelta, Adagrad, Adam, AdamW, Adamax, ASGD, RMSprop,"
-               " Rprop, SGD}}.")
+        msg = (
+            "Unrecognized optimizer: {}, should be one of"
+            " {{Adadelta, Adagrad, Adam, AdamW, Adamax, ASGD, RMSprop,"
+            " Rprop, SGD}}."
+        )
         raise NotImplementedError(msg.format(optimizer_name))
 
     return optimizer
@@ -44,8 +46,10 @@ def update_lr(optimizer, lr):
     """
 
     if not lr > 0:
-        msg = ("The learning rate should be strictly positive, but got"
-               " {} instead.")
+        msg = (
+            "The learning rate should be strictly positive, but got"
+            " {} instead."
+        )
         raise ValueError(msg.format(lr))
 
     for group in optimizer.param_groups:
@@ -77,10 +81,12 @@ def set_scheduler(optimizer, scheduler_name, **kwargs):
     elif scheduler_name == "ReduceLROnPlateau":
         scheduler = lr_scheduler.ReduceLROnPlateau(optimizer, **kwargs)
     else:
-        msg = ("Unrecognized scheduler: {}, should be one of"
-               " {{LambdaLR, MultiplicativeLR, StepLR, MultiStepLR,"
-               " ExponentialLR, CosineAnnealingLR, ReduceLROnPlateau,"
-               " CyclicLR, OneCycleLR, CosineAnnealingWarmRestarts}}.")
+        msg = (
+            "Unrecognized scheduler: {}, should be one of"
+            " {{LambdaLR, MultiplicativeLR, StepLR, MultiStepLR,"
+            " ExponentialLR, CosineAnnealingLR, ReduceLROnPlateau,"
+            " CyclicLR, OneCycleLR, CosineAnnealingWarmRestarts}}."
+        )
         raise NotImplementedError(msg.format(scheduler_name))
 
     return scheduler

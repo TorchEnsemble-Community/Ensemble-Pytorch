@@ -19,20 +19,21 @@ from .utils import set_module
 from .utils import operator as op
 
 
-__all__ = ["BaggingClassifier",
-           "BaggingRegressor"]
+__all__ = ["BaggingClassifier", "BaggingRegressor"]
 
 
-def _parallel_fit_per_epoch(train_loader,
-                            estimator,
-                            cur_lr,
-                            optimizer,
-                            criterion,
-                            idx,
-                            epoch,
-                            log_interval,
-                            device,
-                            is_classification):
+def _parallel_fit_per_epoch(
+    train_loader,
+    estimator,
+    cur_lr,
+    optimizer,
+    criterion,
+    idx,
+    epoch,
+    log_interval,
+    device,
+    is_classification,
+):
     """
     Private function used to fit base estimators in parallel.
 
@@ -50,9 +51,9 @@ def _parallel_fit_per_epoch(train_loader,
         data, target = data.to(device), target.to(device)
 
         # Sampling with replacement
-        sampling_mask = torch.randint(high=batch_size,
-                                      size=(int(batch_size),),
-                                      dtype=torch.int64)
+        sampling_mask = torch.randint(
+            high=batch_size, size=(int(batch_size),), dtype=torch.int64
+        )
         sampling_mask = torch.unique(sampling_mask)  # remove duplicates
         sampling_data = data[sampling_mask]
         sampling_target = target[sampling_mask]
@@ -72,58 +73,71 @@ def _parallel_fit_per_epoch(train_loader,
                 _, predicted = torch.max(sampling_output.data, 1)
                 correct = (predicted == sampling_target).sum().item()
 
-                msg = ("Estimator: {:03d} | Epoch: {:03d} | Batch: {:03d}"
-                       " | Loss: {:.5f} | Correct: {:d}/{:d}")
-                print(msg.format(idx, epoch, batch_idx, loss,
-                                 correct, subsample_size))
+                msg = (
+                    "Estimator: {:03d} | Epoch: {:03d} | Batch: {:03d}"
+                    " | Loss: {:.5f} | Correct: {:d}/{:d}"
+                )
+                print(
+                    msg.format(
+                        idx, epoch, batch_idx, loss, correct, subsample_size
+                    )
+                )
             else:
-                msg = ("Estimator: {:03d} | Epoch: {:03d} | Batch: {:03d}"
-                       " | Loss: {:.5f}")
+                msg = (
+                    "Estimator: {:03d} | Epoch: {:03d} | Batch: {:03d}"
+                    " | Loss: {:.5f}"
+                )
                 print(msg.format(idx, epoch, batch_idx, loss))
 
     return estimator, optimizer
 
 
-@torchensemble_model_doc("""Implementation on the BaggingClassifier.""",
-                         "model")
+@torchensemble_model_doc(
+    """Implementation on the BaggingClassifier.""", "model"
+)
 class BaggingClassifier(BaseModule):
-
     @torchensemble_model_doc(
         """Implementation on the data forwarding in BaggingClassifier.""",
-        "classifier_forward")
+        "classifier_forward",
+    )
     def forward(self, x):
         # Take the average over class distributions from all base estimators.
-        outputs = [F.softmax(estimator(x), dim=1)
-                   for estimator in self.estimators_]
+        outputs = [
+            F.softmax(estimator(x), dim=1) for estimator in self.estimators_
+        ]
         proba = op.average(outputs)
 
         return proba
 
     @torchensemble_model_doc(
         """Set the attributes on optimizer for BaggingClassifier.""",
-        "set_optimizer")
+        "set_optimizer",
+    )
     def set_optimizer(self, optimizer_name, **kwargs):
         self.optimizer_name = optimizer_name
         self.optimizer_args = kwargs
 
     @torchensemble_model_doc(
         """Set the attributes on scheduler for BaggingClassifier.""",
-        "set_scheduler")
+        "set_scheduler",
+    )
     def set_scheduler(self, scheduler_name, **kwargs):
         self.scheduler_name = scheduler_name
         self.scheduler_args = kwargs
         self.use_scheduler_ = True
 
     @torchensemble_model_doc(
-        """Implementation on the training stage of BaggingClassifier.""",
-        "fit")
-    def fit(self,
-            train_loader,
-            epochs=100,
-            log_interval=100,
-            test_loader=None,
-            save_model=True,
-            save_dir=None):
+        """Implementation on the training stage of BaggingClassifier.""", "fit"
+    )
+    def fit(
+        self,
+        train_loader,
+        epochs=100,
+        log_interval=100,
+        test_loader=None,
+        save_model=True,
+        save_dir=None,
+    ):
 
         self._validate_parameters(epochs, log_interval)
         self.n_outputs = self._decide_n_outputs(train_loader, True)
@@ -135,23 +149,26 @@ class BaggingClassifier(BaseModule):
 
         optimizers = []
         for i in range(self.n_estimators):
-            optimizers.append(set_module.set_optimizer(estimators[i],
-                                                       self.optimizer_name,
-                                                       **self.optimizer_args))
+            optimizers.append(
+                set_module.set_optimizer(
+                    estimators[i], self.optimizer_name, **self.optimizer_args
+                )
+            )
 
         if self.use_scheduler_:
-            scheduler_ = set_module.set_scheduler(optimizers[0],
-                                                  self.scheduler_name,
-                                                  **self.scheduler_args)
+            scheduler_ = set_module.set_scheduler(
+                optimizers[0], self.scheduler_name, **self.scheduler_args
+            )
 
         # Utils
         criterion = nn.CrossEntropyLoss()
-        best_acc = 0.
+        best_acc = 0.0
 
         # Internal helper function on pesudo forward
         def _forward(estimators, data):
-            outputs = [F.softmax(estimator(data), dim=1)
-                       for estimator in estimators]
+            outputs = [
+                F.softmax(estimator(data), dim=1) for estimator in estimators
+            ]
             proba = op.average(outputs)
 
             return proba
@@ -172,7 +189,8 @@ class BaggingClassifier(BaseModule):
                     msg = "Parallelization on the training epoch: {:03d}"
                     self.logger.info(msg.format(epoch))
 
-                rets = parallel(delayed(_parallel_fit_per_epoch)(
+                rets = parallel(
+                    delayed(_parallel_fit_per_epoch)(
                         train_loader,
                         estimator,
                         cur_lr,
@@ -182,10 +200,11 @@ class BaggingClassifier(BaseModule):
                         epoch,
                         log_interval,
                         self.device,
-                        True
+                        True,
                     )
                     for idx, (estimator, optimizer) in enumerate(
-                            zip(estimators, optimizers))
+                        zip(estimators, optimizers)
+                    )
                 )
 
                 estimators, optimizers = [], []
@@ -215,8 +234,10 @@ class BaggingClassifier(BaseModule):
                             if save_model:
                                 io.save(self, save_dir, self.logger)
 
-                        msg = ("Epoch: {:03d} | Validation Acc: {:.3f}"
-                               " % | Historical Best: {:.3f} %")
+                        msg = (
+                            "Epoch: {:03d} | Validation Acc: {:.3f}"
+                            " % | Historical Best: {:.3f} %"
+                        )
                         self.logger.info(msg.format(epoch, acc, best_acc))
 
                 # Update the scheduler
@@ -236,7 +257,8 @@ class BaggingClassifier(BaseModule):
 
     @torchensemble_model_doc(
         """Implementation on the evaluating stage of BaggingClassifier.""",
-        "classifier_predict")
+        "classifier_predict",
+    )
     def predict(self, test_loader):
         self.eval()
         correct = 0
@@ -254,13 +276,14 @@ class BaggingClassifier(BaseModule):
         return acc
 
 
-@torchensemble_model_doc("""Implementation on the BaggingRegressor.""",
-                         "model")
+@torchensemble_model_doc(
+    """Implementation on the BaggingRegressor.""", "model"
+)
 class BaggingRegressor(BaseModule):
-
     @torchensemble_model_doc(
         """Implementation on the data forwarding in BaggingRegressor.""",
-        "regressor_forward")
+        "regressor_forward",
+    )
     def forward(self, x):
         # Take the average over predictions from all base estimators.
         outputs = [estimator(x) for estimator in self.estimators_]
@@ -270,29 +293,33 @@ class BaggingRegressor(BaseModule):
 
     @torchensemble_model_doc(
         """Set the attributes on optimizer for BaggingRegressor.""",
-        "set_optimizer")
+        "set_optimizer",
+    )
     def set_optimizer(self, optimizer_name, **kwargs):
         self.optimizer_name = optimizer_name
         self.optimizer_args = kwargs
 
     @torchensemble_model_doc(
         """Set the attributes on scheduler for BaggingRegressor.""",
-        "set_scheduler")
+        "set_scheduler",
+    )
     def set_scheduler(self, scheduler_name, **kwargs):
         self.scheduler_name = scheduler_name
         self.scheduler_args = kwargs
         self.use_scheduler_ = True
 
     @torchensemble_model_doc(
-        """Implementation on the training stage of BaggingRegressor.""",
-        "fit")
-    def fit(self,
-            train_loader,
-            epochs=100,
-            log_interval=100,
-            test_loader=None,
-            save_model=True,
-            save_dir=None):
+        """Implementation on the training stage of BaggingRegressor.""", "fit"
+    )
+    def fit(
+        self,
+        train_loader,
+        epochs=100,
+        log_interval=100,
+        test_loader=None,
+        save_model=True,
+        save_dir=None,
+    ):
 
         self._validate_parameters(epochs, log_interval)
         self.n_outputs = self._decide_n_outputs(train_loader, False)
@@ -304,14 +331,16 @@ class BaggingRegressor(BaseModule):
 
         optimizers = []
         for i in range(self.n_estimators):
-            optimizers.append(set_module.set_optimizer(estimators[i],
-                                                       self.optimizer_name,
-                                                       **self.optimizer_args))
+            optimizers.append(
+                set_module.set_optimizer(
+                    estimators[i], self.optimizer_name, **self.optimizer_args
+                )
+            )
 
         if self.use_scheduler_:
-            scheduler_ = set_module.set_scheduler(optimizers[0],
-                                                  self.scheduler_name,
-                                                  **self.scheduler_args)
+            scheduler_ = set_module.set_scheduler(
+                optimizers[0], self.scheduler_name, **self.scheduler_args
+            )
 
         # Utils
         criterion = nn.MSELoss()
@@ -340,7 +369,8 @@ class BaggingRegressor(BaseModule):
                     msg = "Parallelization on the training epoch: {:03d}"
                     self.logger.info(msg.format(epoch))
 
-                rets = parallel(delayed(_parallel_fit_per_epoch)(
+                rets = parallel(
+                    delayed(_parallel_fit_per_epoch)(
                         train_loader,
                         estimator,
                         cur_lr,
@@ -350,10 +380,11 @@ class BaggingRegressor(BaseModule):
                         epoch,
                         log_interval,
                         self.device,
-                        False
+                        False,
                     )
                     for idx, (estimator, optimizer) in enumerate(
-                            zip(estimators, optimizers))
+                        zip(estimators, optimizers)
+                    )
                 )
 
                 estimators, optimizers = [], []
@@ -380,8 +411,10 @@ class BaggingRegressor(BaseModule):
                             if save_model:
                                 io.save(self, save_dir, self.logger)
 
-                        msg = ("Epoch: {:03d} | Validation MSE:"
-                               " {:.5f} | Historical Best: {:.5f}")
+                        msg = (
+                            "Epoch: {:03d} | Validation MSE:"
+                            " {:.5f} | Historical Best: {:.5f}"
+                        )
                         self.logger.info(msg.format(epoch, mse, best_mse))
 
                 # Update the scheduler
@@ -398,7 +431,8 @@ class BaggingRegressor(BaseModule):
 
     @torchensemble_model_doc(
         """Implementation on the evaluating stage of BaggingRegressor.""",
-        "regressor_predict")
+        "regressor_predict",
+    )
     def predict(self, test_loader):
         self.eval()
         mse = 0

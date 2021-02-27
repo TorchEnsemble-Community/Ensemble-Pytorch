@@ -25,4 +25,4 @@ def test_logger():
 
     with pytest.raises(ValueError) as excinfo:
         set_logger("Loglevel_INVALID", "INVALID")
-    assert("INVALID" in str(excinfo.value))
+    assert "INVALID" in str(excinfo.value)

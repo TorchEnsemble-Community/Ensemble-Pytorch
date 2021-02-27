@@ -35,8 +35,10 @@ class CleanCommand(Clean):
             shutil.rmtree('build')
         for dirpath, dirnames, filenames in os.walk('sklearn'):
             for filename in filenames:
-                if any(filename.endswith(suffix) for suffix in
-                       (".so", ".pyd", ".dll", ".pyc")):
+                if any(
+                    filename.endswith(suffix)
+                    for suffix in (".so", ".pyd", ".dll", ".pyc")
+                ):
                     os.unlink(os.path.join(dirpath, filename))
                     continue
                 extension = os.path.splitext(filename)[1]
@@ -56,14 +58,16 @@ setup(
     name='torchensemble',
     maintainer='Yi-Xuan Xu',
     maintainer_email='xuyx@lamda.nju.edu.cn',
-    description=('Implementations of scikit-learn like ensemble methods in'
-                 ' Pytorch'),
+    description=(
+        'Implementations of scikit-learn like ensemble methods in' ' Pytorch'
+    ),
     license='BSD 3-Clause',
     url='https://github.com/xuyxu/Ensemble-Pytorch',
     project_urls={
         'Bug Tracker': 'https://github.com/xuyxu/Ensemble-Pytorch/issues',
         'Documentation': 'https://ensemble-pytorch.readthedocs.io',
-        'Source Code': 'https://github.com/xuyxu/Ensemble-Pytorch'},
+        'Source Code': 'https://github.com/xuyxu/Ensemble-Pytorch',
+    },
     version='0.1.1',
     long_description=long_description,
     classifiers=[
@@ -79,7 +83,8 @@ setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8'],
+        'Programming Language :: Python :: 3.8',
+    ],
     keywords=['PyTorch', 'Ensemble Learning'],
     packages=find_packages(),
     cmdclass=cmdclass,

@@ -18,20 +18,21 @@ from .utils import set_module
 from .utils import operator as op
 
 
-__all__ = ["VotingClassifier",
-           "VotingRegressor"]
+__all__ = ["VotingClassifier", "VotingRegressor"]
 
 
-def _parallel_fit_per_epoch(train_loader,
-                            estimator,
-                            cur_lr,
-                            optimizer,
-                            criterion,
-                            idx,
-                            epoch,
-                            log_interval,
-                            device,
-                            is_classification):
+def _parallel_fit_per_epoch(
+    train_loader,
+    estimator,
+    cur_lr,
+    optimizer,
+    criterion,
+    idx,
+    epoch,
+    log_interval,
+    device,
+    is_classification,
+):
     """
     Private function used to fit base estimators in parallel.
 
@@ -62,59 +63,72 @@ def _parallel_fit_per_epoch(train_loader,
                 _, predicted = torch.max(output.data, 1)
                 correct = (predicted == target).sum().item()
 
-                msg = ("Estimator: {:03d} | Epoch: {:03d} | Batch: {:03d}"
-                       " | Loss: {:.5f} | Correct: {:d}/{:d}")
-                print(msg.format(idx, epoch, batch_idx, loss,
-                                 correct, batch_size))
+                msg = (
+                    "Estimator: {:03d} | Epoch: {:03d} | Batch: {:03d}"
+                    " | Loss: {:.5f} | Correct: {:d}/{:d}"
+                )
+                print(
+                    msg.format(
+                        idx, epoch, batch_idx, loss, correct, batch_size
+                    )
+                )
             # Regression
             else:
-                msg = ("Estimator: {:03d} | Epoch: {:03d} | Batch: {:03d}"
-                       " | Loss: {:.5f}")
+                msg = (
+                    "Estimator: {:03d} | Epoch: {:03d} | Batch: {:03d}"
+                    " | Loss: {:.5f}"
+                )
                 print(msg.format(idx, epoch, batch_idx, loss))
 
     return estimator, optimizer
 
 
-@torchensemble_model_doc("""Implementation on the VotingClassifier.""",
-                         "model")
+@torchensemble_model_doc(
+    """Implementation on the VotingClassifier.""", "model"
+)
 class VotingClassifier(BaseModule):
-
     @torchensemble_model_doc(
         """Implementation on the data forwarding in VotingClassifier.""",
-        "classifier_forward")
+        "classifier_forward",
+    )
     def forward(self, x):
         # Take the average over class distributions from all base estimators.
-        outputs = [F.softmax(estimator(x), dim=1)
-                   for estimator in self.estimators_]
+        outputs = [
+            F.softmax(estimator(x), dim=1) for estimator in self.estimators_
+        ]
         proba = op.average(outputs)
 
         return proba
 
     @torchensemble_model_doc(
         """Set the attributes on optimizer for VotingClassifier.""",
-        "set_optimizer")
+        "set_optimizer",
+    )
     def set_optimizer(self, optimizer_name, **kwargs):
         self.optimizer_name = optimizer_name
         self.optimizer_args = kwargs
 
     @torchensemble_model_doc(
         """Set the attributes on scheduler for VotingClassifier.""",
-        "set_scheduler")
+        "set_scheduler",
+    )
     def set_scheduler(self, scheduler_name, **kwargs):
         self.scheduler_name = scheduler_name
         self.scheduler_args = kwargs
         self.use_scheduler_ = True
 
     @torchensemble_model_doc(
-        """Implementation on the training stage of VotingClassifier.""",
-        "fit")
-    def fit(self,
-            train_loader,
-            epochs=100,
-            log_interval=100,
-            test_loader=None,
-            save_model=True,
-            save_dir=None):
+        """Implementation on the training stage of VotingClassifier.""", "fit"
+    )
+    def fit(
+        self,
+        train_loader,
+        epochs=100,
+        log_interval=100,
+        test_loader=None,
+        save_model=True,
+        save_dir=None,
+    ):
 
         self._validate_parameters(epochs, log_interval)
         self.n_outputs = self._decide_n_outputs(train_loader, True)
@@ -126,23 +140,26 @@ class VotingClassifier(BaseModule):
 
         optimizers = []
         for i in range(self.n_estimators):
-            optimizers.append(set_module.set_optimizer(estimators[i],
-                                                       self.optimizer_name,
-                                                       **self.optimizer_args))
+            optimizers.append(
+                set_module.set_optimizer(
+                    estimators[i], self.optimizer_name, **self.optimizer_args
+                )
+            )
 
         if self.use_scheduler_:
-            scheduler_ = set_module.set_scheduler(optimizers[0],
-                                                  self.scheduler_name,
-                                                  **self.scheduler_args)
+            scheduler_ = set_module.set_scheduler(
+                optimizers[0], self.scheduler_name, **self.scheduler_args
+            )
 
         # Utils
         criterion = nn.CrossEntropyLoss()
-        best_acc = 0.
+        best_acc = 0.0
 
         # Internal helper function on pesudo forward
         def _forward(estimators, data):
-            outputs = [F.softmax(estimator(data), dim=1)
-                       for estimator in estimators]
+            outputs = [
+                F.softmax(estimator(data), dim=1) for estimator in estimators
+            ]
             proba = op.average(outputs)
 
             return proba
@@ -163,7 +180,8 @@ class VotingClassifier(BaseModule):
                     msg = "Parallelization on the training epoch: {:03d}"
                     self.logger.info(msg.format(epoch))
 
-                rets = parallel(delayed(_parallel_fit_per_epoch)(
+                rets = parallel(
+                    delayed(_parallel_fit_per_epoch)(
                         train_loader,
                         estimator,
                         cur_lr,
@@ -173,10 +191,11 @@ class VotingClassifier(BaseModule):
                         epoch,
                         log_interval,
                         self.device,
-                        True
+                        True,
                     )
                     for idx, (estimator, optimizer) in enumerate(
-                            zip(estimators, optimizers))
+                        zip(estimators, optimizers)
+                    )
                 )
 
                 estimators, optimizers = [], []
@@ -206,8 +225,10 @@ class VotingClassifier(BaseModule):
                             if save_model:
                                 io.save(self, save_dir, self.logger)
 
-                        msg = ("Epoch: {:03d} | Validation Acc: {:.3f}"
-                               " % | Historical Best: {:.3f} %")
+                        msg = (
+                            "Epoch: {:03d} | Validation Acc: {:.3f}"
+                            " % | Historical Best: {:.3f} %"
+                        )
                         self.logger.info(msg.format(epoch, acc, best_acc))
 
                 # Update the scheduler
@@ -227,7 +248,8 @@ class VotingClassifier(BaseModule):
 
     @torchensemble_model_doc(
         """Implementation on the evaluating stage of VotingClassifier.""",
-        "classifier_predict")
+        "classifier_predict",
+    )
     def predict(self, test_loader):
         self.eval()
         correct = 0
@@ -245,13 +267,12 @@ class VotingClassifier(BaseModule):
         return acc
 
 
-@torchensemble_model_doc("""Implementation on the VotingRegressor.""",
-                         "model")
+@torchensemble_model_doc("""Implementation on the VotingRegressor.""", "model")
 class VotingRegressor(BaseModule):
-
     @torchensemble_model_doc(
         """Implementation on the data forwarding in VotingRegressor.""",
-        "regressor_forward")
+        "regressor_forward",
+    )
     def forward(self, x):
         # Take the average over predictions from all base estimators.
 
@@ -262,29 +283,33 @@ class VotingRegressor(BaseModule):
 
     @torchensemble_model_doc(
         """Set the attributes on optimizer for VotingRegressor.""",
-        "set_optimizer")
+        "set_optimizer",
+    )
     def set_optimizer(self, optimizer_name, **kwargs):
         self.optimizer_name = optimizer_name
         self.optimizer_args = kwargs
 
     @torchensemble_model_doc(
         """Set the attributes on scheduler for VotingRegressor.""",
-        "set_scheduler")
+        "set_scheduler",
+    )
     def set_scheduler(self, scheduler_name, **kwargs):
         self.scheduler_name = scheduler_name
         self.scheduler_args = kwargs
         self.use_scheduler_ = True
 
     @torchensemble_model_doc(
-        """Implementation on the training stage of VotingRegressor.""",
-        "fit")
-    def fit(self,
-            train_loader,
-            epochs=100,
-            log_interval=100,
-            test_loader=None,
-            save_model=True,
-            save_dir=None):
+        """Implementation on the training stage of VotingRegressor.""", "fit"
+    )
+    def fit(
+        self,
+        train_loader,
+        epochs=100,
+        log_interval=100,
+        test_loader=None,
+        save_model=True,
+        save_dir=None,
+    ):
 
         self._validate_parameters(epochs, log_interval)
         self.n_outputs = self._decide_n_outputs(train_loader, False)
@@ -296,14 +321,16 @@ class VotingRegressor(BaseModule):
 
         optimizers = []
         for i in range(self.n_estimators):
-            optimizers.append(set_module.set_optimizer(estimators[i],
-                                                       self.optimizer_name,
-                                                       **self.optimizer_args))
+            optimizers.append(
+                set_module.set_optimizer(
+                    estimators[i], self.optimizer_name, **self.optimizer_args
+                )
+            )
 
         if self.use_scheduler_:
-            scheduler_ = set_module.set_scheduler(optimizers[0],
-                                                  self.scheduler_name,
-                                                  **self.scheduler_args)
+            scheduler_ = set_module.set_scheduler(
+                optimizers[0], self.scheduler_name, **self.scheduler_args
+            )
 
         # Utils
         criterion = nn.MSELoss()
@@ -332,7 +359,8 @@ class VotingRegressor(BaseModule):
                     msg = "Parallelization on the training epoch: {:03d}"
                     self.logger.info(msg.format(epoch))
 
-                rets = parallel(delayed(_parallel_fit_per_epoch)(
+                rets = parallel(
+                    delayed(_parallel_fit_per_epoch)(
                         train_loader,
                         estimator,
                         cur_lr,
@@ -342,10 +370,11 @@ class VotingRegressor(BaseModule):
                         epoch,
                         log_interval,
                         self.device,
-                        False
+                        False,
                     )
                     for idx, (estimator, optimizer) in enumerate(
-                            zip(estimators, optimizers))
+                        zip(estimators, optimizers)
+                    )
                 )
 
                 estimators, optimizers = [], []
@@ -372,8 +401,10 @@ class VotingRegressor(BaseModule):
                             if save_model:
                                 io.save(self, save_dir, self.logger)
 
-                        msg = ("Epoch: {:03d} | Validation MSE:"
-                               " {:.5f} | Historical Best: {:.5f}")
+                        msg = (
+                            "Epoch: {:03d} | Validation MSE:"
+                            " {:.5f} | Historical Best: {:.5f}"
+                        )
                         self.logger.info(msg.format(epoch, mse, best_mse))
 
                 # Update the scheduler
@@ -390,7 +421,8 @@ class VotingRegressor(BaseModule):
 
     @torchensemble_model_doc(
         """Implementation on the evaluating stage of VotingRegressor.""",
-        "regressor_predict")
+        "regressor_predict",
+    )
     def predict(self, test_loader):
         self.eval()
         mse = 0

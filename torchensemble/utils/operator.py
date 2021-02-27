@@ -5,11 +5,13 @@ import torch
 import torch.nn.functional as F
 
 
-__all__ = ["average",
-           "sum_with_multiplicative",
-           "onehot_encoding",
-           "pesudo_residual_classification",
-           "pseudo_residual_regression"]
+__all__ = [
+    "average",
+    "sum_with_multiplicative",
+    "onehot_encoding",
+    "pesudo_residual_classification",
+    "pseudo_residual_regression",
+]
 
 
 def average(outputs):

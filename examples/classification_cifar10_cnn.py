@@ -28,7 +28,6 @@ def display_records(records, logger):
 
 
 class LeNet5(nn.Module):
-
     def __init__(self):
         super(LeNet5, self).__init__()
         self.conv1 = nn.Conv2d(3, 6, 5)
@@ -68,22 +67,25 @@ if __name__ == "__main__":
             transforms.RandomHorizontalFlip(),
             transforms.RandomCrop(32, 4),
             transforms.ToTensor(),
-            transforms.Normalize((0.4914, 0.4822, 0.4465),
-                                 (0.2023, 0.1994, 0.2010)),
+            transforms.Normalize(
+                (0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)
+            ),
         ]
     )
 
     test_transformer = transforms.Compose(
         [
             transforms.ToTensor(),
-            transforms.Normalize((0.4914, 0.4822, 0.4465),
-                                 (0.2023, 0.1994, 0.2010)),
+            transforms.Normalize(
+                (0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)
+            ),
         ]
     )
 
     train_loader = DataLoader(
-        datasets.CIFAR10(data_dir, train=True, download=True,
-                         transform=train_transformer),
+        datasets.CIFAR10(
+            data_dir, train=True, download=True, transform=train_transformer
+        ),
         batch_size=batch_size,
         shuffle=True,
     )
@@ -98,9 +100,7 @@ if __name__ == "__main__":
 
     # FusionClassifier
     model = FusionClassifier(
-        estimator=LeNet5,
-        n_estimators=n_estimators,
-        cuda=True
+        estimator=LeNet5, n_estimators=n_estimators, cuda=True
     )
 
     # Set the optimizer
@@ -118,14 +118,13 @@ if __name__ == "__main__":
     toc = time.time()
     evaluating_time = toc - tic
 
-    records.append(("FusionClassifier", training_time, evaluating_time,
-                    testing_acc))
+    records.append(
+        ("FusionClassifier", training_time, evaluating_time, testing_acc)
+    )
 
     # VotingClassifier
     model = VotingClassifier(
-        estimator=LeNet5,
-        n_estimators=n_estimators,
-        cuda=True
+        estimator=LeNet5, n_estimators=n_estimators, cuda=True
     )
 
     # Set the optimizer
@@ -141,14 +140,13 @@ if __name__ == "__main__":
     toc = time.time()
     evaluating_time = toc - tic
 
-    records.append(("VotingClassifier", training_time, evaluating_time,
-                    testing_acc))
+    records.append(
+        ("VotingClassifier", training_time, evaluating_time, testing_acc)
+    )
 
     # BaggingClassifier
     model = BaggingClassifier(
-        estimator=LeNet5,
-        n_estimators=n_estimators,
-        cuda=True
+        estimator=LeNet5, n_estimators=n_estimators, cuda=True
     )
 
     # Set the optimizer
@@ -164,14 +162,13 @@ if __name__ == "__main__":
     toc = time.time()
     evaluating_time = toc - tic
 
-    records.append(("BaggingClassifier", training_time, evaluating_time,
-                    testing_acc))
+    records.append(
+        ("BaggingClassifier", training_time, evaluating_time, testing_acc)
+    )
 
     # GradientBoostingClassifier
     model = GradientBoostingClassifier(
-        estimator=LeNet5,
-        n_estimators=n_estimators,
-        cuda=True
+        estimator=LeNet5, n_estimators=n_estimators, cuda=True
     )
 
     # Set the optimizer
@@ -187,14 +184,18 @@ if __name__ == "__main__":
     toc = time.time()
     evaluating_time = toc - tic
 
-    records.append(("GradientBoostingClassifier", training_time,
-                    evaluating_time, testing_acc))
+    records.append(
+        (
+            "GradientBoostingClassifier",
+            training_time,
+            evaluating_time,
+            testing_acc,
+        )
+    )
 
     # SnapshotEnsembleClassifier
     model = SnapshotEnsembleClassifier(
-        estimator=LeNet5,
-        n_estimators=n_estimators,
-        cuda=True
+        estimator=LeNet5, n_estimators=n_estimators, cuda=True
     )
 
     # Set the optimizer
@@ -210,8 +211,14 @@ if __name__ == "__main__":
     toc = time.time()
     evaluating_time = toc - tic
 
-    records.append(("SnapshotEnsembleClassifier", training_time,
-                    evaluating_time, testing_acc))
+    records.append(
+        (
+            "SnapshotEnsembleClassifier",
+            training_time,
+            evaluating_time,
+            testing_acc,
+        )
+    )
 
     # Print results on different ensemble methods
     display_records(records, logger)

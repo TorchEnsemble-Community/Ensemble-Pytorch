@@ -11,10 +11,7 @@ from torchensemble.utils.logging import set_logger
 set_logger("pytest_adversarial_training")
 
 
-X_train = torch.Tensor(np.array(([1, 1],
-                                 [2, 2],
-                                 [3, 3],
-                                 [4, 4])))
+X_train = torch.Tensor(np.array(([1, 1], [2, 2], [3, 3], [4, 4])))
 y_train_clf = torch.LongTensor(np.array(([0, 0, 1, 1])))
 
 
@@ -36,9 +33,9 @@ def test_adversarial_training_range():
     """
     This unit test checks the input range check in adversarial_training.py.
     """
-    model = torchensemble.AdversarialTrainingClassifier(estimator=MLP_clf,
-                                                        n_estimators=2,
-                                                        cuda=False)
+    model = torchensemble.AdversarialTrainingClassifier(
+        estimator=MLP_clf, n_estimators=2, cuda=False
+    )
 
     model.set_optimizer("Adam")
 

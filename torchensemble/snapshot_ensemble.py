@@ -25,9 +25,11 @@ from .utils import set_module
 from .utils import operator as op
 
 
-__all__ = ["_BaseSnapshotEnsemble",
-           "SnapshotEnsembleClassifier",
-           "SnapshotEnsembleRegressor"]
+__all__ = [
+    "_BaseSnapshotEnsemble",
+    "SnapshotEnsembleClassifier",
+    "SnapshotEnsembleRegressor",
+]
 
 
 __fit_doc = """
@@ -74,6 +76,7 @@ def _snapshot_ensemble_model_doc(header, item="fit"):
     Decorator on obtaining documentation for different snapshot ensemble
     models.
     """
+
     def get_doc(item):
         """Return selected item"""
         __doc = {"fit": __fit_doc}
@@ -84,23 +87,23 @@ def _snapshot_ensemble_model_doc(header, item="fit"):
         doc.extend(get_doc(item))
         cls.__doc__ = "".join(doc)
         return cls
+
     return adddoc
 
 
 class _BaseSnapshotEnsemble(BaseModule):
-
-    def __init__(self,
-                 estimator,
-                 n_estimators,
-                 estimator_args=None,
-                 cuda=True):
+    def __init__(
+        self, estimator, n_estimators, estimator_args=None, cuda=True
+    ):
         super(BaseModule, self).__init__()
 
         # Make sure estimator is not an instance
         if not isinstance(estimator, type):
-            msg = ("The input argument `estimator` should be a class"
-                   " inherited from nn.Module. Perhaps you have passed"
-                   " an instance of that class into the ensemble.")
+            msg = (
+                "The input argument `estimator` should be a class"
+                " inherited from nn.Module. Perhaps you have passed"
+                " an instance of that class into the ensemble."
+            )
             raise RuntimeError(msg)
 
         self.base_estimator_ = estimator
@@ -121,33 +124,43 @@ class _BaseSnapshotEnsemble(BaseModule):
                 raise ValueError(msg)
 
             if len(lr_clip) != 2:
-                msg = ("lr_clip should only have two elements, one for lower"
-                       " bound, and another for upper bound.")
+                msg = (
+                    "lr_clip should only have two elements, one for lower"
+                    " bound, and another for upper bound."
+                )
                 self.logger.error(msg)
                 raise ValueError(msg)
 
             if not lr_clip[0] < lr_clip[1]:
-                msg = ("The first element = {} should be smaller than the"
-                       " second element = {} in lr_clip.")
+                msg = (
+                    "The first element = {} should be smaller than the"
+                    " second element = {} in lr_clip."
+                )
                 self.logger.error(msg.format(lr_clip[0], lr_clip[1]))
                 raise ValueError(msg.format(lr_clip[0], lr_clip[1]))
 
         if not epochs > 0:
-            msg = ("The number of training epochs = {} should be strictly"
-                   " positive.")
+            msg = (
+                "The number of training epochs = {} should be strictly"
+                " positive."
+            )
             self.logger.error(msg.format(epochs))
             raise ValueError(msg.format(epochs))
 
         if not log_interval > 0:
-            msg = ("The number of batches to wait before printting the"
-                   " training status should be strictly positive, but got {}"
-                   " instead.")
+            msg = (
+                "The number of batches to wait before printting the"
+                " training status should be strictly positive, but got {}"
+                " instead."
+            )
             self.logger.error(msg.format(log_interval))
             raise ValueError(msg.format(log_interval))
 
         if not epochs % self.n_estimators == 0:
-            msg = ("The number of training epochs = {} should be a multiple"
-                   " of n_estimators = {}.")
+            msg = (
+                "The number of training epochs = {} should be a multiple"
+                " of n_estimators = {}."
+            )
             self.logger.error(msg.format(epochs, self.n_estimators))
             raise ValueError(msg.format(epochs, self.n_estimators))
 
@@ -188,23 +201,26 @@ class _BaseSnapshotEnsemble(BaseModule):
         return scheduler
 
     def set_scheduler(self, scheduler_name, **kwargs):
-        msg = ("The learning rate scheduler for Snapshot Ensemble will be"
-               " automatically set. Calling this function has no effect on"
-               " the training stage of Snapshot Ensemble.")
+        msg = (
+            "The learning rate scheduler for Snapshot Ensemble will be"
+            " automatically set. Calling this function has no effect on"
+            " the training stage of Snapshot Ensemble."
+        )
         warnings.warn(msg, RuntimeWarning)
 
 
 @torchensemble_model_doc(
-    """Implementation on the SnapshotEnsembleClassifier.""", "model")
+    """Implementation on the SnapshotEnsembleClassifier.""", "model"
+)
 class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble):
-
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.is_classification = True
 
     @torchensemble_model_doc(
         """Implementation on the data forwarding in SnapshotEnsembleClassifier.""",  # noqa: E501
-        "classifier_forward")
+        "classifier_forward",
+    )
     def forward(self, x):
         proba = self._forward(x)
 
@@ -212,40 +228,44 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble):
 
     @torchensemble_model_doc(
         """Set the attributes on optimizer for SnapshotEnsembleClassifier.""",
-        "set_optimizer")
+        "set_optimizer",
+    )
     def set_optimizer(self, optimizer_name, **kwargs):
         self.optimizer_name = optimizer_name
         self.optimizer_args = kwargs
 
     @_snapshot_ensemble_model_doc(
         """Implementation on the training stage of SnapshotEnsembleClassifier.""",  # noqa: E501
-        "fit"
+        "fit",
     )
-    def fit(self,
-            train_loader,
-            lr_clip=None,
-            epochs=100,
-            log_interval=100,
-            test_loader=None,
-            save_model=True,
-            save_dir=None):
+    def fit(
+        self,
+        train_loader,
+        lr_clip=None,
+        epochs=100,
+        log_interval=100,
+        test_loader=None,
+        save_model=True,
+        save_dir=None,
+    ):
         self._validate_parameters(lr_clip, epochs, log_interval)
-        self.n_outputs = self._decide_n_outputs(train_loader,
-                                                self.is_classification)
+        self.n_outputs = self._decide_n_outputs(
+            train_loader, self.is_classification
+        )
 
         # A dummy model used to generate snapshot ensembles
         estimator_ = self._make_estimator()
 
         # Set the optimizer and scheduler
-        optimizer = set_module.set_optimizer(estimator_,
-                                             self.optimizer_name,
-                                             **self.optimizer_args)
+        optimizer = set_module.set_optimizer(
+            estimator_, self.optimizer_name, **self.optimizer_args
+        )
 
         scheduler = self._set_scheduler(optimizer, epochs * len(train_loader))
 
         # Utils
         criterion = nn.CrossEntropyLoss()
-        best_acc = 0.
+        best_acc = 0.0
         counter = 0  # a counter on generating snapshots
         n_iters_per_estimator = epochs * len(train_loader) // self.n_estimators
 
@@ -272,8 +292,10 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble):
                         _, predicted = torch.max(output.data, 1)
                         correct = (predicted == target).sum().item()
 
-                        msg = ("lr: {:.5f} | Epoch: {:03d} | Batch: {:03d} |"
-                               " Loss: {:.5f} | Correct: {:d}/{:d}")
+                        msg = (
+                            "lr: {:.5f} | Epoch: {:03d} | Batch: {:03d} |"
+                            " Loss: {:.5f} | Correct: {:d}/{:d}"
+                        )
                         self.logger.info(
                             msg.format(
                                 optimizer.param_groups[0]["lr"],
@@ -281,7 +303,7 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble):
                                 batch_idx,
                                 loss,
                                 correct,
-                                batch_size
+                                batch_size,
                             )
                         )
 
@@ -319,14 +341,12 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble):
                         if save_model:
                             io.save(self, save_dir, self.logger)
 
-                    msg = ("n_estimators: {} | Validation Acc: {:.3f} %"
-                           " | Historical Best: {:.3f} %")
+                    msg = (
+                        "n_estimators: {} | Validation Acc: {:.3f} %"
+                        " | Historical Best: {:.3f} %"
+                    )
                     self.logger.info(
-                        msg.format(
-                            len(self.estimators_),
-                            acc,
-                            best_acc
-                        )
+                        msg.format(len(self.estimators_), acc, best_acc)
                     )
 
         if save_model and not test_loader:
@@ -334,7 +354,8 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble):
 
     @torchensemble_model_doc(
         """Implementation on the evaluating stage of SnapshotEnsembleClassifier.""",  # noqa: E501
-        "classifier_predict")
+        "classifier_predict",
+    )
     def predict(self, test_loader):
         self.eval()
         correct = 0
@@ -353,50 +374,55 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble):
 
 
 @torchensemble_model_doc(
-    """Implementation on the SnapshotEnsembleRegressor.""", "model")
+    """Implementation on the SnapshotEnsembleRegressor.""", "model"
+)
 class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble):
-
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.is_classification = False
 
     @torchensemble_model_doc(
         """Implementation on the data forwarding in SnapshotEnsembleRegressor.""",  # noqa: E501
-        "regressor_forward")
+        "regressor_forward",
+    )
     def forward(self, x):
         pred = self._forward(x)
         return pred
 
     @torchensemble_model_doc(
         """Set the attributes on optimizer for SnapshotEnsembleRegressor.""",
-        "set_optimizer")
+        "set_optimizer",
+    )
     def set_optimizer(self, optimizer_name, **kwargs):
         self.optimizer_name = optimizer_name
         self.optimizer_args = kwargs
 
     @_snapshot_ensemble_model_doc(
         """Implementation on the training stage of SnapshotEnsembleRegressor.""",  # noqa: E501
-        "fit"
+        "fit",
     )
-    def fit(self,
-            train_loader,
-            lr_clip=None,
-            epochs=100,
-            log_interval=100,
-            test_loader=None,
-            save_model=True,
-            save_dir=None):
+    def fit(
+        self,
+        train_loader,
+        lr_clip=None,
+        epochs=100,
+        log_interval=100,
+        test_loader=None,
+        save_model=True,
+        save_dir=None,
+    ):
         self._validate_parameters(lr_clip, epochs, log_interval)
-        self.n_outputs = self._decide_n_outputs(train_loader,
-                                                self.is_classification)
+        self.n_outputs = self._decide_n_outputs(
+            train_loader, self.is_classification
+        )
 
         # A dummy model used to generate snapshot ensembles
         estimator_ = self._make_estimator()
 
         # Set the optimizer and scheduler
-        optimizer = set_module.set_optimizer(estimator_,
-                                             self.optimizer_name,
-                                             **self.optimizer_args)
+        optimizer = set_module.set_optimizer(
+            estimator_, self.optimizer_name, **self.optimizer_args
+        )
 
         scheduler = self._set_scheduler(optimizer, epochs * len(train_loader))
 
@@ -425,14 +451,17 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble):
                 # Print training status
                 if batch_idx % log_interval == 0:
                     with torch.no_grad():
-                        msg = ("lr: {:.5f} | Epoch: {:03d} | Batch: {:03d}"
-                               " | Loss: {:.5f}")
+                        msg = (
+                            "lr: {:.5f} | Epoch: {:03d} | Batch: {:03d}"
+                            " | Loss: {:.5f}"
+                        )
                         self.logger.info(
                             msg.format(
                                 optimizer.param_groups[0]["lr"],
                                 epoch,
                                 batch_idx,
-                                loss)
+                                loss,
+                            )
                         )
 
                 # Snapshot ensemble updates the learning rate per iteration
@@ -465,14 +494,12 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble):
                         if save_model:
                             io.save(self, save_dir, self.logger)
 
-                    msg = ("n_estimators: {} | Validation MSE: {:.5f} |"
-                           " Historical Best: {:.5f}")
+                    msg = (
+                        "n_estimators: {} | Validation MSE: {:.5f} |"
+                        " Historical Best: {:.5f}"
+                    )
                     self.logger.info(
-                        msg.format(
-                            len(self.estimators_),
-                            mse,
-                            best_mse
-                        )
+                        msg.format(len(self.estimators_), mse, best_mse)
                     )
 
         if save_model and not test_loader:
@@ -480,7 +507,8 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble):
 
     @torchensemble_model_doc(
         """Implementation on the evaluating stage of SnapshotEnsembleRegressor.""",  # noqa: E501
-        "regressor_predict")
+        "regressor_predict",
+    )
     def predict(self, test_loader):
         self.eval()
         mse = 0

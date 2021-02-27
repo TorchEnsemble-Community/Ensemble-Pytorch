@@ -18,8 +18,10 @@ def set_logger(log_file=None, log_console_level="info", log_file_level=None):
         elif level.lower() == 'critical':
             return logging.CRITICAL
         else:
-            msg = ("`log_console_level` must be one of {{DEBUG, INFO,"
-                   " WARNING, ERROR, CRITICAL}}, but got {} instead.")
+            msg = (
+                "`log_console_level` must be one of {{DEBUG, INFO,"
+                " WARNING, ERROR, CRITICAL}}, but got {} instead."
+            )
             raise ValueError(msg.format(level.upper()))
 
     _logger = logging.getLogger()
@@ -47,11 +49,15 @@ def set_logger(log_file=None, log_console_level="info", log_file_level=None):
         log_name = os.path.join(log_path, log_file + '-' + rq + '.log')
         print('Start logging into file {}...'.format(log_name))
         fh = logging.FileHandler(log_name, mode='w')
-        fh.setLevel(logging.DEBUG if log_file_level is None
-                    else _get_level(log_file_level))
+        fh.setLevel(
+            logging.DEBUG
+            if log_file_level is None
+            else _get_level(log_file_level)
+        )
         fh_formatter = logging.Formatter(
             "%(asctime)s - %(filename)s[line:%(lineno)d] - "
-            "%(levelname)s: %(message)s")
+            "%(levelname)s: %(message)s"
+        )
         fh.setFormatter(fh_formatter)
         _logger.addHandler(fh)
     _logger.setLevel("DEBUG")

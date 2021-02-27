@@ -22,9 +22,11 @@ from .utils import set_module
 from .utils import operator as op
 
 
-__all__ = ["_BaseAdversarialTraining",
-           "AdversarialTrainingClassifier",
-           "AdversarialTrainingRegressor"]
+__all__ = [
+    "_BaseAdversarialTraining",
+    "AdversarialTrainingClassifier",
+    "AdversarialTrainingRegressor",
+]
 
 
 __fit_doc = """
@@ -69,6 +71,7 @@ def _adversarial_training_model_doc(header, item="fit"):
     Decorator on obtaining documentation for different adversarial training
     models.
     """
+
     def get_doc(item):
         """Return selected item"""
         __doc = {"fit": __fit_doc}
@@ -79,20 +82,23 @@ def _adversarial_training_model_doc(header, item="fit"):
         doc.extend(get_doc(item))
         cls.__doc__ = "".join(doc)
         return cls
+
     return adddoc
 
 
-def _parallel_fit_per_epoch(train_loader,
-                            epsilon,
-                            estimator,
-                            cur_lr,
-                            optimizer,
-                            criterion,
-                            idx,
-                            epoch,
-                            log_interval,
-                            device,
-                            is_classification):
+def _parallel_fit_per_epoch(
+    train_loader,
+    epsilon,
+    estimator,
+    cur_lr,
+    optimizer,
+    criterion,
+    idx,
+    epoch,
+    log_interval,
+    device,
+    is_classification,
+):
     """
     Private function used to fit base estimators in parallel.
 
@@ -133,8 +139,10 @@ def _parallel_fit_per_epoch(train_loader,
                 _, predicted = torch.max(org_output.data, 1)
                 correct = (predicted == target).sum().item()
 
-                msg = ("Estimator: {:03d} | Epoch: {:03d} | Batch: {:03d}"
-                       " | Loss: {:.5f} | Correct: {:d}/{:d}")
+                msg = (
+                    "Estimator: {:03d} | Epoch: {:03d} | Batch: {:03d}"
+                    " | Loss: {:.5f} | Correct: {:d}/{:d}"
+                )
                 print(
                     msg.format(
                         idx, epoch, batch_idx, loss, correct, batch_size
@@ -142,8 +150,10 @@ def _parallel_fit_per_epoch(train_loader,
                 )
             # Regression
             else:
-                msg = ("Estimator: {:03d} | Epoch: {:03d} | Batch: {:03d}"
-                       " | Loss: {:.5f}")
+                msg = (
+                    "Estimator: {:03d} | Epoch: {:03d} | Batch: {:03d}"
+                    " | Loss: {:.5f}"
+                )
                 print(msg.format(idx, epoch, batch_idx, loss))
 
     return estimator, optimizer
@@ -158,9 +168,11 @@ def _get_fgsm_samples(sample, epsilon, sample_grad):
     # Check the input range of `sample`
     min_value, max_value = torch.min(sample), torch.max(sample)
     if not 0 <= min_value < max_value <= 1:
-        msg = ("The input range of samples passed to adversarial training"
-               " should be in the range [0, 1], but got [{:.3f}, {:.3f}]"
-               " instead.")
+        msg = (
+            "The input range of samples passed to adversarial training"
+            " should be in the range [0, 1], but got [{:.3f}, {:.3f}]"
+            " instead."
+        )
         raise ValueError(msg.format(min_value, max_value))
 
     sign_sample_grad = sample_grad.sign()
@@ -171,59 +183,69 @@ def _get_fgsm_samples(sample, epsilon, sample_grad):
 
 
 class _BaseAdversarialTraining(BaseModule):
-
     def _validate_parameters(self, epochs, epsilon, log_interval):
         """Validate hyper-parameters on training the ensemble."""
 
         if not epochs > 0:
-            msg = ("The number of training epochs = {} should be strictly"
-                   " positive.")
+            msg = (
+                "The number of training epochs = {} should be strictly"
+                " positive."
+            )
             self.logger.error(msg.format(epochs))
             raise ValueError(msg.format(epochs))
 
         if not 0 < epsilon <= 1:
-            msg = ("The step used to generate adversarial samples in FGSM"
-                   " should be in the range (0, 1], but got {} instead.")
+            msg = (
+                "The step used to generate adversarial samples in FGSM"
+                " should be in the range (0, 1], but got {} instead."
+            )
             self.logger.error(msg.format(epsilon))
             raise ValueError(msg.format(epsilon))
 
         if not log_interval > 0:
-            msg = ("The number of batches to wait before printting the"
-                   " training status should be strictly positive, but got {}"
-                   " instead.")
+            msg = (
+                "The number of batches to wait before printting the"
+                " training status should be strictly positive, but got {}"
+                " instead."
+            )
             self.logger.error(msg.format(log_interval))
             raise ValueError(msg.format(log_interval))
 
 
-@torchensemble_model_doc("""Implementation on the AdversarialTrainingClassifier.""",  # noqa: E501
-                         "model")
+@torchensemble_model_doc(
+    """Implementation on the AdversarialTrainingClassifier.""",  # noqa: E501
+    "model",
+)
 class AdversarialTrainingClassifier(_BaseAdversarialTraining):
-
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.is_classification = True
 
     @torchensemble_model_doc(
         """Implementation on the data forwarding in AdversarialTrainingClassifier.""",  # noqa: E501
-        "classifier_forward")
+        "classifier_forward",
+    )
     def forward(self, x):
         # Take the average over class distributions from all base estimators.
-        outputs = [F.softmax(estimator(x), dim=1)
-                   for estimator in self.estimators_]
+        outputs = [
+            F.softmax(estimator(x), dim=1) for estimator in self.estimators_
+        ]
         proba = op.average(outputs)
 
         return proba
 
     @torchensemble_model_doc(
         """Set the attributes on optimizer for AdversarialTrainingClassifier.""",  # noqa: E501
-        "set_optimizer")
+        "set_optimizer",
+    )
     def set_optimizer(self, optimizer_name, **kwargs):
         self.optimizer_name = optimizer_name
         self.optimizer_args = kwargs
 
     @torchensemble_model_doc(
         """Set the attributes on scheduler for AdversarialTrainingClassifier.""",  # noqa: E501
-        "set_scheduler")
+        "set_scheduler",
+    )
     def set_scheduler(self, scheduler_name, **kwargs):
         self.scheduler_name = scheduler_name
         self.scheduler_args = kwargs
@@ -231,16 +253,18 @@ class AdversarialTrainingClassifier(_BaseAdversarialTraining):
 
     @_adversarial_training_model_doc(
         """Implementation on the training stage of AdversarialTrainingClassifier.""",  # noqa: E501
-        "fit"
+        "fit",
     )
-    def fit(self,
-            train_loader,
-            epochs=100,
-            epsilon=0.5,
-            log_interval=100,
-            test_loader=None,
-            save_model=True,
-            save_dir=None):
+    def fit(
+        self,
+        train_loader,
+        epochs=100,
+        epsilon=0.5,
+        log_interval=100,
+        test_loader=None,
+        save_model=True,
+        save_dir=None,
+    ):
 
         self._validate_parameters(epochs, epsilon, log_interval)
         self.n_outputs = self._decide_n_outputs(train_loader, True)
@@ -252,23 +276,26 @@ class AdversarialTrainingClassifier(_BaseAdversarialTraining):
 
         optimizers = []
         for i in range(self.n_estimators):
-            optimizers.append(set_module.set_optimizer(estimators[i],
-                                                       self.optimizer_name,
-                                                       **self.optimizer_args))
+            optimizers.append(
+                set_module.set_optimizer(
+                    estimators[i], self.optimizer_name, **self.optimizer_args
+                )
+            )
 
         if self.use_scheduler_:
-            scheduler_ = set_module.set_scheduler(optimizers[0],
-                                                  self.scheduler_name,
-                                                  **self.scheduler_args)
+            scheduler_ = set_module.set_scheduler(
+                optimizers[0], self.scheduler_name, **self.scheduler_args
+            )
 
         # Utils
         criterion = nn.CrossEntropyLoss()
-        best_acc = 0.
+        best_acc = 0.0
 
         # Internal helper function on pesudo forward
         def _forward(estimators, data):
-            outputs = [F.softmax(estimator(data), dim=1)
-                       for estimator in estimators]
+            outputs = [
+                F.softmax(estimator(data), dim=1) for estimator in estimators
+            ]
             proba = op.average(outputs)
 
             return proba
@@ -289,7 +316,8 @@ class AdversarialTrainingClassifier(_BaseAdversarialTraining):
                     msg = "Parallelization on the training epoch: {:03d}"
                     self.logger.info(msg.format(epoch))
 
-                rets = parallel(delayed(_parallel_fit_per_epoch)(
+                rets = parallel(
+                    delayed(_parallel_fit_per_epoch)(
                         train_loader,
                         epsilon,
                         estimator,
@@ -300,10 +328,11 @@ class AdversarialTrainingClassifier(_BaseAdversarialTraining):
                         epoch,
                         log_interval,
                         self.device,
-                        False
+                        False,
                     )
                     for idx, (estimator, optimizer) in enumerate(
-                            zip(estimators, optimizers))
+                        zip(estimators, optimizers)
+                    )
                 )
 
                 estimators, optimizers = [], []
@@ -333,8 +362,10 @@ class AdversarialTrainingClassifier(_BaseAdversarialTraining):
                             if save_model:
                                 io.save(self, save_dir, self.logger)
 
-                        msg = ("Epoch: {:03d} | Validation Acc: {:.3f}"
-                               " % | Historical Best: {:.3f} %")
+                        msg = (
+                            "Epoch: {:03d} | Validation Acc: {:.3f}"
+                            " % | Historical Best: {:.3f} %"
+                        )
                         self.logger.info(msg.format(epoch, acc, best_acc))
 
                 # Update the scheduler
@@ -354,7 +385,8 @@ class AdversarialTrainingClassifier(_BaseAdversarialTraining):
 
     @torchensemble_model_doc(
         """Implementation on the evaluating stage of AdversarialTrainingClassifier.""",  # noqa: E501
-        "classifier_predict")
+        "classifier_predict",
+    )
     def predict(self, test_loader):
         self.eval()
         correct = 0
@@ -372,17 +404,19 @@ class AdversarialTrainingClassifier(_BaseAdversarialTraining):
         return acc
 
 
-@torchensemble_model_doc("""Implementation on the AdversarialTrainingRegressor.""",  # noqa: E501
-                         "model")
+@torchensemble_model_doc(
+    """Implementation on the AdversarialTrainingRegressor.""",  # noqa: E501
+    "model",
+)
 class AdversarialTrainingRegressor(_BaseAdversarialTraining):
-
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.is_classification = False
 
     @torchensemble_model_doc(
         """Implementation on the data forwarding in AdversarialTrainingRegressor.""",  # noqa: E501
-        "regressor_forward")
+        "regressor_forward",
+    )
     def forward(self, x):
         # Take the average over predictions from all base estimators.
         outputs = [estimator(x) for estimator in self.estimators_]
@@ -392,14 +426,16 @@ class AdversarialTrainingRegressor(_BaseAdversarialTraining):
 
     @torchensemble_model_doc(
         """Set the attributes on optimizer for AdversarialTrainingRegressor.""",  # noqa: E501
-        "set_optimizer")
+        "set_optimizer",
+    )
     def set_optimizer(self, optimizer_name, **kwargs):
         self.optimizer_name = optimizer_name
         self.optimizer_args = kwargs
 
     @torchensemble_model_doc(
         """Set the attributes on scheduler for AdversarialTrainingRegressor.""",  # noqa: E501
-        "set_scheduler")
+        "set_scheduler",
+    )
     def set_scheduler(self, scheduler_name, **kwargs):
         self.scheduler_name = scheduler_name
         self.scheduler_args = kwargs
@@ -407,16 +443,18 @@ class AdversarialTrainingRegressor(_BaseAdversarialTraining):
 
     @_adversarial_training_model_doc(
         """Implementation on the training stage of AdversarialTrainingRegressor.""",  # noqa: E501
-        "fit"
+        "fit",
     )
-    def fit(self,
-            train_loader,
-            epochs=100,
-            epsilon=0.5,
-            log_interval=100,
-            test_loader=None,
-            save_model=True,
-            save_dir=None):
+    def fit(
+        self,
+        train_loader,
+        epochs=100,
+        epsilon=0.5,
+        log_interval=100,
+        test_loader=None,
+        save_model=True,
+        save_dir=None,
+    ):
 
         self._validate_parameters(epochs, epsilon, log_interval)
         self.n_outputs = self._decide_n_outputs(train_loader, True)
@@ -428,14 +466,16 @@ class AdversarialTrainingRegressor(_BaseAdversarialTraining):
 
         optimizers = []
         for i in range(self.n_estimators):
-            optimizers.append(set_module.set_optimizer(estimators[i],
-                                                       self.optimizer_name,
-                                                       **self.optimizer_args))
+            optimizers.append(
+                set_module.set_optimizer(
+                    estimators[i], self.optimizer_name, **self.optimizer_args
+                )
+            )
 
         if self.use_scheduler_:
-            scheduler_ = set_module.set_scheduler(optimizers[0],
-                                                  self.scheduler_name,
-                                                  **self.scheduler_args)
+            scheduler_ = set_module.set_scheduler(
+                optimizers[0], self.scheduler_name, **self.scheduler_args
+            )
 
         # Utils
         criterion = nn.MSELoss()
@@ -464,7 +504,8 @@ class AdversarialTrainingRegressor(_BaseAdversarialTraining):
                     msg = "Parallelization on the training epoch: {:03d}"
                     self.logger.info(msg.format(epoch))
 
-                rets = parallel(delayed(_parallel_fit_per_epoch)(
+                rets = parallel(
+                    delayed(_parallel_fit_per_epoch)(
                         train_loader,
                         epsilon,
                         estimator,
@@ -475,10 +516,11 @@ class AdversarialTrainingRegressor(_BaseAdversarialTraining):
                         epoch,
                         log_interval,
                         self.device,
-                        True
+                        True,
                     )
                     for idx, (estimator, optimizer) in enumerate(
-                            zip(estimators, optimizers))
+                        zip(estimators, optimizers)
+                    )
                 )
 
                 estimators, optimizers = [], []
@@ -505,8 +547,10 @@ class AdversarialTrainingRegressor(_BaseAdversarialTraining):
                             if save_model:
                                 io.save(self, save_dir, self.logger)
 
-                        msg = ("Epoch: {:03d} | Validation MSE:"
-                               " {:.5f} | Historical Best: {:.5f}")
+                        msg = (
+                            "Epoch: {:03d} | Validation MSE:"
+                            " {:.5f} | Historical Best: {:.5f}"
+                        )
                         self.logger.info(msg.format(epoch, mse, best_mse))
 
                 # Update the scheduler
@@ -523,7 +567,8 @@ class AdversarialTrainingRegressor(_BaseAdversarialTraining):
 
     @torchensemble_model_doc(
         """Implementation on the evaluating stage of AdversarialTrainingRegressor.""",  # noqa: E501
-        "regressor_predict")
+        "regressor_predict",
+    )
     def predict(self, test_loader):
         self.eval()
         mse = 0

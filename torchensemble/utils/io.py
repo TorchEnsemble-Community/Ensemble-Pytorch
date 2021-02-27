@@ -11,14 +11,18 @@ def save(model, save_dir, logger):
         os.mkdir(save_dir)
 
     # {Ensemble_Method_Name}_{Base_Estimator_Name}_{n_estimators}
-    filename = "{}_{}_{}_ckpt.pth".format(type(model).__name__,
-                                          model.base_estimator_.__name__,
-                                          model.n_estimators)
+    filename = "{}_{}_{}_ckpt.pth".format(
+        type(model).__name__,
+        model.base_estimator_.__name__,
+        model.n_estimators,
+    )
 
     # The real number of base estimators in some ensembles is not same as
     # `n_estimators`.
-    state = {"n_estimators": len(model.estimators_),
-             "model": model.state_dict()}
+    state = {
+        "n_estimators": len(model.estimators_),
+        "model": model.state_dict(),
+    }
     save_dir = os.path.join(save_dir, filename)
 
     logger.info("Saving the model to `{}`".format(save_dir))
@@ -35,9 +39,11 @@ def load(model, save_dir="./", logger=None):
         raise FileExistsError("`{}` does not exist".format(save_dir))
 
     # {Ensemble_Method_Name}_{Base_Estimator_Name}_{n_estimators}
-    filename = "{}_{}_{}_ckpt.pth".format(type(model).__name__,
-                                          model.base_estimator_.__name__,
-                                          model.n_estimators)
+    filename = "{}_{}_{}_ckpt.pth".format(
+        type(model).__name__,
+        model.base_estimator_.__name__,
+        model.n_estimators,
+    )
     save_dir = os.path.join(save_dir, filename)
 
     if logger:

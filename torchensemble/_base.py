@@ -18,16 +18,19 @@ def torchensemble_model_doc(header, item):
     item : string
        Type of the docstring item.
     """
+
     def get_doc(item):
         """Return the selected item."""
-        __doc = {"model": const.__model_doc,
-                 "fit": const.__fit_doc,
-                 "set_optimizer": const.__set_optimizer_doc,
-                 "set_scheduler": const.__set_scheduler_doc,
-                 "classifier_forward": const.__classification_forward_doc,
-                 "classifier_predict": const.__classification_predict_doc,
-                 "regressor_forward": const.__regression_forward_doc,
-                 "regressor_predict": const.__regression_predict_doc}
+        __doc = {
+            "model": const.__model_doc,
+            "fit": const.__fit_doc,
+            "set_optimizer": const.__set_optimizer_doc,
+            "set_scheduler": const.__set_scheduler_doc,
+            "classifier_forward": const.__classification_forward_doc,
+            "classifier_predict": const.__classification_predict_doc,
+            "regressor_forward": const.__regression_forward_doc,
+            "regressor_predict": const.__regression_predict_doc,
+        }
         return __doc[item]
 
     def adddoc(cls):
@@ -45,19 +48,24 @@ class BaseModule(abc.ABC, nn.Module):
     WARNING: This class cannot be used directly.
     Please use the derived classes instead.
     """
-    def __init__(self,
-                 estimator,
-                 n_estimators,
-                 estimator_args=None,
-                 cuda=True,
-                 n_jobs=None):
+
+    def __init__(
+        self,
+        estimator,
+        n_estimators,
+        estimator_args=None,
+        cuda=True,
+        n_jobs=None,
+    ):
         super(BaseModule, self).__init__()
 
         # Make sure that `estimator` is not an instance
         if not isinstance(estimator, type):
-            msg = ("The input argument `estimator` should be a class"
-                   " inherited from `nn.Module`. Perhaps you have passed"
-                   " an instance of that class into the ensemble.")
+            msg = (
+                "The input argument `estimator` should be a class"
+                " inherited from `nn.Module`. Perhaps you have passed"
+                " an instance of that class into the ensemble."
+            )
             raise RuntimeError(msg)
 
         self.base_estimator_ = estimator
@@ -124,15 +132,19 @@ class BaseModule(abc.ABC, nn.Module):
         """Validate hyper-parameters on training the ensemble."""
 
         if not epochs > 0:
-            msg = ("The number of training epochs should be strictly positive"
-                   ", but got {} instead.")
+            msg = (
+                "The number of training epochs should be strictly positive"
+                ", but got {} instead."
+            )
             self.logger.error(msg.format(epochs))
             raise ValueError(msg.format(epochs))
 
         if not log_interval > 0:
-            msg = ("The number of batches to wait before printing the"
-                   " training status should be strictly positive, but got {}"
-                   " instead.")
+            msg = (
+                "The number of batches to wait before printing the"
+                " training status should be strictly positive, but got {}"
+                " instead."
+            )
             self.logger.error(msg.format(log_interval))
             raise ValueError(msg.format(log_interval))
 
@@ -157,13 +169,15 @@ class BaseModule(abc.ABC, nn.Module):
         """
 
     @abc.abstractmethod
-    def fit(self,
-            train_loader,
-            epochs=100,
-            log_interval=100,
-            test_loader=None,
-            save_model=True,
-            save_dir=None):
+    def fit(
+        self,
+        train_loader,
+        epochs=100,
+        log_interval=100,
+        test_loader=None,
+        save_model=True,
+        save_dir=None,
+    ):
         """
         Implementation on the training stage of the ensemble.
         """

@@ -8,9 +8,11 @@ import torchensemble
 from torchensemble.utils.logging import set_logger
 
 
-parallel = [torchensemble.FusionClassifier,
-            torchensemble.VotingClassifier,
-            torchensemble.BaggingClassifier]
+parallel = [
+    torchensemble.FusionClassifier,
+    torchensemble.VotingClassifier,
+    torchensemble.BaggingClassifier,
+]
 
 set_logger("pytest_training_params")
 
@@ -30,10 +32,7 @@ class MLP(nn.Module):
 
 
 # Trainining data
-X_train = torch.Tensor(np.array(([1, 1],
-                                 [2, 2],
-                                 [3, 3],
-                                 [4, 4])))
+X_train = torch.Tensor(np.array(([1, 1], [2, 2], [3, 3], [4, 4])))
 
 y_train = torch.LongTensor(np.array(([0, 0, 1, 1])))
 
@@ -59,9 +58,9 @@ def test_parallel(method):
 
 
 def test_gradient_boosting():
-    model = torchensemble.GradientBoostingClassifier(estimator=MLP,
-                                                     n_estimators=2,
-                                                     cuda=False)
+    model = torchensemble.GradientBoostingClassifier(
+        estimator=MLP, n_estimators=2, cuda=False
+    )
 
     # Epochs
     with pytest.raises(ValueError) as excinfo:
@@ -79,19 +78,18 @@ def test_gradient_boosting():
     assert "number of tolerant rounds" in str(excinfo.value)
 
     # Shrinkage rate
-    model = torchensemble.GradientBoostingClassifier(estimator=MLP,
-                                                     n_estimators=2,
-                                                     shrinkage_rate=2,
-                                                     cuda=False)
+    model = torchensemble.GradientBoostingClassifier(
+        estimator=MLP, n_estimators=2, shrinkage_rate=2, cuda=False
+    )
     with pytest.raises(ValueError) as excinfo:
         model.fit(train_loader)
     assert "shrinkage rate should be in the range" in str(excinfo.value)
 
 
 def test_snapshot_ensemble():
-    model = torchensemble.SnapshotEnsembleClassifier(estimator=MLP,
-                                                     n_estimators=2,
-                                                     cuda=False)
+    model = torchensemble.SnapshotEnsembleClassifier(
+        estimator=MLP, n_estimators=2, cuda=False
+    )
 
     # Learning rate clip
     with pytest.raises(ValueError) as excinfo:
@@ -123,9 +121,9 @@ def test_snapshot_ensemble():
 
 
 def test_adversarial_training():
-    model = torchensemble.AdversarialTrainingClassifier(estimator=MLP,
-                                                        n_estimators=2,
-                                                        cuda=False)
+    model = torchensemble.AdversarialTrainingClassifier(
+        estimator=MLP, n_estimators=2, cuda=False
+    )
 
     # Epochs
     with pytest.raises(ValueError) as excinfo:

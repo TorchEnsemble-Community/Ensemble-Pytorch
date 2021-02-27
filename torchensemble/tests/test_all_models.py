@@ -9,20 +9,24 @@ from torchensemble.utils import io
 from torchensemble.utils.logging import set_logger
 
 
-all_clf = [torchensemble.FusionClassifier,
-           torchensemble.VotingClassifier,
-           torchensemble.BaggingClassifier,
-           torchensemble.GradientBoostingClassifier,
-           torchensemble.SnapshotEnsembleClassifier,
-           torchensemble.AdversarialTrainingClassifier]
+all_clf = [
+    torchensemble.FusionClassifier,
+    torchensemble.VotingClassifier,
+    torchensemble.BaggingClassifier,
+    torchensemble.GradientBoostingClassifier,
+    torchensemble.SnapshotEnsembleClassifier,
+    torchensemble.AdversarialTrainingClassifier,
+]
 
 
-all_reg = [torchensemble.FusionRegressor,
-           torchensemble.VotingRegressor,
-           torchensemble.BaggingRegressor,
-           torchensemble.GradientBoostingRegressor,
-           torchensemble.SnapshotEnsembleRegressor,
-           torchensemble.AdversarialTrainingRegressor]
+all_reg = [
+    torchensemble.FusionRegressor,
+    torchensemble.VotingRegressor,
+    torchensemble.BaggingRegressor,
+    torchensemble.GradientBoostingRegressor,
+    torchensemble.SnapshotEnsembleRegressor,
+    torchensemble.AdversarialTrainingRegressor,
+]
 
 
 # Remove randomness
@@ -60,18 +64,16 @@ class MLP_reg(nn.Module):
 
 
 # Trainining data
-X_train = torch.Tensor(np.array(([0.1, 0.1],
-                                 [0.2, 0.2],
-                                 [0.3, 0.3],
-                                 [0.4, 0.4])))
+X_train = torch.Tensor(
+    np.array(([0.1, 0.1], [0.2, 0.2], [0.3, 0.3], [0.4, 0.4]))
+)
 
 y_train_clf = torch.LongTensor(np.array(([0, 0, 1, 1])))
 y_train_reg = torch.FloatTensor(np.array(([0.1, 0.2, 0.3, 0.4])))
 y_train_reg = y_train_reg.view(-1, 1)
 
 # Testing data
-X_test = torch.Tensor(np.array(([0.5, 0.5],
-                                [0.6, 0.6])))
+X_test = torch.Tensor(np.array(([0.5, 0.5], [0.6, 0.6])))
 
 y_test_clf = torch.LongTensor(np.array(([1, 0])))
 y_test_reg = torch.FloatTensor(np.array(([0.5, 0.6])))
@@ -106,10 +108,9 @@ def test_clf(clf):
         epochs = 6
 
     # Train
-    model.fit(train_loader,
-              epochs=epochs,
-              test_loader=test_loader,
-              save_model=True)
+    model.fit(
+        train_loader, epochs=epochs, test_loader=test_loader, save_model=True
+    )
 
     # Test
     prev_acc = model.predict(test_loader)
@@ -151,10 +152,9 @@ def test_reg(reg):
         epochs = 6
 
     # Train
-    model.fit(train_loader,
-              epochs=epochs,
-              test_loader=test_loader,
-              save_model=True)
+    model.fit(
+        train_loader, epochs=epochs, test_loader=test_loader, save_model=True
+    )
 
     # Test
     prev_mse = model.predict(test_loader)
@@ -175,5 +175,7 @@ def test_estimator_check(method):
     an instance of a class inherited from nn.Module.
     """
     with pytest.raises(RuntimeError) as excinfo:
-        model = method(estimator=MLP_clf(), n_estimators=2, cuda=False)  # noqa: F841,E501
+        model = method(
+            estimator=MLP_clf(), n_estimators=2, cuda=False
+        )  # noqa: F841,E501
     assert "input argument `estimator` should be a class" in str(excinfo.value)
