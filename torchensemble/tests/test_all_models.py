@@ -175,7 +175,5 @@ def test_estimator_check(method):
     an instance of a class inherited from nn.Module.
     """
     with pytest.raises(RuntimeError) as excinfo:
-        model = method(
-            estimator=MLP_clf(), n_estimators=2, cuda=False
-        )  # noqa: F841,E501
+        method(estimator=MLP_clf(), n_estimators=2, cuda=False)
     assert "input argument `estimator` should be a class" in str(excinfo.value)
