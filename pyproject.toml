@@ -1,0 +1,23 @@
+[build-system]
+requires = [
+    "torch>=0.4.1",
+    "torchvision>=0.2.2",
+    "scikit-learn>=0.23.0"
+]
+[tool.black]
+line-length = 79
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+  | docs
+)/
+'''

@@ -27,5 +27,6 @@ jobs:
         pip install -r build_tools/requirements.txt
     - name: Check code quality
       run: |
+        black --skip-string-normalization --check --config pyproject.toml ./
         chmod +x "${GITHUB_WORKSPACE}/build_tools/linting.sh"
         ./build_tools/linting.sh
