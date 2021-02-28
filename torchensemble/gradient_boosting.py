@@ -9,6 +9,7 @@
 import abc
 import torch
 import logging
+import warnings
 import torch.nn as nn
 import torch.nn.functional as F
 
@@ -29,12 +30,17 @@ __model_doc = """
     Parameters
     ----------
     estimator : torch.nn.Module
-        The class of base estimator inherited from :mod:`torch.nn.Module`.
+        The class or object of your base estimator.
+
+        - If :obj:`class`, it should inherit from :mod:`torch.nn.Module`.
+        - If :obj:`object`, it should be instantiated from a class inherited
+          from :mod:`torch.nn.Module`.
     n_estimators : int
         The number of base estimators in the ensemble.
     estimator_args : dict, default=None
         The dictionary of hyper-parameters used to instantiate base
-        estimators (Optional).
+        estimators. This parameter will have no effect if ``estimator`` is a
+        base estimator object after instantiation.
     shrinkage_rate : float, default=1
         The shrinkage rate used in gradient boosting.
     cuda : bool, default=True
@@ -120,19 +126,17 @@ class _BaseGradientBoosting(BaseModule):
         cuda=True,
     ):
         super(BaseModule, self).__init__()
-
-        # Make sure estimator is not an instance
-        if not isinstance(estimator, type):
-            msg = (
-                "The input argument `estimator` should be a class"
-                " inherited from nn.Module. Perhaps you have passed"
-                " an instance of that class into the ensemble."
-            )
-            raise RuntimeError(msg)
-
         self.base_estimator_ = estimator
         self.n_estimators = n_estimators
         self.estimator_args = estimator_args
+
+        if estimator_args and not isinstance(estimator, type):
+            msg = (
+                "The input `estimator_args` will have no effect since"
+                " `estimator` is already an object after instantiation."
+            )
+            warnings.warn(msg, RuntimeWarning)
+
         self.shrinkage_rate = shrinkage_rate
         self.device = torch.device("cuda" if cuda else "cpu")
         self.logger = logging.getLogger()
