@@ -2,7 +2,11 @@ __model_doc = """
     Parameters
     ----------
     estimator : torch.nn.Module
-        The class of base estimator inherited from :mod:`torch.nn.Module`.
+        The class or object of your base estimator.
+
+        - If :obj:`class`, it should inherit from :mod:`torch.nn.Module`.
+        - If :obj:`object`, it should be instantiated from a class inherited
+          from :mod:`torch.nn.Module`.
     n_estimators : int
         The number of base estimators in the ensemble.
     estimator_args : dict, default=None
