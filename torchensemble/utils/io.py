@@ -15,7 +15,7 @@ def get_config(cfg_dir):
         )
     _, extension = os.path.splitext(cfg_dir)
 
-    if extension == ".yaml":
+    if extension == ".yml":
         loader = yaml.SafeLoader
         loader.add_implicit_resolver(
             u"tag:yaml.org,2002:float",

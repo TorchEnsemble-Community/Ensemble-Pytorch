@@ -1,3 +1,4 @@
 flake8
 pytest-cov
 black==20.8b1
+pyyaml
