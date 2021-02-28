@@ -1,5 +1,49 @@
 import os
+import re
+import json
+import yaml
 import torch
+
+
+def get_config(cfg_dir):
+    """
+    Load the json or yaml configuration file from the specified directory.
+    """
+    if not os.path.exists(cfg_dir):
+        raise FileExistsError(
+            "Configuration file does not exist: `{}`".format(cfg_dir)
+        )
+    _, extension = os.path.splitext(cfg_dir)
+
+    if extension == ".yaml":
+        loader = yaml.SafeLoader
+        loader.add_implicit_resolver(
+            u"tag:yaml.org,2002:float",
+            re.compile(
+                u"""^(?:
+             [-+]?(?:[0-9][0-9_]*)\\.[0-9_]*(?:[eE][-+]?[0-9]+)?
+            |[-+]?(?:[0-9][0-9_]*)(?:[eE][-+]?[0-9]+)
+            |\\.[0-9_]+(?:[eE][-+][0-9]+)?
+            |[-+]?[0-9][0-9_]*(?::[0-5]?[0-9])+\\.[0-9_]*
+            |[-+]?\\.(?:inf|Inf|INF)
+            |\\.(?:nan|NaN|NAN))$""",
+                re.X,
+            ),
+            list(u"-+0123456789."),
+        )
+        with open(cfg_dir, "r") as f:
+            cfg = yaml.load(f, Loader=loader)
+    elif extension == ".json":
+        with open(cfg_dir, "r") as f:
+            cfg = json.load(f)
+    else:
+        msg = (
+            "Unsupported type of configuration file: {}, should be one of"
+            " {{yaml, json}}"
+        )
+        raise NotImplementedError(msg.format(extension))
+
+    return cfg
 
 
 def save(model, save_dir, logger):

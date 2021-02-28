@@ -3,6 +3,7 @@ import torch
 import logging
 import torch.nn as nn
 
+from .utils import io
 from . import _constants as const
 
 
@@ -124,7 +125,17 @@ class BaseModule(abc.ABC, nn.Module):
         if self.estimator_args is None:
             estimator = self.base_estimator_()
         else:
-            estimator = self.base_estimator_(**self.estimator_args)
+            if isinstance(self.estimator_args, dict):
+                estimator = self.base_estimator_(**self.estimator_args)
+            elif isinstance(self.estimator_args, str):
+                config = io.get_config(self.estimator_args)
+                estimator = self.base_estimator_(config)
+            else:
+                msg = (
+                    "Cannot instantiate the base estimator because"
+                    " `estimator_args` is not one of {{None, dict, str}}."
+                )
+                raise ValueError(msg)
 
         return estimator.to(self.device)
 
