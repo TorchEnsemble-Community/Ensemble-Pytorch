@@ -1,6 +1,6 @@
 .. image:: ./docs/_images/badge_small.png
 
-|github|_ |readthedocs|_ |codecov|_ |python|_ |pypi|_ |license|_ |style|_
+|github|_ |readthedocs|_ |codecov|_ |python|_ |pypi|_ |license|_
 
 .. |github| image:: https://github.com/xuyxu/Ensemble-Pytorch/workflows/torchensemble-CI/badge.svg
 .. _github: https://github.com/xuyxu/Ensemble-Pytorch/actions
@@ -19,9 +19,6 @@
 
 .. |license| image:: https://img.shields.io/github/license/xuyxu/Ensemble-Pytorch
 .. _license: https://github.com/xuyxu/Ensemble-Pytorch/blob/master/LICENSE
-
-.. |style| image:: https://img.shields.io/badge/code%20style-black-000000.svg
-.. _style: https://github.com/psf/black
 
 Ensemble PyTorch
 ================
@@ -79,11 +76,11 @@ Minimal Example on How to Use
     # Evaluate
     accuracy = model.predict(test_loader)               # evaluate the ensemble
 
-List of methods
----------------
+Supported Ensemble
+------------------
 
 +--------+----------------------+-------------------+
-| **ID** |    **Method Name**   | **Ensemble Type** |
+| **ID** |   **Ensemble Name**  | **Ensemble Type** |
 +--------+----------------------+-------------------+
 |    1   |        Fusion        |       Mixed       |
 +--------+----------------------+-------------------+
@@ -98,8 +95,8 @@ List of methods
 |    6   | Adversarial Training |      Parallel     |
 +--------+----------------------+-------------------+
 
-Experiments
------------
+Experiment
+----------
 
 Classification on CIFAR-10
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -154,8 +151,8 @@ Regression on YearPredictionMSD
 | **GradientBoostingRegressor**   | 1.08          | 0.71          | -0.12         |
 +---------------------------------+---------------+---------------+---------------+
 
-Package dependencies
---------------------
+Package Dependency
+------------------
 
 -  joblib>=0.11
 -  scikit-learn>=0.23.0
