@@ -11,7 +11,8 @@ __model_doc = """
         The number of base estimators in the ensemble.
     estimator_args : dict, default=None
         The dictionary of hyper-parameters used to instantiate base
-        estimators (Optional).
+        estimators. This parameter will have no effect if ``estimator`` is a
+        base estimator object after instantiation.
     cuda : bool, default=True
 
         - If ``True``, use GPU to train and evaluate the ensemble.
