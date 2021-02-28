@@ -2,7 +2,7 @@
    :align: center
    :width: 400
 
-|github|_ |readthedocs|_ |codecov|_ |python|_ |pypi|_ |license|_ |style|_
+|github|_ |readthedocs|_ |codecov|_ |python|_ |pypi|_ |license|_
 
 .. |github| image:: https://github.com/xuyxu/Ensemble-Pytorch/workflows/torchensemble-CI/badge.svg
 .. _github: https://github.com/xuyxu/Ensemble-Pytorch/actions
@@ -13,8 +13,8 @@
 .. |codecov| image:: https://codecov.io/gh/xuyxu/Ensemble-Pytorch/branch/master/graph/badge.svg?token=2FXCFRIDTV
 .. _codecov: https://codecov.io/gh/xuyxu/Ensemble-Pytorch
 
-.. |python| image:: https://img.shields.io/badge/python-3.6+-blue?logo=python
-.. _python: https://www.python.org/
+.. |python| image:: https://img.shields.io/pypi/pyversions/torchensemble
+.. _python: https://pypi.org/project/torchensemble/
 
 .. |pypi| image:: https://img.shields.io/pypi/v/torchensemble
 .. _pypi: https://pypi.org/project/torchensemble/
@@ -22,10 +22,7 @@
 .. |license| image:: https://img.shields.io/github/license/xuyxu/Ensemble-Pytorch
 .. _license: https://github.com/xuyxu/Ensemble-Pytorch/blob/master/LICENSE
 
-.. |style| image:: https://img.shields.io/badge/code%20style-black-000000.svg
-.. _style: https://github.com/psf/black
-
-Ensemble-PyTorch Documentation
+Ensemble PyTorch Documentation
 ==============================
 
 .. rst-class:: center
