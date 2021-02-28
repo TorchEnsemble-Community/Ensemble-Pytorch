@@ -81,7 +81,7 @@ y_test_reg = y_test_reg.view(-1, 1)
 
 
 @pytest.mark.parametrize("clf", all_clf)
-def test_clf(clf):
+def test_clf_class(clf):
     """
     This unit test checks the training and evaluating stage of all classifiers.
     """
@@ -124,8 +124,52 @@ def test_clf(clf):
     assert prev_acc == post_acc  # ensure the same performance
 
 
+@pytest.mark.parametrize("clf", all_clf)
+def test_clf_object(clf):
+    """
+    This unit test checks the training and evaluating stage of all classifiers.
+    """
+    epochs = 1
+    n_estimators = 2
+
+    model = clf(estimator=MLP_clf(), n_estimators=n_estimators, cuda=False)
+
+    # Optimizer
+    model.set_optimizer("Adam", lr=1e-3, weight_decay=5e-4)
+
+    # Scheduler (Snapshot Ensemble Excluded)
+    if not isinstance(model, torchensemble.SnapshotEnsembleClassifier):
+        model.set_scheduler("MultiStepLR", milestones=[2, 4])
+
+    # Prepare data
+    train = TensorDataset(X_train, y_train_clf)
+    train_loader = DataLoader(train, batch_size=2, shuffle=False)
+    test = TensorDataset(X_test, y_test_clf)
+    test_loader = DataLoader(test, batch_size=2, shuffle=False)
+
+    # Snapshot ensemble needs more epochs
+    if isinstance(model, torchensemble.SnapshotEnsembleClassifier):
+        epochs = 6
+
+    # Train
+    model.fit(
+        train_loader, epochs=epochs, test_loader=test_loader, save_model=True
+    )
+
+    # Test
+    prev_acc = model.predict(test_loader)
+
+    # Reload
+    new_model = clf(estimator=MLP_clf(), n_estimators=n_estimators, cuda=False)
+    io.load(new_model)
+
+    post_acc = new_model.predict(test_loader)
+
+    assert prev_acc == post_acc  # ensure the same performance
+
+
 @pytest.mark.parametrize("reg", all_reg)
-def test_reg(reg):
+def test_reg_class(reg):
     """
     This unit test checks the training and evaluating stage of all regressors.
     """
@@ -161,6 +205,50 @@ def test_reg(reg):
 
     # Reload
     new_model = reg(estimator=MLP_reg, n_estimators=n_estimators, cuda=False)
+    io.load(new_model)
+
+    post_mse = new_model.predict(test_loader)
+
+    assert prev_mse == post_mse  # ensure the same performance
+
+
+@pytest.mark.parametrize("reg", all_reg)
+def test_reg_object(reg):
+    """
+    This unit test checks the training and evaluating stage of all regressors.
+    """
+    epochs = 1
+    n_estimators = 2
+
+    model = reg(estimator=MLP_reg(), n_estimators=n_estimators, cuda=False)
+
+    # Optimizer
+    model.set_optimizer("Adam", lr=1e-3, weight_decay=5e-4)
+
+    # Scheduler (Snapshot Ensemble Excluded)
+    if not isinstance(model, torchensemble.SnapshotEnsembleRegressor):
+        model.set_scheduler("MultiStepLR", milestones=[2, 4])
+
+    # Prepare data
+    train = TensorDataset(X_train, y_train_reg)
+    train_loader = DataLoader(train, batch_size=2, shuffle=False)
+    test = TensorDataset(X_test, y_test_reg)
+    test_loader = DataLoader(test, batch_size=2, shuffle=False)
+
+    # Snapshot ensemble needs more epochs
+    if isinstance(model, torchensemble.SnapshotEnsembleRegressor):
+        epochs = 6
+
+    # Train
+    model.fit(
+        train_loader, epochs=epochs, test_loader=test_loader, save_model=True
+    )
+
+    # Test
+    prev_mse = model.predict(test_loader)
+
+    # Reload
+    new_model = reg(estimator=MLP_reg(), n_estimators=n_estimators, cuda=False)
     io.load(new_model)
 
     post_mse = new_model.predict(test_loader)
