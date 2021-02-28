@@ -37,18 +37,19 @@ Stable Version
 The stable version is available at PyPI. You can install it using:
 
 .. code:: bash
-   pip install torchensemble
 
-Build from Source
-~~~~~~~~~~~~~~~~~
+   $ pip install torchensemble
 
-Building the package from source is simple. Just clone this repo and run ``setup.py``.
+Latest Version
+~~~~~~~~~~~~~~
+
+To use the latest version, you need to build the package from source:
 
 .. code:: bash
 
     $ git clone https://github.com/xuyxu/Ensemble-Pytorch.git
     $ cd Ensemble-Pytorch
-    $ pip install -r requirements.txt (Optional)
+    $ pip install -r requirements.txt
     $ python setup.py install
 
 Minimal Example on How to Use
@@ -58,25 +59,25 @@ Minimal Example on How to Use
 
     from torchensemble import ensemble_method           # import ensemble (e.g., VotingClassifier)
 
-    # Load the data
+    # Load your dataset
     train_loader = DataLoader(...)
     test_loader = DataLoader(...)
 
     # Define the ensemble
     model = ensemble_method(estimator=base_estimator,   # your deep learning model
-                            n_estimators=10)            # number of base estimators
+                            n_estimators=10)            # the number of base estimators
 
     # Set the optimizer
-    model.set_optimizer("Adam",
-                        lr=learning_rate,
-                        weight_decay=weight_decay)
+    model.set_optimizer("Adam",                         # parameter optimizer
+                        lr=learning_rate,               # learning rate of the optimizer
+                        weight_decay=weight_decay)      # weight decay of the optimizer
 
     # Train
     model.fit(train_loader,
-              epochs=epochs)
+              epochs=epochs)                            # the number of training epochs
 
     # Evaluate
-    accuracy = model.predict(test_loader)
+    accuracy = model.predict(test_loader)               # evaluate the ensemble
 
 List of methods
 ---------------
