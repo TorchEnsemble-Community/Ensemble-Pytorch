@@ -26,48 +26,32 @@
 Ensemble Pytorch
 ================
 
-Implementation of ensemble methods in Pytorch to boost the performance of your model.
-
-News
-----
-
-- The package has been uploaded to PyPI. You can now install it using ``pip install torchensemble``
--  A pre-released version of documentation is available at
-   https://ensemble-pytorch.readthedocs.io/en/latest/
-
-List of methods
----------------
-
-+--------+----------------------+-------------------+
-| **ID** |    **Method Name**   | **Ensemble Type** |
-+--------+----------------------+-------------------+
-|    1   |        Fusion        |       Mixed       |
-+--------+----------------------+-------------------+
-|    2   |        Voting        |      Parallel     |
-+--------+----------------------+-------------------+
-|    3   |        Bagging       |      Parallel     |
-+--------+----------------------+-------------------+
-|    4   |   Gradient Boosting  |     Sequential    |
-+--------+----------------------+-------------------+
-|    5   |   Snapshot Ensemble  |     Sequential    |
-+--------+----------------------+-------------------+
-|    6   | Adversarial Training |      Parallel     |
-+--------+----------------------+-------------------+
+Implementation of ensemble methods in Pytorch to boost the performance of your model. Please refer to our `documentation <https://ensemble-pytorch.readthedocs.io/>`__ for details.
 
 Installation
 ------------
 
-Installing Ensemble-Pytorch package is simple. Just clone this repo and
-run ``setup.py``.
+Stable Version
+~~~~~~~~~~~~~~
+
+The stable version is available at PyPI. You can install it using:
+
+.. code:: bash
+   pip install torchensemble
+
+Build from Source
+~~~~~~~~~~~~~~~~~
+
+Building the package from source is simple. Just clone this repo and run ``setup.py``.
 
 .. code:: bash
 
-    $ git clone https://github.com/AaronX121/Ensemble-Pytorch.git
+    $ git clone https://github.com/xuyxu/Ensemble-Pytorch.git
     $ cd Ensemble-Pytorch
-    $ pip install -r requirements.txt
+    $ pip install -r requirements.txt (Optional)
     $ python setup.py install
 
-Minimal example on how to use
+Minimal Example on How to Use
 -----------------------------
 
 .. code:: python
@@ -94,8 +78,27 @@ Minimal example on how to use
     # Evaluate
     accuracy = model.predict(test_loader)
 
-Benchmarks
-----------
+List of methods
+---------------
+
++--------+----------------------+-------------------+
+| **ID** |    **Method Name**   | **Ensemble Type** |
++--------+----------------------+-------------------+
+|    1   |        Fusion        |       Mixed       |
++--------+----------------------+-------------------+
+|    2   |        Voting        |      Parallel     |
++--------+----------------------+-------------------+
+|    3   |        Bagging       |      Parallel     |
++--------+----------------------+-------------------+
+|    4   |   Gradient Boosting  |     Sequential    |
++--------+----------------------+-------------------+
+|    5   |   Snapshot Ensemble  |     Sequential    |
++--------+----------------------+-------------------+
+|    6   | Adversarial Training |      Parallel     |
++--------+----------------------+-------------------+
+
+Experiments
+-----------
 
 -  **Classification on CIFAR-10**
 -  The table below presents the classification accuracy of different
