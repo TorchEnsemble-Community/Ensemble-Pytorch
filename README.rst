@@ -101,7 +101,9 @@ List of methods
 Experiments
 -----------
 
--  **Classification on CIFAR-10**
+Classification on CIFAR-10
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 -  The table below presents the classification accuracy of different
    ensemble classifiers on the testing data of **CIFAR-10**
 -  Each classifier uses **10** LeNet-5 model (with RELU activation and
@@ -125,7 +127,9 @@ Experiments
 | **GradientBoostingClassifier**   | 3.17          | 80.82             | **+7.78**         |
 +----------------------------------+---------------+-------------------+-------------------+
 
--  **Regression on YearPredictionMSD**
+Regression on YearPredictionMSD
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 -  The table below presents the mean squared error (MSE) of different
    ensemble regressors on the testing data of **YearPredictionMSD**
 -  Each regressor uses **10** multi-layered perceptron (MLP) model (with
