@@ -166,14 +166,3 @@ def test_reg(reg):
     post_mse = new_model.predict(test_loader)
 
     assert prev_mse == post_mse  # ensure the same performance
-
-
-@pytest.mark.parametrize("method", all_clf + all_reg)
-def test_estimator_check(method):
-    """
-    This unit test checks that the input argument estimator should not be
-    an instance of a class inherited from nn.Module.
-    """
-    with pytest.raises(RuntimeError) as excinfo:
-        method(estimator=MLP_clf(), n_estimators=2, cuda=False)
-    assert "input argument `estimator` should be a class" in str(excinfo.value)

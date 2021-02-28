@@ -10,10 +10,16 @@ def save(model, save_dir, logger):
     if not os.path.isdir(save_dir):
         os.mkdir(save_dir)
 
-    # {Ensemble_Method_Name}_{Base_Estimator_Name}_{n_estimators}
+    # Decide the base estimator name
+    if isinstance(model.base_estimator_, type):
+        base_estimator_name = model.base_estimator_.__name__
+    else:
+        base_estimator_name = model.base_estimator_.__class__.__name__
+
+    # {Ensemble_Model_Name}_{Base_Estimator_Name}_{n_estimators}
     filename = "{}_{}_{}_ckpt.pth".format(
         type(model).__name__,
-        model.base_estimator_.__name__,
+        base_estimator_name,
         model.n_estimators,
     )
 

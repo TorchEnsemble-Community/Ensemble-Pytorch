@@ -1,19 +1,20 @@
 Changelog
 =========
 
-[Ver 0.1.*]
------------
+Ver 0.1.*
+---------
 
+* |Feature| |API| Add support on accepting instantiated base estimators as valid input | `@xuyxu <https://github.com/xuyxu>`__
 * |Fix| Fix missing base estimators when calling :meth:`load()` for all ensembles | `@xuyxu <https://github.com/xuyxu>`__
-* |MajorFeature| Add methods on model deserialization :meth:`load()` for all ensembles | `@mttgdd <https://github.com/mttgdd>`__
+* |Feature| |API| Add methods on model deserialization :meth:`load()` for all ensembles | `@mttgdd <https://github.com/mttgdd>`__
 
-[Beta]
-------
+Beta
+----
 
-* |MajorFeature| Add :meth:`set_scheduler` for all ensembles | `@xuyxu <https://github.com/xuyxu>`__
+* |Feature| |API| Add :meth:`set_scheduler` for all ensembles | `@xuyxu <https://github.com/xuyxu>`__
 * |MajorFeature| Add :class:`AdversarialTrainingClassifier` and :class:`AdversarialTrainingRegressor` | `@xuyxu <https://github.com/xuyxu>`__
 * |MajorFeature| Add :class:`SnapshotEnsembleClassifier` and :class:`SnapshotEnsembleRegressor` | `@xuyxu <https://github.com/xuyxu>`__
-* |MajorFeature| Add model validation and serialization | `@ozanpkr <https://github.com/ozanpkr>`__ and `@xuyxu <https://github.com/xuyxu>`__
+* |Feature| |API| Add model validation and serialization | `@ozanpkr <https://github.com/ozanpkr>`__ and `@xuyxu <https://github.com/xuyxu>`__
 * |Enhancement| Add CI and maintenance tools | `@xuyxu <https://github.com/xuyxu>`__
 * |Enhancement| Add the code coverage on codecov | `@xuyxu <https://github.com/xuyxu>`__
 * |Enhancement| Add the version numbers to requirements.txt | `@zackhardtoname <https://github.com/zackhardtoname>`__ and `@xuyxu <https://github.com/xuyxu>`__

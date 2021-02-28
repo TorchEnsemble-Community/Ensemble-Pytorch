@@ -1,6 +1,8 @@
 import abc
+import copy
 import torch
 import logging
+import warnings
 import torch.nn as nn
 
 from . import _constants as const
@@ -58,19 +60,17 @@ class BaseModule(abc.ABC, nn.Module):
         n_jobs=None,
     ):
         super(BaseModule, self).__init__()
-
-        # Make sure that `estimator` is not an instance
-        if not isinstance(estimator, type):
-            msg = (
-                "The input argument `estimator` should be a class"
-                " inherited from `nn.Module`. Perhaps you have passed"
-                " an instance of that class into the ensemble."
-            )
-            raise RuntimeError(msg)
-
         self.base_estimator_ = estimator
         self.n_estimators = n_estimators
         self.estimator_args = estimator_args
+
+        if estimator_args and not isinstance(estimator, type):
+            msg = (
+                "The input `estimator_args` will have no effect since"
+                " `estimator` is already an object after instantiation."
+            )
+            warnings.warn(msg, RuntimeWarning)
+
         self.device = torch.device("cuda" if cuda else "cpu")
         self.n_jobs = n_jobs
         self.logger = logging.getLogger()
@@ -121,10 +121,18 @@ class BaseModule(abc.ABC, nn.Module):
 
     def _make_estimator(self):
         """Make and configure a copy of the `self.base_estimator_`."""
-        if self.estimator_args is None:
-            estimator = self.base_estimator_()
+
+        # Call `deepcopy` to make a base estimator
+        if not isinstance(self.base_estimator_, type):
+            estimator = copy.deepcopy(self.base_estimator_)
+        # Call `__init__` to make a base estimator
         else:
-            estimator = self.base_estimator_(**self.estimator_args)
+            # Without params
+            if self.estimator_args is None:
+                estimator = self.base_estimator_()
+            # With params
+            else:
+                estimator = self.base_estimator_(**self.estimator_args)
 
         return estimator.to(self.device)
 
