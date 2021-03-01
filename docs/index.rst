@@ -32,8 +32,8 @@ Ensemble PyTorch Documentation
 
 **Ensemble-PyTorch** implements a collection of ensemble methods in PyTorch. It provides:
 
-* |:arrow_up_small:| Easy ways to boost the performance of your deep learning models.
-* |:eyes:| Easy-to-use APIs on training and evaluating.
+* |:arrow_up_small:| Easy ways to improve the performance and robustness of your deep learning model.
+* |:eyes:| Easy-to-use APIs on training and evaluating the ensemble.
 * |:zap:| High training efficiency with parallelization.
 
 | This package is under active development. Please feel free to open an `issue <https://github.com/xuyxu/Ensemble-Pytorch/issues>`__ if your have any problem. In addition, any feature request or `pull request <https://github.com/xuyxu/Ensemble-Pytorch/pulls>`__ would be highly welcomed.
