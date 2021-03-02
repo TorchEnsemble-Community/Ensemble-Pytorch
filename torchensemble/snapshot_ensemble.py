@@ -48,13 +48,12 @@ __fit_doc = """
     log_interval : int, default=100
         The number of batches to wait before logging the training status.
     test_loader : torch.utils.data.DataLoader, default=None
-        A :mod:`torch.utils.data.DataLoader` container that contains the
-        evaluating data.
+        A :mod:`DataLoader` container that contains the evaluating data.
 
-        - If ``None``, no validation is conducted after each snapshot model
+        - If ``None``, no validation is conducted after each snapshot
           being generated.
         - If not ``None``, the ensemble will be evaluated on this
-          dataloader after each snapshot model being generated.
+          dataloader after each snapshot being generated.
     save_model : bool, default=True
         Specify whether to save the model parameters.
 
