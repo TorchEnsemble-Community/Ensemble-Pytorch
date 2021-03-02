@@ -23,7 +23,7 @@
 Ensemble PyTorch
 ================
 
-Implementation of ensemble methods in PyTorch to boost the performance of your model. Please refer to our `documentation <https://ensemble-pytorch.readthedocs.io/>`__ for details.
+Implementation of ensemble methods in PyTorch to improve the performance and robustness of your deep learning model. Please refer to our `documentation <https://ensemble-pytorch.readthedocs.io/>`__ for details.
 
 Installation
 ------------
@@ -31,7 +31,7 @@ Installation
 Stable Version
 ~~~~~~~~~~~~~~
 
-The stable version is available at PyPI. You can install it using:
+The stable version is available at `PyPI <https://pypi.org/project/torchensemble/>`__. You can install it using:
 
 .. code:: bash
 
@@ -40,13 +40,13 @@ The stable version is available at PyPI. You can install it using:
 Latest Version
 ~~~~~~~~~~~~~~
 
-To use the latest version, you need to build the package from source:
+To use the latest version, you need to install the package from source:
 
 .. code:: bash
 
     $ git clone https://github.com/xuyxu/Ensemble-Pytorch.git
     $ cd Ensemble-Pytorch
-    $ pip install -r requirements.txt
+    $ pip install -r requirements.txt (Optional)
     $ python setup.py install
 
 Minimal Example on How to Use
