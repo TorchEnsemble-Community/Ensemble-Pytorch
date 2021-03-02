@@ -20,11 +20,10 @@ def set_optimizer(model, optimizer_name, **kwargs):
         "SGD",
     ]
     if optimizer_name not in torch_optim_optimizers:
-        msg = (
-            f"Unrecognized optimizer: {optimizer_name}, should be one of"
-            " {torch_optim_optimizers}."
+        msg = "Unrecognized optimizer: {}, should be one of {}."
+        raise NotImplementedError(
+            msg.format(optimizer_name, ",".join(torch_optim_optimizers))
         )
-        raise NotImplementedError(msg.format(optimizer_name))
 
     optimizer_cls = getattr(
         importlib.import_module('torch.optim'), optimizer_name
@@ -75,11 +74,10 @@ def set_scheduler(optimizer, scheduler_name, **kwargs):
         "CosineAnnealingWarmRestarts",
     ]
     if scheduler_name not in torch_lr_schedulers:
-        msg = (
-            f"Unrecognized scheduler: {scheduler_name}, should be one of"
-            " {torch_lr_schedulers}."
+        msg = "Unrecognized scheduler: {}, should be one of {}."
+        raise NotImplementedError(
+            msg.format(scheduler_name, ",".join(torch_lr_schedulers))
         )
-        raise NotImplementedError(msg.format(scheduler_name))
 
     scheduler_cls = getattr(
         importlib.import_module('torch.optim.lr_scheduler'), scheduler_name
