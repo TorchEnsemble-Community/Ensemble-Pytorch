@@ -5,8 +5,6 @@ Experiments
 
   This page will be updated once all experiments are done. We are sorry for the delay, which is caused by the prohibitively long time on running all experiments listed below.
 
-The running scripts on all experiments are available in the folder `experiments <https://github.com/xuyxu/Ensemble-Pytorch/tree/master/experiments>`__.
-
 Performance Comparison
 ----------------------
 
@@ -24,9 +22,9 @@ We have collected four different configurations on the dataset and base estimato
 +------------------+----------------+-----------+-------------------+
 |  LeNet@CIFAR-10  |     LeNet-5    |  CIFAR-10 | 5, 10, 15, 20, 25 |
 +------------------+----------------+-----------+-------------------+
-|  ResNet@CIFAR-10 |    ResNet-18   |  CIFAR-10 |   2, 4, 6, 8, 10  |
+|  ResNet@CIFAR-10 |    ResNet-18   |  CIFAR-10 |    2, 5, 7, 10    |
 +------------------+----------------+-----------+-------------------+
-| ResNet@CIFAR-100 |    ResNet-18   | CIFAR-100 |   2, 4, 6, 8, 10  |
+| ResNet@CIFAR-100 |    ResNet-18   | CIFAR-100 |    2, 5, 7, 10    |
 +------------------+----------------+-----------+-------------------+
 
 * Data augmentations were adopted on **CIFAR-10** and **CIFAR-100** datasets.
