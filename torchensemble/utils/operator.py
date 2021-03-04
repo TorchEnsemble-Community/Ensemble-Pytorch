@@ -9,7 +9,7 @@ __all__ = [
     "average",
     "sum_with_multiplicative",
     "onehot_encoding",
-    "pesudo_residual_classification",
+    "pseudo_residual_classification",
     "pseudo_residual_regression",
 ]
 
@@ -36,7 +36,7 @@ def onehot_encoding(label, n_classes):
     return onehot
 
 
-def pesudo_residual_classification(target, output, n_classes):
+def pseudo_residual_classification(target, output, n_classes):
     """
     Compute the pseudo residual for classification with cross-entropyloss."""
     y_onehot = onehot_encoding(target, n_classes)
