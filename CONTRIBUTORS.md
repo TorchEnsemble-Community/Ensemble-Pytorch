@@ -13,6 +13,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://github.com/mttgdd"><img src="https://avatars.githubusercontent.com/u/3154919?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Matt Gadd</b></sub></a><br /><a href="https://github.com/xuyxu/Ensemble-Pytorch/commits?author=mttgdd" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/Xiaohui9607"><img src="https://avatars.githubusercontent.com/u/37996225?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Xiaohui Chen</b></sub></a><br /><a href="https://github.com/xuyxu/Ensemble-Pytorch/issues?q=author%3AXiaohui9607" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/cspsampedro"><img src="https://avatars.githubusercontent.com/u/7384605?v=4?s=100" width="100px;" alt=""/><br /><sub><b>cspsampedro</b></sub></a><br /><a href="#ideas-cspsampedro" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/xuyxu/Ensemble-Pytorch/commits?author=cspsampedro" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/nolaurence"><img src="https://avatars.githubusercontent.com/u/53215736?v=4?s=100" width="100px;" alt=""/><br /><sub><b>nolaurence</b></sub></a><br /><a href="https://github.com/xuyxu/Ensemble-Pytorch/commits?author=nolaurence" title="Code">💻</a></td>
   </tr>
 </table>
 
