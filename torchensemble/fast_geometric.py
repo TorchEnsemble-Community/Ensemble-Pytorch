@@ -1,7 +1,8 @@
 """
-  Motivated by geometric insights on the DNN loss surface, fast geometirc is
-  an efficient ensemble method that uses a customized learning rate scheduler
-  to generate base estimators, similar to snapshot ensemble.
+  Motivated by geometric insights on the loss surface of deep neural networks,
+  Fast Geometirc Ensembling (FGE) is an efficient ensemble that uses a
+  customized learning rate scheduler to generate base estimators, similar to
+  snapshot ensemble.
 
   Reference:
       T. Garipov, P. Izmailov, D. Podoprikhin et al., Loss Surfaces, Mode
@@ -24,9 +25,9 @@ from .utils import operator as op
 
 
 __all__ = [
-    "_BaseFastGemoetric",
-    "FastGemoetricClassifier",
-    "FastGemoetricRegressor",
+    "_BaseFastGeometric",
+    "FastGeometricClassifier",
+    "FastGeometricRegressor",
 ]
 
 
@@ -36,16 +37,17 @@ __fit_doc = """
     train_loader : torch.utils.data.DataLoader
         A :mod:`DataLoader` container that contains the training data.
     epochs : int, default=100
-        The number of training epochs used to build the dummy base estimator.
+        The number of training epochs used to fit the dummy base estimator.
     log_interval : int, default=100
         The number of batches to wait before logging the training status.
     test_loader : torch.utils.data.DataLoader, default=None
         A :mod:`DataLoader` container that contains the evaluating data.
 
-        - If ``None``, no validation is conducted after each snapshot
-          being generated.
-        - If not ``None``, the ensemble will be evaluated on this
-          dataloader after each snapshot being generated.
+        - If ``None``, no validation is conducted during the training stage
+          of the dummy base estimator.
+        - If not ``None``, the dummy base estimator will be evaluated on this
+          dataloader after each training epoch, and the checkpoint with the
+          best validation performance will be reserved.
 """
 
 
@@ -55,16 +57,16 @@ __fge_doc = """
     train_loader : torch.utils.data.DataLoader
         A :mod:`DataLoader` container that contains the training data.
     epochs : int, default=20
-        The number of training epochs used to build the ensemble.
+        The number of training epochs used to build the entire ensemble.
     lr_1 : float, default=5e-2
-        alpha_1 in original paper used to decide learning rate per iteration.
+        alpha_1 in original paper used to adjust the learning rate.
     lr_2 : float, default=1e-4
-        alpha_2 in original paper used to decide learning rate per iteration.
+        alpha_2 in original paper used to adjust the learning rate.
     test_loader : torch.utils.data.DataLoader, default=None
         A :mod:`DataLoader` container that contains the evaluating data.
 
-        - If ``None``, no validation is conducted after each base estimator
-          being generated.
+        - If ``None``, no validation is conducted after each real base
+          estimator being generated.
         - If not ``None``, the ensemble will be evaluated on this
           dataloader after each base estimator being generated.
     save_model : bool, default=True
@@ -102,7 +104,7 @@ def _fast_geometric_model_doc(header, item="fit"):
     return adddoc
 
 
-class _BaseFastGemoetric(BaseModule):
+class _BaseFastGeometric(BaseModule):
     def __init__(
         self, estimator, n_estimators, estimator_args=None, cuda=True
     ):
@@ -182,15 +184,15 @@ class _BaseFastGemoetric(BaseModule):
 
 
 @torchensemble_model_doc(
-    """Implementation on the FastGemoetricClassifier.""", "model"
+    """Implementation on the FastGeometricClassifier.""", "model"
 )
-class FastGemoetricClassifier(_BaseFastGemoetric):
+class FastGeometricClassifier(_BaseFastGeometric):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.is_classification = True
 
     @torchensemble_model_doc(
-        """Implementation on the data forwarding in FastGemoetricClassifier.""",  # noqa: E501
+        """Implementation on the data forwarding in FastGeometricClassifier.""",  # noqa: E501
         "classifier_forward",
     )
     def forward(self, x):
@@ -199,7 +201,7 @@ class FastGemoetricClassifier(_BaseFastGemoetric):
         return F.softmax(proba, dim=1)
 
     @_fast_geometric_model_doc(
-        """Implementation on the training stage of FastGemoetricClassifier.""",  # noqa: E501
+        """Implementation on the training stage of FastGeometricClassifier.""",  # noqa: E501
         "fit",
     )
     def fit(
@@ -210,7 +212,7 @@ class FastGemoetricClassifier(_BaseFastGemoetric):
             train_loader, self.is_classification
         )
 
-        # A dummy model used to generate base estimators
+        # A dummy base estimator
         estimator_ = self._make_estimator()
 
         # Set the optimizer and scheduler
@@ -289,10 +291,10 @@ class FastGemoetricClassifier(_BaseFastGemoetric):
                 scheduler.step()
 
         # Save the dummy base estimator
-        self.dummy_base_estimator_ = estimator_
+        self.dummy_base_estimator_ = copy.deepcopy(estimator_)
 
     @_fast_geometric_model_doc(
-        """Implementation on the ensembling stage of FastGemoetricClassifier.""",  # noqa: E501
+        """Implementation on the ensembling stage of FastGeometricClassifier.""",  # noqa: E501
         "fge",
     )
     def ensemble(
@@ -308,7 +310,7 @@ class FastGemoetricClassifier(_BaseFastGemoetric):
     ):
         if not hasattr(self, "dummy_base_estimator_"):
             msg = (
-                "Please call the `fit` method to build the dummy base"
+                "Please call the `fit` method to fit the dummy base"
                 " estimator first."
             )
             raise RuntimeError(msg)
@@ -316,9 +318,11 @@ class FastGemoetricClassifier(_BaseFastGemoetric):
         # Number of training epochs per base estimator: cycle / 2
         cycle = 2 * epochs // self.n_estimators
 
-        # Set the optimizer and scheduler
+        # Set the optimizer
         optimizer = set_module.set_optimizer(
-            self.dummy_base_estimator_, self.optimizer_name, **self.optimizer_args
+            self.dummy_base_estimator_,
+            self.optimizer_name,
+            **self.optimizer_args
         )
 
         # Utils
@@ -329,8 +333,7 @@ class FastGemoetricClassifier(_BaseFastGemoetric):
         for epoch in range(epochs):
 
             # Update learning rate
-            lr = self._adjust_lr(optimizer, epoch, cycle, lr_1, lr_2)
-            print(lr)         
+            self._adjust_lr(optimizer, epoch, cycle, lr_1, lr_2)     
 
             # Training
             self.dummy_base_estimator_.train()
@@ -366,7 +369,7 @@ class FastGemoetricClassifier(_BaseFastGemoetric):
                             )
                         )
 
-            # Expand the ensemble when learning rate meets the minimum value
+            # Update the ensemble when learning rate meets the minimum value
             if optimizer.param_groups[0]["lr"] == lr_2:
                 estimator = copy.deepcopy(self.dummy_base_estimator_)
                 self.estimators_.append(estimator)
@@ -409,7 +412,7 @@ class FastGemoetricClassifier(_BaseFastGemoetric):
         self.is_fitted_ = True
 
     @torchensemble_model_doc(
-        """Implementation on the evaluating stage of FastGemoetricClassifier.""",  # noqa: E501
+        """Implementation on the evaluating stage of FastGeometricClassifier.""",  # noqa: E501
         "classifier_predict",
     )
     def predict(self, test_loader):
@@ -438,15 +441,15 @@ class FastGemoetricClassifier(_BaseFastGemoetric):
 
 
 @torchensemble_model_doc(
-    """Implementation on the FastGemoetricRegressor.""", "model"
+    """Implementation on the FastGeometricRegressor.""", "model"
 )
-class FastGemoetricRegressor(_BaseFastGemoetric):
+class FastGeometricRegressor(_BaseFastGeometric):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.is_classification = False
 
     @torchensemble_model_doc(
-        """Implementation on the data forwarding in FastGemoetricRegressor.""",  # noqa: E501
+        """Implementation on the data forwarding in FastGeometricRegressor.""",  # noqa: E501
         "regressor_forward",
     )
     def forward(self, x):
@@ -454,7 +457,7 @@ class FastGemoetricRegressor(_BaseFastGemoetric):
         return pred
 
     @torchensemble_model_doc(
-        """Set the attributes on optimizer for FastGemoetricRegressor.""",
+        """Set the attributes on optimizer for FastGeometricRegressor.""",
         "set_optimizer",
     )
     def set_optimizer(self, optimizer_name, **kwargs):
@@ -462,7 +465,7 @@ class FastGemoetricRegressor(_BaseFastGemoetric):
         self.optimizer_args = kwargs
 
     @_fast_geometric_model_doc(
-        """Implementation on the training stage of FastGemoetricRegressor.""",  # noqa: E501
+        """Implementation on the training stage of FastGeometricRegressor.""",  # noqa: E501
         "fit",
     )
     def fit(
@@ -570,7 +573,7 @@ class FastGemoetricRegressor(_BaseFastGemoetric):
             io.save(self, save_dir, self.logger)
 
     @torchensemble_model_doc(
-        """Implementation on the evaluating stage of FastGemoetricRegressor.""",  # noqa: E501
+        """Implementation on the evaluating stage of FastGeometricRegressor.""",  # noqa: E501
         "regressor_predict",
     )
     def predict(self, test_loader):
