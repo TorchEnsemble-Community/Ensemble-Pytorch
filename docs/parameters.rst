@@ -134,3 +134,38 @@ AdversarialTrainingRegressor
 
 .. autoclass:: torchensemble.adversarial_training.AdversarialTrainingRegressor
     :members:
+
+Fast Geometric Ensemble
+-----------------------
+
+Motivated by geometric insights on the DNN loss surface, fast geometirc is an
+efficient ensemble method that uses customized learning rate scheduler to
+generate base estimators, similar to snapshot ensemble.
+
+Reference:
+    T. Garipov, P. Izmailov, D. Podoprikhin et al., Loss Surfaces, Mode
+    Connectivity, and Fast Ensembling of DNNs, NeurIPS, 2018.
+
+Notice that unlike all ensembles above, using fast geometric ensemble (FGE) is
+a two-staged process. Concretely, you first need to call :meth:`fit` to build
+a dummy base estimator that will be used to generate ensembles. Second, you
+need to call :meth:`ensemble` to generate real base estimators in the ensemble.
+The pipeline is shown in the following code snippet:
+
+.. code:: python
+
+    model = FastGemoetricClassifier(**ensemble_related_args)
+    model.fit(**base_estimator_related_args)  # train the base estimator used to generate ensembles
+    model.ensemble(**fge_related_args)  # generate the ensemble
+
+FastGemoetricClassifier
+***********************
+
+.. autoclass:: torchensemble.fast_geometric.FastGemoetricClassifier
+    :members:
+
+FastGemoetricRegressor
+***********************
+
+.. autoclass:: torchensemble.fast_geometric.FastGemoetricRegressor
+    :members:
