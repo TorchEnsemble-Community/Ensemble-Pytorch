@@ -9,6 +9,7 @@
   "imageSize": 100,
   "commit": false,
   "commitConvention": "none",
+  "contributorsSortAlphabetically": true,
   "contributors": [
     {
       "login": "xuyxu",
