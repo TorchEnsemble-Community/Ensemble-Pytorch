@@ -1,7 +1,7 @@
 """
   Motivated by geometric insights on the DNN loss surface, fast geometirc is
-  an efficient ensemble method that uses customized learning rate scheduler to
-  generate base estimators, similar to snapshot ensemble.
+  an efficient ensemble method that uses a customized learning rate scheduler
+  to generate base estimators, similar to snapshot ensemble.
 
   Reference:
       T. Garipov, P. Izmailov, D. Podoprikhin et al., Loss Surfaces, Mode
@@ -10,7 +10,6 @@
 
 
 import copy
-import math
 import torch
 import logging
 import warnings
@@ -57,8 +56,6 @@ __fge_doc = """
         A :mod:`DataLoader` container that contains the training data.
     epochs : int, default=20
         The number of training epochs used to build the ensemble.
-    cycle : int, default=4
-        The number of training epochs per cycle.
     lr_1 : float, default=5e-2
         alpha_1 in original paper used to decide learning rate per iteration.
     lr_2 : float, default=1e-4
@@ -126,6 +123,7 @@ class _BaseFastGemoetric(BaseModule):
         self.logger = logging.getLogger()
 
         self.estimators_ = nn.ModuleList()
+        self.use_scheduler_ = False
 
     def _forward(self, x):
         """
@@ -138,22 +136,25 @@ class _BaseFastGemoetric(BaseModule):
 
         return output
 
-    def _set_scheduler(self, optimizer, epoch, cycle, alpha_1, alpha_2):
+    def _adjust_lr(self, optimizer, epoch, cycle, alpha_1, alpha_2):
         """
         Set the internal learning rate scheduler for fast geometric ensemble.
         Please refer to the original paper for details.
         """
-
-        def schedule(iter):
-            t = ((epoch % cycle) + iter) / cycle
+        # A piece-wise linear curve with multiple peaks, the maximum value
+        # is `alpha_1` and the minimum value is `alpha_2`
+        def scheduler(epoch):
+            t = (((epoch-1) % cycle) + 1) / cycle
             if t < 0.5:
                 return alpha_1 * (1.0 - 2.0 * t) + alpha_2 * 2.0 * t
             else:
                 return alpha_1 * (2.0 * t - 1.0) + alpha_2 * (2.0 - 2.0 * t)
 
-        scheduler = LambdaLR(optimizer, lr_lambda=schedule)
+        lr = scheduler(epoch)
+        for param_group in optimizer.param_groups:
+            param_group["lr"] = lr
 
-        return scheduler
+        return lr
 
     @torchensemble_model_doc(
         """Set the attributes on optimizer for Fast Geometric Ensemble.""",
@@ -270,7 +271,7 @@ class FastGemoetricClassifier(_BaseFastGemoetric):
                     for _, (data, target) in enumerate(test_loader):
                         data = data.to(self.device)
                         target = target.to(self.device)
-                        output = self.forward(data)
+                        output = estimator_(data)
                         _, predicted = torch.max(output.data, 1)
                         correct += (predicted == target).sum().item()
                         total += target.size(0)
@@ -284,7 +285,8 @@ class FastGemoetricClassifier(_BaseFastGemoetric):
                     )
                     self.logger.info(msg.format(acc, best_acc))
 
-            scheduler.step()
+            if self.use_scheduler_:
+                scheduler.step()
 
         # Save the dummy base estimator
         self.dummy_base_estimator_ = estimator_
@@ -297,7 +299,6 @@ class FastGemoetricClassifier(_BaseFastGemoetric):
         self,
         train_loader,
         epochs=20,
-        cycle=4,
         lr_1=5e-2,
         lr_2=1e-4,
         log_interval=100,
@@ -305,29 +306,41 @@ class FastGemoetricClassifier(_BaseFastGemoetric):
         save_model=True,
         save_dir=None,
     ):
-        # Set the optimizer and scheduler
-        estimator_ = self.dummy_base_estimator_
-        optimizer = set_module.set_optimizer(
-            estimator_, self.optimizer_name, **self.optimizer_args
-        )
+        if not hasattr(self, "dummy_base_estimator_"):
+            msg = (
+                "Please call the `fit` method to build the dummy base"
+                " estimator first."
+            )
+            raise RuntimeError(msg)
 
-        scheduler = self._set_scheduler(optimizer, epochs, cycle, lr_1, lr_2)
+        # Number of training epochs per base estimator: cycle / 2
+        cycle = 2 * epochs // self.n_estimators
+
+        # Set the optimizer and scheduler
+        optimizer = set_module.set_optimizer(
+            self.dummy_base_estimator_, self.optimizer_name, **self.optimizer_args
+        )
 
         # Utils
         criterion = nn.CrossEntropyLoss()
         best_acc = 0.0
+        updated = False
 
         for epoch in range(epochs):
 
+            # Update learning rate
+            lr = self._adjust_lr(optimizer, epoch, cycle, lr_1, lr_2)
+            print(lr)         
+
             # Training
-            estimator_.train()
+            self.dummy_base_estimator_.train()
             for batch_idx, (data, target) in enumerate(train_loader):
 
                 batch_size = data.size(0)
                 data, target = data.to(self.device), target.to(self.device)
 
                 optimizer.zero_grad()
-                output = estimator_(data)
+                output = self.dummy_base_estimator_(data)
                 loss = criterion(output, target)
                 loss.backward()
                 optimizer.step()
@@ -353,20 +366,17 @@ class FastGemoetricClassifier(_BaseFastGemoetric):
                             )
                         )
 
-                # Fast geometric ensemble updates the learning rate per
-                # iteration instead of per epoch.
-                scheduler.step()
-
-            # Expand the ensemble
-            if (epoch + 1) % (cycle // 2) == 0:
-                estimator = copy.deepcopy(estimator_)
+            # Expand the ensemble when learning rate meets the minimum value
+            if optimizer.param_groups[0]["lr"] == lr_2:
+                estimator = copy.deepcopy(self.dummy_base_estimator_)
                 self.estimators_.append(estimator)
+                updated = True
 
                 msg = "Save the base estimator with index: {}"
                 self.logger.info(msg.format(len(self.estimators_) - 1))
 
-            # Validation after each base estimator being generated
-            if test_loader and (epoch + 1) % (cycle // 2) == 0:
+            # Validation after each base estimator being added
+            if test_loader and updated:
                 self.eval()
                 with torch.no_grad():
                     correct = 0
@@ -392,6 +402,7 @@ class FastGemoetricClassifier(_BaseFastGemoetric):
                     self.logger.info(
                         msg.format(len(self.estimators_), acc, best_acc)
                     )
+                updated = False  # reset the flag
 
         if save_model and not test_loader:
             io.save(self, save_dir, self.logger)
