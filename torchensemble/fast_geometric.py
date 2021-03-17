@@ -309,10 +309,8 @@ class FastGeometricClassifier(_BaseFastGeometric):
         self,
         train_loader,
         epochs=20,
-        lr_1=5e-2,
+        lr_1=1e-3,
         lr_2=1e-4,
-        momentum=0.9,
-        weight_decay=1e-4,
         log_interval=100,
         test_loader=None,
         save_model=True,
@@ -328,13 +326,11 @@ class FastGeometricClassifier(_BaseFastGeometric):
         # Number of training epochs per base estimator: cycle / 2
         cycle = 2 * epochs // self.n_estimators
 
-        # Set the internal SGD optimizer
+        # Set the internal optimizer
         optimizer = set_module.set_optimizer(
             self.dummy_base_estimator_,
-            "SGD",
-            lr=lr_1,
-            momentum=momentum,
-            weight_decay=weight_decay,
+            self.optimizer_name,
+            **self.optimizer_args
         )
 
         # Utils

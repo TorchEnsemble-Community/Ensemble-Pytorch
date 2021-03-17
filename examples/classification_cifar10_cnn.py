@@ -12,7 +12,7 @@ from torchensemble.voting import VotingClassifier
 from torchensemble.bagging import BaggingClassifier
 from torchensemble.gradient_boosting import GradientBoostingClassifier
 from torchensemble.snapshot_ensemble import SnapshotEnsembleClassifier
-from torchensemble.fast_geometric import FastGemoetricClassifier
+from torchensemble.fast_geometric import FastGeometricClassifier
 
 from torchensemble.utils.logging import set_logger
 
@@ -221,8 +221,8 @@ if __name__ == "__main__":
     #     )
     # )
 
-    # FastGemoetricClassifier
-    model = FastGemoetricClassifier(
+    # FastGeometricClassifier
+    model = FastGeometricClassifier(
         estimator=LeNet5, n_estimators=n_estimators, cuda=True
     )
 
@@ -244,10 +244,10 @@ if __name__ == "__main__":
 
     records.append(
         (
-            "FastGemoetricClassifier",
+            "FastGeometricClassifier",
             training_time,
             evaluating_time,
-            testing_acc
+            testing_acc,
         )
     )
 
