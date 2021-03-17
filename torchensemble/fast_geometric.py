@@ -59,14 +59,10 @@ __fge_doc = """
         The number of training epochs used to build the entire ensemble.
     lr_1 : float, default=5e-2
         ``alpha_1`` in original paper used to adjust the learning rate, also
-        serves as the initial learning rate of the internal SGD optimizer.
+        serves as the initial learning rate of the internal optimizer.
     lr_2 : float, default=1e-4
         ``alpha_2`` in original paper used to adjust the learning rate, also
-        serves as the smallest learning rate of the internal SGD optimizer.
-    momentum : float, default=0.9
-        The momentum factor of the internal SGD optimizer.
-    weight_decay : float, default=1e-4
-        The weight decay of the internal SGD optimizer.
+        serves as the smallest learning rate of the internal optimizer.
     test_loader : torch.utils.data.DataLoader, default=None
         A :mod:`DataLoader` container that contains the evaluating data.
 
@@ -192,7 +188,7 @@ class _BaseFastGeometric(BaseModule):
 
 
 @torchensemble_model_doc(
-    """Implementation on the FastGeometricClassifier.""", "model"
+    """Implementation on the FastGeometricClassifier.""", "seq_model"
 )
 class FastGeometricClassifier(_BaseFastGeometric):
     def __init__(self, **kwargs):
@@ -207,6 +203,28 @@ class FastGeometricClassifier(_BaseFastGeometric):
         proba = self._forward(x)
 
         return F.softmax(proba, dim=1)
+
+    @torchensemble_model_doc(
+        (
+            """Set the attributes on optimizer for FastGeometricClassifier. """
+            + """Notice that keyword arguments specified here will also be """
+            + """used in the ensembling stage except the learning rate.."""
+        ),
+        "set_optimizer",
+    )
+    def set_optimizer(self, optimizer_name, **kwargs):
+        super().set_optimizer(optimizer_name=optimizer_name, **kwargs)
+
+    @torchensemble_model_doc(
+        (
+            """Set the attributes on scheduler for FastGeometricClassifier. """
+            + """Notice that this scheduler will only be used in the stage on """  # noqa: E501
+            + """fitting the dummy base estimator."""
+        ),
+        "set_scheduler",
+    )
+    def set_scheduler(self, scheduler_name, **kwargs):
+        super().set_scheduler(scheduler_name=scheduler_name, **kwargs)
 
     @_fast_geometric_model_doc(
         """Implementation on the training stage of FastGeometricClassifier.""",  # noqa: E501
@@ -453,7 +471,7 @@ class FastGeometricClassifier(_BaseFastGeometric):
 
 
 @torchensemble_model_doc(
-    """Implementation on the FastGeometricRegressor.""", "model"
+    """Implementation on the FastGeometricRegressor.""", "seq_model"
 )
 class FastGeometricRegressor(_BaseFastGeometric):
     def __init__(self, **kwargs):
@@ -469,12 +487,26 @@ class FastGeometricRegressor(_BaseFastGeometric):
         return pred
 
     @torchensemble_model_doc(
-        """Set the attributes on optimizer for FastGeometricRegressor.""",
+        (
+            """Set the attributes on optimizer for FastGeometricRegressor. """
+            + """Notice that keyword arguments specified here will also be """
+            + """used in the ensembling stage except the learning rate."""
+        ),
         "set_optimizer",
     )
     def set_optimizer(self, optimizer_name, **kwargs):
-        self.optimizer_name = optimizer_name
-        self.optimizer_args = kwargs
+        super().set_optimizer(optimizer_name=optimizer_name, **kwargs)
+
+    @torchensemble_model_doc(
+        (
+            """Set the attributes on scheduler for FastGeometricRegressor. """
+            + """Notice that this scheduler will only be used in the stage on """  # noqa: E501
+            + """fitting the dummy base estimator."""
+        ),
+        "set_scheduler",
+    )
+    def set_scheduler(self, scheduler_name, **kwargs):
+        super().set_scheduler(scheduler_name=scheduler_name, **kwargs)
 
     @_fast_geometric_model_doc(
         """Implementation on the training stage of FastGeometricRegressor.""",  # noqa: E501

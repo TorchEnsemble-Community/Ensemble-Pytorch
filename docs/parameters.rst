@@ -154,18 +154,18 @@ The pipeline is shown in the following code snippet:
 
 .. code:: python
 
-    model = FastGemoetricClassifier(**ensemble_related_args)
+    model = FastGeometricClassifier(**ensemble_related_args)
     model.fit(**base_estimator_related_args)  # train the base estimator used to generate ensembles
     model.ensemble(**fge_related_args)  # generate the ensemble
 
-FastGemoetricClassifier
+FastGeometricClassifier
 ***********************
 
-.. autoclass:: torchensemble.fast_geometric.FastGemoetricClassifier
+.. autoclass:: torchensemble.fast_geometric.FastGeometricClassifier
     :members:
 
-FastGemoetricRegressor
+FastGeometricRegressor
 ***********************
 
-.. autoclass:: torchensemble.fast_geometric.FastGemoetricRegressor
+.. autoclass:: torchensemble.fast_geometric.FastGeometricRegressor
     :members:
