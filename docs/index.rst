@@ -13,8 +13,8 @@
 .. |codecov| image:: https://codecov.io/gh/xuyxu/Ensemble-Pytorch/branch/master/graph/badge.svg?token=2FXCFRIDTV
 .. _codecov: https://codecov.io/gh/xuyxu/Ensemble-Pytorch
 
-.. |python| image:: https://img.shields.io/pypi/pyversions/torchensemble
-.. _python: https://pypi.org/project/torchensemble/
+.. |python| image:: https://img.shields.io/badge/python-3.6+-blue?logo=python
+.. _python: https://www.python.org/
 
 .. |pypi| image:: https://img.shields.io/pypi/v/torchensemble
 .. _pypi: https://pypi.org/project/torchensemble/
