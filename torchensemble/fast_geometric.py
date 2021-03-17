@@ -16,7 +16,6 @@ import logging
 import warnings
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.optim.lr_scheduler import LambdaLR
 
 from ._base import BaseModule, torchensemble_model_doc
 from .utils import io
@@ -59,9 +58,15 @@ __fge_doc = """
     epochs : int, default=20
         The number of training epochs used to build the entire ensemble.
     lr_1 : float, default=5e-2
-        alpha_1 in original paper used to adjust the learning rate.
+        ``alpha_1`` in original paper used to adjust the learning rate, also
+        serves as the initial learning rate of the internal SGD optimizer.
     lr_2 : float, default=1e-4
-        alpha_2 in original paper used to adjust the learning rate.
+        ``alpha_2`` in original paper used to adjust the learning rate, also
+        serves as the smallest learning rate of the internal SGD optimizer.
+    momentum : float, default=0.9
+        The momentum factor of the internal SGD optimizer.
+    weight_decay : float, default=1e-4
+        The weight decay of the internal SGD optimizer.
     test_loader : torch.utils.data.DataLoader, default=None
         A :mod:`DataLoader` container that contains the evaluating data.
 
@@ -69,6 +74,8 @@ __fge_doc = """
           estimator being generated.
         - If not ``None``, the ensemble will be evaluated on this
           dataloader after each base estimator being generated.
+    log_interval : int, default=100
+        The number of batches to wait before logging the training status.
     save_model : bool, default=True
         Specify whether to save the model parameters.
 
@@ -138,21 +145,22 @@ class _BaseFastGeometric(BaseModule):
 
         return output
 
-    def _adjust_lr(self, optimizer, epoch, cycle, alpha_1, alpha_2):
+    def _adjust_lr(
+        self, optimizer, epoch, i, n_iters, cycle, alpha_1, alpha_2
+    ):
         """
         Set the internal learning rate scheduler for fast geometric ensemble.
         Please refer to the original paper for details.
         """
-        # A piece-wise linear curve with multiple peaks, the maximum value
-        # is `alpha_1` and the minimum value is `alpha_2`
-        def scheduler(epoch):
-            t = (((epoch-1) % cycle) + 1) / cycle
+
+        def scheduler(i):
+            t = ((epoch % cycle) + i) / cycle
             if t < 0.5:
                 return alpha_1 * (1.0 - 2.0 * t) + alpha_2 * 2.0 * t
             else:
                 return alpha_1 * (2.0 * t - 1.0) + alpha_2 * (2.0 - 2.0 * t)
 
-        lr = scheduler(epoch)
+        lr = scheduler(i / n_iters)
         for param_group in optimizer.param_groups:
             param_group["lr"] = lr
 
@@ -303,6 +311,8 @@ class FastGeometricClassifier(_BaseFastGeometric):
         epochs=20,
         lr_1=5e-2,
         lr_2=1e-4,
+        momentum=0.9,
+        weight_decay=1e-4,
         log_interval=100,
         test_loader=None,
         save_model=True,
@@ -318,26 +328,31 @@ class FastGeometricClassifier(_BaseFastGeometric):
         # Number of training epochs per base estimator: cycle / 2
         cycle = 2 * epochs // self.n_estimators
 
-        # Set the optimizer
+        # Set the internal SGD optimizer
         optimizer = set_module.set_optimizer(
             self.dummy_base_estimator_,
-            self.optimizer_name,
-            **self.optimizer_args
+            "SGD",
+            lr=lr_1,
+            momentum=momentum,
+            weight_decay=weight_decay,
         )
 
         # Utils
         criterion = nn.CrossEntropyLoss()
         best_acc = 0.0
+        n_iters = len(train_loader)
         updated = False
 
         for epoch in range(epochs):
 
-            # Update learning rate
-            self._adjust_lr(optimizer, epoch, cycle, lr_1, lr_2)     
-
             # Training
             self.dummy_base_estimator_.train()
             for batch_idx, (data, target) in enumerate(train_loader):
+
+                # Update learning rate
+                self._adjust_lr(
+                    optimizer, epoch, batch_idx, n_iters, cycle, lr_1, lr_2
+                )
 
                 batch_size = data.size(0)
                 data, target = data.to(self.device), target.to(self.device)
@@ -369,8 +384,8 @@ class FastGeometricClassifier(_BaseFastGeometric):
                             )
                         )
 
-            # Update the ensemble when learning rate meets the minimum value
-            if optimizer.param_groups[0]["lr"] == lr_2:
+            # Update the ensemble
+            if (epoch + 1) % (cycle // 2) == 0:
                 estimator = copy.deepcopy(self.dummy_base_estimator_)
                 self.estimators_.append(estimator)
                 updated = True
@@ -405,7 +420,7 @@ class FastGeometricClassifier(_BaseFastGeometric):
                     self.logger.info(
                         msg.format(len(self.estimators_), acc, best_acc)
                     )
-                updated = False  # reset the flag
+                updated = False  # reset the updating flag
 
         if save_model and not test_loader:
             io.save(self, save_dir, self.logger)
@@ -422,6 +437,7 @@ class FastGeometricClassifier(_BaseFastGeometric):
                 "Please call the `ensemble` method to build the ensemble"
                 " first."
             )
+            self.logger.error(msg)
             raise RuntimeError(msg)
 
         self.eval()
