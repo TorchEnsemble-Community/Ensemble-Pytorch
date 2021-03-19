@@ -99,130 +99,8 @@ if __name__ == "__main__":
 
     logger = set_logger("classification_cifar10_cnn")
 
-    # # FusionClassifier
-    # model = FusionClassifier(
-    #     estimator=LeNet5, n_estimators=n_estimators, cuda=True
-    # )
-
-    # # Set the optimizer
-    # model.set_optimizer("Adam", lr=lr, weight_decay=weight_decay)
-
-    # # Training
-    # tic = time.time()
-    # model.fit(train_loader, epochs=epochs)
-    # toc = time.time()
-    # training_time = toc - tic
-
-    # # Evaluating
-    # tic = time.time()
-    # testing_acc = model.predict(test_loader)
-    # toc = time.time()
-    # evaluating_time = toc - tic
-
-    # records.append(
-    #     ("FusionClassifier", training_time, evaluating_time, testing_acc)
-    # )
-
-    # # VotingClassifier
-    # model = VotingClassifier(
-    #     estimator=LeNet5, n_estimators=n_estimators, cuda=True
-    # )
-
-    # # Set the optimizer
-    # model.set_optimizer("Adam", lr=lr, weight_decay=weight_decay)
-
-    # tic = time.time()
-    # model.fit(train_loader, epochs=epochs)
-    # toc = time.time()
-    # training_time = toc - tic
-
-    # tic = time.time()
-    # testing_acc = model.predict(test_loader)
-    # toc = time.time()
-    # evaluating_time = toc - tic
-
-    # records.append(
-    #     ("VotingClassifier", training_time, evaluating_time, testing_acc)
-    # )
-
-    # # BaggingClassifier
-    # model = BaggingClassifier(
-    #     estimator=LeNet5, n_estimators=n_estimators, cuda=True
-    # )
-
-    # # Set the optimizer
-    # model.set_optimizer("Adam", lr=lr, weight_decay=weight_decay)
-
-    # tic = time.time()
-    # model.fit(train_loader, epochs=epochs)
-    # toc = time.time()
-    # training_time = toc - tic
-
-    # tic = time.time()
-    # testing_acc = model.predict(test_loader)
-    # toc = time.time()
-    # evaluating_time = toc - tic
-
-    # records.append(
-    #     ("BaggingClassifier", training_time, evaluating_time, testing_acc)
-    # )
-
-    # # GradientBoostingClassifier
-    # model = GradientBoostingClassifier(
-    #     estimator=LeNet5, n_estimators=n_estimators, cuda=True
-    # )
-
-    # # Set the optimizer
-    # model.set_optimizer("Adam", lr=lr, weight_decay=weight_decay)
-
-    # tic = time.time()
-    # model.fit(train_loader, epochs=epochs)
-    # toc = time.time()
-    # training_time = toc - tic
-
-    # tic = time.time()
-    # testing_acc = model.predict(test_loader)
-    # toc = time.time()
-    # evaluating_time = toc - tic
-
-    # records.append(
-    #     (
-    #         "GradientBoostingClassifier",
-    #         training_time,
-    #         evaluating_time,
-    #         testing_acc,
-    #     )
-    # )
-
-    # # SnapshotEnsembleClassifier
-    # model = SnapshotEnsembleClassifier(
-    #     estimator=LeNet5, n_estimators=n_estimators, cuda=True
-    # )
-
-    # # Set the optimizer
-    # model.set_optimizer("Adam", lr=lr, weight_decay=weight_decay)
-
-    # tic = time.time()
-    # model.fit(train_loader, epochs=epochs)
-    # toc = time.time()
-    # training_time = toc - tic
-
-    # tic = time.time()
-    # testing_acc = model.predict(test_loader)
-    # toc = time.time()
-    # evaluating_time = toc - tic
-
-    # records.append(
-    #     (
-    #         "SnapshotEnsembleClassifier",
-    #         training_time,
-    #         evaluating_time,
-    #         testing_acc,
-    #     )
-    # )
-
-    # FastGeometricClassifier
-    model = FastGeometricClassifier(
+    # FusionClassifier
+    model = FusionClassifier(
         estimator=LeNet5, n_estimators=n_estimators, cuda=True
     )
 
@@ -231,8 +109,7 @@ if __name__ == "__main__":
 
     # Training
     tic = time.time()
-    model.fit(train_loader, epochs=100)
-    model.ensemble(train_loader, test_loader=test_loader)
+    model.fit(train_loader, epochs=epochs)
     toc = time.time()
     training_time = toc - tic
 
@@ -243,8 +120,101 @@ if __name__ == "__main__":
     evaluating_time = toc - tic
 
     records.append(
+        ("FusionClassifier", training_time, evaluating_time, testing_acc)
+    )
+
+    # VotingClassifier
+    model = VotingClassifier(
+        estimator=LeNet5, n_estimators=n_estimators, cuda=True
+    )
+
+    # Set the optimizer
+    model.set_optimizer("Adam", lr=lr, weight_decay=weight_decay)
+
+    tic = time.time()
+    model.fit(train_loader, epochs=epochs)
+    toc = time.time()
+    training_time = toc - tic
+
+    tic = time.time()
+    testing_acc = model.predict(test_loader)
+    toc = time.time()
+    evaluating_time = toc - tic
+
+    records.append(
+        ("VotingClassifier", training_time, evaluating_time, testing_acc)
+    )
+
+    # BaggingClassifier
+    model = BaggingClassifier(
+        estimator=LeNet5, n_estimators=n_estimators, cuda=True
+    )
+
+    # Set the optimizer
+    model.set_optimizer("Adam", lr=lr, weight_decay=weight_decay)
+
+    tic = time.time()
+    model.fit(train_loader, epochs=epochs)
+    toc = time.time()
+    training_time = toc - tic
+
+    tic = time.time()
+    testing_acc = model.predict(test_loader)
+    toc = time.time()
+    evaluating_time = toc - tic
+
+    records.append(
+        ("BaggingClassifier", training_time, evaluating_time, testing_acc)
+    )
+
+    # GradientBoostingClassifier
+    model = GradientBoostingClassifier(
+        estimator=LeNet5, n_estimators=n_estimators, cuda=True
+    )
+
+    # Set the optimizer
+    model.set_optimizer("Adam", lr=lr, weight_decay=weight_decay)
+
+    tic = time.time()
+    model.fit(train_loader, epochs=epochs)
+    toc = time.time()
+    training_time = toc - tic
+
+    tic = time.time()
+    testing_acc = model.predict(test_loader)
+    toc = time.time()
+    evaluating_time = toc - tic
+
+    records.append(
         (
-            "FastGeometricClassifier",
+            "GradientBoostingClassifier",
+            training_time,
+            evaluating_time,
+            testing_acc,
+        )
+    )
+
+    # SnapshotEnsembleClassifier
+    model = SnapshotEnsembleClassifier(
+        estimator=LeNet5, n_estimators=n_estimators, cuda=True
+    )
+
+    # Set the optimizer
+    model.set_optimizer("Adam", lr=lr, weight_decay=weight_decay)
+
+    tic = time.time()
+    model.fit(train_loader, epochs=epochs)
+    toc = time.time()
+    training_time = toc - tic
+
+    tic = time.time()
+    testing_acc = model.predict(test_loader)
+    toc = time.time()
+    evaluating_time = toc - tic
+
+    records.append(
+        (
+            "SnapshotEnsembleClassifier",
             training_time,
             evaluating_time,
             testing_acc,
