@@ -117,13 +117,13 @@ def test_clf_class(clf):
         model.ensemble(ret, train_loader, epochs=4, test_loader=test_loader)
 
     # Test
-    prev_acc = model.predict(test_loader)
+    model.predict(test_loader)
 
     # Reload
     new_model = clf(estimator=MLP_clf, n_estimators=n_estimators, cuda=False)
     io.load(new_model)
 
-    post_acc = new_model.predict(test_loader)
+    new_model.predict(test_loader)
 
 
 @pytest.mark.parametrize("clf", all_clf)
@@ -161,13 +161,13 @@ def test_clf_object(clf):
         model.ensemble(ret, train_loader, epochs=4, test_loader=test_loader)
 
     # Test
-    prev_acc = model.predict(test_loader)
+    model.predict(test_loader)
 
     # Reload
     new_model = clf(estimator=MLP_clf(), n_estimators=n_estimators, cuda=False)
     io.load(new_model)
 
-    post_acc = new_model.predict(test_loader)
+    new_model.predict(test_loader)
 
 
 @pytest.mark.parametrize("reg", all_reg)
@@ -205,13 +205,13 @@ def test_reg_class(reg):
         model.ensemble(ret, train_loader, epochs=4, test_loader=test_loader)
 
     # Test
-    prev_mse = model.predict(test_loader)
+    model.predict(test_loader)
 
     # Reload
     new_model = reg(estimator=MLP_reg, n_estimators=n_estimators, cuda=False)
     io.load(new_model)
 
-    post_mse = new_model.predict(test_loader)
+    new_model.predict(test_loader)
 
 
 @pytest.mark.parametrize("reg", all_reg)
@@ -249,10 +249,10 @@ def test_reg_object(reg):
         model.ensemble(ret, train_loader, epochs=4, test_loader=test_loader)
 
     # Test
-    prev_mse = model.predict(test_loader)
+    model.predict(test_loader)
 
     # Reload
     new_model = reg(estimator=MLP_reg(), n_estimators=n_estimators, cuda=False)
     io.load(new_model)
 
-    post_mse = new_model.predict(test_loader)
+    new_model.predict(test_loader)
