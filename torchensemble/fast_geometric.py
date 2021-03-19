@@ -550,7 +550,6 @@ class FastGeometricRegressor(_BaseFastGeometric):
             estimator_.train()
             for batch_idx, (data, target) in enumerate(train_loader):
 
-                batch_size = data.size(0)
                 data, target = data.to(self.device), target.to(self.device)
 
                 optimizer.zero_grad()
