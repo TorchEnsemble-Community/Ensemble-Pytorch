@@ -47,12 +47,19 @@ __fit_doc = """
         - If not ``None``, the dummy base estimator will be evaluated on this
           dataloader after each training epoch, and the checkpoint with the
           best validation performance will be reserved.
+
+    Returns
+    -------
+    estimator_ : :obj:`object`
+        The fitted base estimator.
 """
 
 
 __fge_doc = """
     Parameters
     ----------
+    estimator : :obj:`object`
+        The fitted base estimator.
     train_loader : torch.utils.data.DataLoader
         A :mod:`DataLoader` container that contains the training data.
     epochs : int, default=20
@@ -316,8 +323,7 @@ class FastGeometricClassifier(_BaseFastGeometric):
             if self.use_scheduler_:
                 scheduler.step()
 
-        # Save the dummy base estimator
-        self.dummy_base_estimator_ = copy.deepcopy(estimator_)
+        return estimator_
 
     @_fast_geometric_model_doc(
         """Implementation on the ensembling stage of FastGeometricClassifier.""",  # noqa: E501
@@ -325,6 +331,7 @@ class FastGeometricClassifier(_BaseFastGeometric):
     )
     def ensemble(
         self,
+        estimator,
         train_loader,
         epochs=20,
         lr_1=1e-3,
@@ -334,21 +341,13 @@ class FastGeometricClassifier(_BaseFastGeometric):
         save_model=True,
         save_dir=None,
     ):
-        if not hasattr(self, "dummy_base_estimator_"):
-            msg = (
-                "Please call the `fit` method to fit the dummy base"
-                " estimator first."
-            )
-            raise RuntimeError(msg)
 
         # Number of training epochs per base estimator: cycle / 2
         cycle = 2 * epochs // self.n_estimators
 
         # Set the internal optimizer
         optimizer = set_module.set_optimizer(
-            self.dummy_base_estimator_,
-            self.optimizer_name,
-            **self.optimizer_args
+            estimator, self.optimizer_name, **self.optimizer_args
         )
 
         # Utils
@@ -360,7 +359,7 @@ class FastGeometricClassifier(_BaseFastGeometric):
         for epoch in range(epochs):
 
             # Training
-            self.dummy_base_estimator_.train()
+            estimator.train()
             for batch_idx, (data, target) in enumerate(train_loader):
 
                 # Update learning rate
@@ -372,7 +371,7 @@ class FastGeometricClassifier(_BaseFastGeometric):
                 data, target = data.to(self.device), target.to(self.device)
 
                 optimizer.zero_grad()
-                output = self.dummy_base_estimator_(data)
+                output = estimator(data)
                 loss = criterion(output, target)
                 loss.backward()
                 optimizer.step()
@@ -400,8 +399,7 @@ class FastGeometricClassifier(_BaseFastGeometric):
 
             # Update the ensemble
             if (epoch + 1) % (cycle // 2) == 0:
-                estimator = copy.deepcopy(self.dummy_base_estimator_)
-                self.estimators_.append(estimator)
+                self.estimators_.append(copy.deepcopy(estimator))
                 updated = True
 
                 msg = "Save the base estimator with index: {}"
@@ -446,7 +444,7 @@ class FastGeometricClassifier(_BaseFastGeometric):
     )
     def predict(self, test_loader):
 
-        if not self.is_fitted_:
+        if len(self.estimators_) == 0:
             msg = (
                 "Please call the `ensemble` method to build the ensemble"
                 " first."
@@ -588,8 +586,7 @@ class FastGeometricRegressor(_BaseFastGeometric):
             if self.use_scheduler_:
                 scheduler.step()
 
-        # Save the dummy base estimator
-        self.dummy_base_estimator_ = copy.deepcopy(estimator_)
+        return estimator_
 
     @_fast_geometric_model_doc(
         """Implementation on the ensembling stage of FastGeometricRegressor.""",  # noqa: E501
@@ -597,6 +594,7 @@ class FastGeometricRegressor(_BaseFastGeometric):
     )
     def ensemble(
         self,
+        estimator,
         train_loader,
         epochs=20,
         lr_1=1e-3,
@@ -606,21 +604,13 @@ class FastGeometricRegressor(_BaseFastGeometric):
         save_model=True,
         save_dir=None,
     ):
-        if not hasattr(self, "dummy_base_estimator_"):
-            msg = (
-                "Please call the `fit` method to fit the dummy base"
-                " estimator first."
-            )
-            raise RuntimeError(msg)
 
         # Number of training epochs per base estimator: cycle / 2
         cycle = 2 * epochs // self.n_estimators
 
         # Set the internal optimizer
         optimizer = set_module.set_optimizer(
-            self.dummy_base_estimator_,
-            self.optimizer_name,
-            **self.optimizer_args
+            estimator, self.optimizer_name, **self.optimizer_args
         )
 
         # Utils
@@ -632,7 +622,7 @@ class FastGeometricRegressor(_BaseFastGeometric):
         for epoch in range(epochs):
 
             # Training
-            self.dummy_base_estimator_.train()
+            estimator.train()
             for batch_idx, (data, target) in enumerate(train_loader):
 
                 # Update learning rate
@@ -643,7 +633,7 @@ class FastGeometricRegressor(_BaseFastGeometric):
                 data, target = data.to(self.device), target.to(self.device)
 
                 optimizer.zero_grad()
-                output = self.dummy_base_estimator_(data)
+                output = estimator(data)
                 loss = criterion(output, target)
                 loss.backward()
                 optimizer.step()
@@ -656,8 +646,7 @@ class FastGeometricRegressor(_BaseFastGeometric):
 
             # Update the ensemble
             if (epoch + 1) % (cycle // 2) == 0:
-                estimator = copy.deepcopy(self.dummy_base_estimator_)
-                self.estimators_.append(estimator)
+                self.estimators_.append(copy.deepcopy(estimator))
                 updated = True
 
                 msg = "Save the base estimator with index: {}"
@@ -677,6 +666,8 @@ class FastGeometricRegressor(_BaseFastGeometric):
 
                     if mse < best_mse:
                         best_mse = mse
+                        if save_model:
+                            io.save(self, save_dir, self.logger)
 
                     msg = (
                         "Epoch: {:03d} | Validation MSE: {:.5f} |"
@@ -695,7 +686,7 @@ class FastGeometricRegressor(_BaseFastGeometric):
     )
     def predict(self, test_loader):
 
-        if not self.is_fitted_:
+        if len(self.estimators_) == 0:
             msg = (
                 "Please call the `ensemble` method to build the ensemble"
                 " first."

@@ -26,6 +26,7 @@ all_reg = [
     torchensemble.GradientBoostingRegressor,
     torchensemble.SnapshotEnsembleRegressor,
     torchensemble.AdversarialTrainingRegressor,
+    torchensemble.FastGeometricRegressor,
 ]
 
 
@@ -108,9 +109,11 @@ def test_clf_class(clf):
         epochs = 6
 
     # Train
-    model.fit(
-        train_loader, epochs=epochs, test_loader=test_loader, save_model=True
-    )
+    ret = model.fit(train_loader, epochs=epochs, test_loader=test_loader)
+
+    # Extra step for Fast Geometric Ensemble
+    if isinstance(model, torchensemble.FastGeometricClassifier):
+        model.ensemble(ret, train_loader, epochs=4, test_loader=test_loader)
 
     # Test
     prev_acc = model.predict(test_loader)
@@ -152,9 +155,11 @@ def test_clf_object(clf):
         epochs = 6
 
     # Train
-    model.fit(
-        train_loader, epochs=epochs, test_loader=test_loader, save_model=True
-    )
+    ret = model.fit(train_loader, epochs=epochs, test_loader=test_loader)
+
+    # Extra step for Fast Geometric Ensemble
+    if isinstance(model, torchensemble.FastGeometricClassifier):
+        model.ensemble(ret, train_loader, epochs=4, test_loader=test_loader)
 
     # Test
     prev_acc = model.predict(test_loader)
@@ -196,9 +201,11 @@ def test_reg_class(reg):
         epochs = 6
 
     # Train
-    model.fit(
-        train_loader, epochs=epochs, test_loader=test_loader, save_model=True
-    )
+    ret = model.fit(train_loader, epochs=epochs, test_loader=test_loader)
+
+    # Extra step for Fast Geometric Ensemble
+    if isinstance(model, torchensemble.FastGeometricRegressor):
+        model.ensemble(ret, train_loader, epochs=4, test_loader=test_loader)
 
     # Test
     prev_mse = model.predict(test_loader)
@@ -240,9 +247,11 @@ def test_reg_object(reg):
         epochs = 6
 
     # Train
-    model.fit(
-        train_loader, epochs=epochs, test_loader=test_loader, save_model=True
-    )
+    ret = model.fit(train_loader, epochs=epochs, test_loader=test_loader)
+
+    # Extra step for Fast Geometric Ensemble
+    if isinstance(model, torchensemble.FastGeometricRegressor):
+        model.ensemble(ret, train_loader, epochs=4, test_loader=test_loader)
 
     # Test
     prev_mse = model.predict(test_loader)
@@ -254,3 +263,8 @@ def test_reg_object(reg):
     post_mse = new_model.predict(test_loader)
 
     assert prev_mse == post_mse  # ensure the same performance
+
+
+if __name__ == "__main__":
+
+    test_reg_class(torchensemble.FastGeometricRegressor)
