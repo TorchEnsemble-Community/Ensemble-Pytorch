@@ -16,7 +16,7 @@ all_clf = [
     torchensemble.GradientBoostingClassifier,
     torchensemble.SnapshotEnsembleClassifier,
     torchensemble.AdversarialTrainingClassifier,
-    torchensemble.FastGeometricClassifier
+    torchensemble.FastGeometricClassifier,
 ]
 
 
