@@ -522,12 +522,12 @@ class FastGeometricRegressor(_BaseFastGeometric):
         save_model=True,
         save_dir=None,
     ):
-        self._validate_parameters(lr_clip, epochs, log_interval)
+        self._validate_parameters(epochs, log_interval)
         self.n_outputs = self._decide_n_outputs(
             train_loader, self.is_classification
         )
 
-        # A dummy model used to generate snapshot ensembles
+        # A dummy base estimator
         estimator_ = self._make_estimator()
 
         # Set the optimizer and scheduler
@@ -535,23 +535,23 @@ class FastGeometricRegressor(_BaseFastGeometric):
             estimator_, self.optimizer_name, **self.optimizer_args
         )
 
-        scheduler = self._set_scheduler(optimizer, epochs * len(train_loader))
+        if self.use_scheduler_:
+            scheduler = set_module.set_scheduler(
+                optimizer, self.scheduler_name, **self.scheduler_args
+            )
 
         # Utils
         criterion = nn.MSELoss()
         best_mse = float("inf")
-        counter = 0  # a counter on generating snapshots
-        n_iters_per_estimator = epochs * len(train_loader) // self.n_estimators
 
-        # Training loop
-        estimator_.train()
         for epoch in range(epochs):
+
+            # Training
+            estimator_.train()
             for batch_idx, (data, target) in enumerate(train_loader):
 
+                batch_size = data.size(0)
                 data, target = data.to(self.device), target.to(self.device)
-
-                # Clip the learning rate
-                optimizer = self._clip_lr(optimizer, lr_clip)
 
                 optimizer.zero_grad()
                 output = estimator_(data)
@@ -562,34 +562,111 @@ class FastGeometricRegressor(_BaseFastGeometric):
                 # Print training status
                 if batch_idx % log_interval == 0:
                     with torch.no_grad():
-                        msg = (
-                            "lr: {:.5f} | Epoch: {:03d} | Batch: {:03d}"
-                            " | Loss: {:.5f}"
-                        )
-                        self.logger.info(
-                            msg.format(
-                                optimizer.param_groups[0]["lr"],
-                                epoch,
-                                batch_idx,
-                                loss,
-                            )
-                        )
+                        msg = "Epoch: {:03d} | Batch: {:03d} | Loss: {:.5f}"
+                        self.logger.info(msg.format(epoch, batch_idx, loss))
 
-                # Snapshot ensemble updates the learning rate per iteration
-                # instead of per epoch.
+            # Validation
+            if test_loader:
+                estimator_.eval()
+                with torch.no_grad():
+                    mse = 0
+                    for _, (data, target) in enumerate(test_loader):
+                        data = data.to(self.device)
+                        target = target.to(self.device)
+                        output = estimator_(data)
+                        mse += criterion(output, target)
+                    mse /= len(test_loader)
+
+                    if mse < best_mse:
+                        best_mse = mse
+
+                    msg = (
+                        "Epoch: {:03d} | Validation MSE: {:.5f} |"
+                        " Historical Best: {:.5f}"
+                    )
+                    self.logger.info(msg.format(epoch, mse, best_mse))
+
+            if self.use_scheduler_:
                 scheduler.step()
-                counter += 1
 
-            if counter % n_iters_per_estimator == 0:
-                # Generate and save the snapshot
-                snapshot = copy.deepcopy(estimator_)
-                self.estimators_.append(snapshot)
+        # Save the dummy base estimator
+        self.dummy_base_estimator_ = copy.deepcopy(estimator_)
 
-                msg = "Save the snapshot model with index: {}"
+    @_fast_geometric_model_doc(
+        """Implementation on the ensembling stage of FastGeometricRegressor.""",  # noqa: E501
+        "fge",
+    )
+    def ensemble(
+        self,
+        train_loader,
+        epochs=20,
+        lr_1=1e-3,
+        lr_2=1e-4,
+        log_interval=100,
+        test_loader=None,
+        save_model=True,
+        save_dir=None,
+    ):
+        if not hasattr(self, "dummy_base_estimator_"):
+            msg = (
+                "Please call the `fit` method to fit the dummy base"
+                " estimator first."
+            )
+            raise RuntimeError(msg)
+
+        # Number of training epochs per base estimator: cycle / 2
+        cycle = 2 * epochs // self.n_estimators
+
+        # Set the internal optimizer
+        optimizer = set_module.set_optimizer(
+            self.dummy_base_estimator_,
+            self.optimizer_name,
+            **self.optimizer_args
+        )
+
+        # Utils
+        criterion = nn.MSELoss()
+        best_mse = float("inf")
+        n_iters = len(train_loader)
+        updated = False
+
+        for epoch in range(epochs):
+
+            # Training
+            self.dummy_base_estimator_.train()
+            for batch_idx, (data, target) in enumerate(train_loader):
+
+                # Update learning rate
+                self._adjust_lr(
+                    optimizer, epoch, batch_idx, n_iters, cycle, lr_1, lr_2
+                )
+
+                batch_size = data.size(0)
+                data, target = data.to(self.device), target.to(self.device)
+
+                optimizer.zero_grad()
+                output = self.dummy_base_estimator_(data)
+                loss = criterion(output, target)
+                loss.backward()
+                optimizer.step()
+
+                # Print training status
+                if batch_idx % log_interval == 0:
+                    with torch.no_grad():
+                        msg = "Epoch: {:03d} | Batch: {:03d} | Loss: {:.5f}"
+                        self.logger.info(msg.format(epoch, batch_idx, loss))
+
+            # Update the ensemble
+            if (epoch + 1) % (cycle // 2) == 0:
+                estimator = copy.deepcopy(self.dummy_base_estimator_)
+                self.estimators_.append(estimator)
+                updated = True
+
+                msg = "Save the base estimator with index: {}"
                 self.logger.info(msg.format(len(self.estimators_) - 1))
 
-            # Validation after each snapshot model being generated
-            if test_loader and counter % n_iters_per_estimator == 0:
+            # Validation after each base estimator being added
+            if test_loader and updated:
                 self.eval()
                 with torch.no_grad():
                     mse = 0
@@ -602,25 +679,32 @@ class FastGeometricRegressor(_BaseFastGeometric):
 
                     if mse < best_mse:
                         best_mse = mse
-                        if save_model:
-                            io.save(self, save_dir, self.logger)
 
                     msg = (
-                        "n_estimators: {} | Validation MSE: {:.5f} |"
+                        "Epoch: {:03d} | Validation MSE: {:.5f} |"
                         " Historical Best: {:.5f}"
                     )
-                    self.logger.info(
-                        msg.format(len(self.estimators_), mse, best_mse)
-                    )
+                    self.logger.info(msg.format(epoch, mse, best_mse))
+                updated = False  # reset the updating flag
 
         if save_model and not test_loader:
             io.save(self, save_dir, self.logger)
+        self.is_fitted_ = True
 
     @torchensemble_model_doc(
         """Implementation on the evaluating stage of FastGeometricRegressor.""",  # noqa: E501
         "regressor_predict",
     )
     def predict(self, test_loader):
+
+        if not self.is_fitted_:
+            msg = (
+                "Please call the `ensemble` method to build the ensemble"
+                " first."
+            )
+            self.logger.error(msg)
+            raise RuntimeError(msg)
+
         self.eval()
         mse = 0
         criterion = nn.MSELoss()
