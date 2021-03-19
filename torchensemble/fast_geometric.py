@@ -641,7 +641,6 @@ class FastGeometricRegressor(_BaseFastGeometric):
                     optimizer, epoch, batch_idx, n_iters, cycle, lr_1, lr_2
                 )
 
-                batch_size = data.size(0)
                 data, target = data.to(self.device), target.to(self.device)
 
                 optimizer.zero_grad()
