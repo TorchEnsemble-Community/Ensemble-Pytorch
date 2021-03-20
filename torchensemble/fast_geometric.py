@@ -52,6 +52,11 @@ __fit_doc = """
     -------
     estimator_ : :obj:`object`
         The fitted base estimator.
+
+        - If test_loader is ``None``, the base estimator fully trained will be
+          returned.
+        - If test_loader is not ``None``, the base estimator with the best
+          validation performance will be returned.
 """
 
 
@@ -247,6 +252,7 @@ class FastGeometricClassifier(_BaseFastGeometric):
 
         # A dummy base estimator
         estimator_ = self._make_estimator()
+        ret_estimator = None
 
         # Set the optimizer and scheduler
         optimizer = set_module.set_optimizer(
@@ -314,6 +320,7 @@ class FastGeometricClassifier(_BaseFastGeometric):
 
                     if acc > best_acc:
                         best_acc = acc
+                        ret_estimator = copy.deepcopy(estimator_)
 
                     msg = (
                         "Validation Acc: {:.3f} % | Historical Best: {:.3f} %"
@@ -323,7 +330,11 @@ class FastGeometricClassifier(_BaseFastGeometric):
             if self.use_scheduler_:
                 scheduler.step()
 
-        return estimator_
+        # Extra step is `test_loader` is None
+        if ret_estimator is None:
+            ret_estimator = copy.deepcopy(estimator_)
+
+        return ret_estimator
 
     @_fast_geometric_model_doc(
         """Implementation on the ensembling stage of FastGeometricClassifier.""",  # noqa: E501
@@ -398,7 +409,7 @@ class FastGeometricClassifier(_BaseFastGeometric):
                         )
 
             # Update the ensemble
-            if (epoch + 1) % (cycle // 2) == 0:
+            if (epoch % cycle + 1) == cycle // 2:
                 self.estimators_.append(copy.deepcopy(estimator))
                 updated = True
 
@@ -527,6 +538,7 @@ class FastGeometricRegressor(_BaseFastGeometric):
 
         # A dummy base estimator
         estimator_ = self._make_estimator()
+        ret_estimator = None
 
         # Set the optimizer and scheduler
         optimizer = set_module.set_optimizer(
@@ -576,6 +588,7 @@ class FastGeometricRegressor(_BaseFastGeometric):
 
                     if mse < best_mse:
                         best_mse = mse
+                        ret_estimator = copy.deepcopy(estimator_)
 
                     msg = (
                         "Epoch: {:03d} | Validation MSE: {:.5f} |"
@@ -585,6 +598,10 @@ class FastGeometricRegressor(_BaseFastGeometric):
 
             if self.use_scheduler_:
                 scheduler.step()
+
+        # Extra step is `test_loader` is None
+        if ret_estimator is None:
+            ret_estimator = copy.deepcopy(estimator_)
 
         return estimator_
 
@@ -645,7 +662,7 @@ class FastGeometricRegressor(_BaseFastGeometric):
                         self.logger.info(msg.format(epoch, batch_idx, loss))
 
             # Update the ensemble
-            if (epoch + 1) % (cycle // 2) == 0:
+            if (epoch % cycle + 1) == cycle // 2:
                 self.estimators_.append(copy.deepcopy(estimator))
                 updated = True
 
