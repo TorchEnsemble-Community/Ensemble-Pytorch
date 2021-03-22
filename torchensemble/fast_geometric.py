@@ -344,17 +344,14 @@ class FastGeometricClassifier(_BaseFastGeometric):
         self,
         estimator,
         train_loader,
-        epochs=20,
-        lr_1=1e-3,
+        cycle=4,
+        lr_1=5e-2,
         lr_2=1e-4,
         log_interval=100,
         test_loader=None,
         save_model=True,
         save_dir=None,
     ):
-
-        # Number of training epochs per base estimator: cycle / 2
-        cycle = 2 * epochs // self.n_estimators
 
         # Set the internal optimizer
         optimizer = set_module.set_optimizer(
@@ -366,8 +363,9 @@ class FastGeometricClassifier(_BaseFastGeometric):
         best_acc = 0.0
         n_iters = len(train_loader)
         updated = False
+        epoch = 0
 
-        for epoch in range(epochs):
+        while len(self.estimators_) < self.n_estimators:
 
             # Training
             estimator.train()
@@ -444,6 +442,7 @@ class FastGeometricClassifier(_BaseFastGeometric):
                         msg.format(len(self.estimators_), acc, best_acc)
                     )
                 updated = False  # reset the updating flag
+            epoch += 1
 
         if save_model and not test_loader:
             io.save(self, save_dir, self.logger)
@@ -613,17 +612,14 @@ class FastGeometricRegressor(_BaseFastGeometric):
         self,
         estimator,
         train_loader,
-        epochs=20,
-        lr_1=1e-3,
+        cycle=4,
+        lr_1=5e-2,
         lr_2=1e-4,
         log_interval=100,
         test_loader=None,
         save_model=True,
         save_dir=None,
     ):
-
-        # Number of training epochs per base estimator: cycle / 2
-        cycle = 2 * epochs // self.n_estimators
 
         # Set the internal optimizer
         optimizer = set_module.set_optimizer(
@@ -635,8 +631,9 @@ class FastGeometricRegressor(_BaseFastGeometric):
         best_mse = float("inf")
         n_iters = len(train_loader)
         updated = False
+        epoch = 0
 
-        for epoch in range(epochs):
+        while len(self.estimators_) < self.n_estimators:
 
             # Training
             estimator.train()
@@ -692,6 +689,7 @@ class FastGeometricRegressor(_BaseFastGeometric):
                     )
                     self.logger.info(msg.format(epoch, mse, best_mse))
                 updated = False  # reset the updating flag
+            epoch += 1
 
         if save_model and not test_loader:
             io.save(self, save_dir, self.logger)

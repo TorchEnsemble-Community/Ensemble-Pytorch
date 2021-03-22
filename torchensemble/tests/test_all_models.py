@@ -114,7 +114,7 @@ def test_clf_class(clf):
 
     # Extra step for Fast Geometric Ensemble
     if isinstance(model, torchensemble.FastGeometricClassifier):
-        model.ensemble(ret, train_loader, epochs=4, test_loader=test_loader)
+        model.ensemble(ret, train_loader, test_loader=test_loader)
 
     # Test
     model.predict(test_loader)
@@ -158,7 +158,7 @@ def test_clf_object(clf):
 
     # Extra step for Fast Geometric Ensemble
     if isinstance(model, torchensemble.FastGeometricClassifier):
-        model.ensemble(ret, train_loader, epochs=4, test_loader=test_loader)
+        model.ensemble(ret, train_loader, test_loader=test_loader)
 
     # Test
     model.predict(test_loader)
@@ -202,7 +202,7 @@ def test_reg_class(reg):
 
     # Extra step for Fast Geometric Ensemble
     if isinstance(model, torchensemble.FastGeometricRegressor):
-        model.ensemble(ret, train_loader, epochs=4, test_loader=test_loader)
+        model.ensemble(ret, train_loader, test_loader=test_loader)
 
     # Test
     model.predict(test_loader)
@@ -246,7 +246,7 @@ def test_reg_object(reg):
 
     # Extra step for Fast Geometric Ensemble
     if isinstance(model, torchensemble.FastGeometricRegressor):
-        model.ensemble(ret, train_loader, epochs=4, test_loader=test_loader)
+        model.ensemble(ret, train_loader, test_loader=test_loader)
 
     # Test
     model.predict(test_loader)
