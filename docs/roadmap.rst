@@ -21,6 +21,7 @@ Maintenance Related
 -------------------
 
 * |Enhancement| Refactor existing code to reduce the redundancy
+* |Enhancement| Reduce the randomness in the experiment part by running each experiment multiple times with different random seeds
 
 .. role:: raw-html(raw)
    :format: html
