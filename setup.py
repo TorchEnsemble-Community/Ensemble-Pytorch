@@ -59,7 +59,7 @@ setup(
     maintainer='Yi-Xuan Xu',
     maintainer_email='xuyx@lamda.nju.edu.cn',
     description=(
-        'Implementations of scikit-learn like ensemble methods in' ' Pytorch'
+        'Implementations of scikit-learn like ensemble methods in Pytorch'
     ),
     license='BSD 3-Clause',
     url='https://github.com/xuyxu/Ensemble-Pytorch',
@@ -68,7 +68,7 @@ setup(
         'Documentation': 'https://ensemble-pytorch.readthedocs.io',
         'Source Code': 'https://github.com/xuyxu/Ensemble-Pytorch',
     },
-    version='0.1.1',
+    version='0.1.2',
     long_description=long_description,
     classifiers=[
         'Intended Audience :: Science/Research',
