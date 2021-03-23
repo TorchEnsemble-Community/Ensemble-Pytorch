@@ -67,8 +67,8 @@ __fge_doc = """
         The fitted base estimator.
     train_loader : torch.utils.data.DataLoader
         A :mod:`DataLoader` container that contains the training data.
-    epochs : int, default=20
-        The number of training epochs used to build the entire ensemble.
+    cycle : int, default=4
+        The number of cycles used to build each base estimator in the ensemble.
     lr_1 : float, default=5e-2
         ``alpha_1`` in original paper used to adjust the learning rate, also
         serves as the initial learning rate of the internal optimizer.
@@ -330,7 +330,7 @@ class FastGeometricClassifier(_BaseFastGeometric):
             if self.use_scheduler_:
                 scheduler.step()
 
-        # Extra step is `test_loader` is None
+        # Extra step if `test_loader` is None
         if ret_estimator is None:
             ret_estimator = copy.deepcopy(estimator_)
 
@@ -598,7 +598,7 @@ class FastGeometricRegressor(_BaseFastGeometric):
             if self.use_scheduler_:
                 scheduler.step()
 
-        # Extra step is `test_loader` is None
+        # Extra step if `test_loader` is None
         if ret_estimator is None:
             ret_estimator = copy.deepcopy(estimator_)
 
