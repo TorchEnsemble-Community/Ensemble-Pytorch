@@ -161,7 +161,7 @@ if __name__ == "__main__":
     model.ensemble(
         estimator,
         train_loader,
-        epochs=40,
+        cycle=4,
         lr_1=5e-2,
         lr_2=5e-4,
         test_loader=test_loader,
