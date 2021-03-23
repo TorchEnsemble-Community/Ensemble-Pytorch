@@ -25,6 +25,7 @@ def torchensemble_model_doc(header, item):
         """Return the selected item."""
         __doc = {
             "model": const.__model_doc,
+            "seq_model": const.__seq_model_doc,
             "fit": const.__fit_doc,
             "set_optimizer": const.__set_optimizer_doc,
             "set_scheduler": const.__set_scheduler_doc,

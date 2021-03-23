@@ -16,6 +16,7 @@ all_clf = [
     torchensemble.GradientBoostingClassifier,
     torchensemble.SnapshotEnsembleClassifier,
     torchensemble.AdversarialTrainingClassifier,
+    torchensemble.FastGeometricClassifier,
 ]
 
 
@@ -26,6 +27,7 @@ all_reg = [
     torchensemble.GradientBoostingRegressor,
     torchensemble.SnapshotEnsembleRegressor,
     torchensemble.AdversarialTrainingRegressor,
+    torchensemble.FastGeometricRegressor,
 ]
 
 
@@ -108,20 +110,20 @@ def test_clf_class(clf):
         epochs = 6
 
     # Train
-    model.fit(
-        train_loader, epochs=epochs, test_loader=test_loader, save_model=True
-    )
+    ret = model.fit(train_loader, epochs=epochs, test_loader=test_loader)
+
+    # Extra step for Fast Geometric Ensemble
+    if isinstance(model, torchensemble.FastGeometricClassifier):
+        model.ensemble(ret, train_loader, test_loader=test_loader)
 
     # Test
-    prev_acc = model.predict(test_loader)
+    model.predict(test_loader)
 
     # Reload
     new_model = clf(estimator=MLP_clf, n_estimators=n_estimators, cuda=False)
     io.load(new_model)
 
-    post_acc = new_model.predict(test_loader)
-
-    assert prev_acc == post_acc  # ensure the same performance
+    new_model.predict(test_loader)
 
 
 @pytest.mark.parametrize("clf", all_clf)
@@ -152,20 +154,20 @@ def test_clf_object(clf):
         epochs = 6
 
     # Train
-    model.fit(
-        train_loader, epochs=epochs, test_loader=test_loader, save_model=True
-    )
+    ret = model.fit(train_loader, epochs=epochs, test_loader=test_loader)
+
+    # Extra step for Fast Geometric Ensemble
+    if isinstance(model, torchensemble.FastGeometricClassifier):
+        model.ensemble(ret, train_loader, test_loader=test_loader)
 
     # Test
-    prev_acc = model.predict(test_loader)
+    model.predict(test_loader)
 
     # Reload
     new_model = clf(estimator=MLP_clf(), n_estimators=n_estimators, cuda=False)
     io.load(new_model)
 
-    post_acc = new_model.predict(test_loader)
-
-    assert prev_acc == post_acc  # ensure the same performance
+    new_model.predict(test_loader)
 
 
 @pytest.mark.parametrize("reg", all_reg)
@@ -196,20 +198,20 @@ def test_reg_class(reg):
         epochs = 6
 
     # Train
-    model.fit(
-        train_loader, epochs=epochs, test_loader=test_loader, save_model=True
-    )
+    ret = model.fit(train_loader, epochs=epochs, test_loader=test_loader)
+
+    # Extra step for Fast Geometric Ensemble
+    if isinstance(model, torchensemble.FastGeometricRegressor):
+        model.ensemble(ret, train_loader, test_loader=test_loader)
 
     # Test
-    prev_mse = model.predict(test_loader)
+    model.predict(test_loader)
 
     # Reload
     new_model = reg(estimator=MLP_reg, n_estimators=n_estimators, cuda=False)
     io.load(new_model)
 
-    post_mse = new_model.predict(test_loader)
-
-    assert prev_mse == post_mse  # ensure the same performance
+    new_model.predict(test_loader)
 
 
 @pytest.mark.parametrize("reg", all_reg)
@@ -240,17 +242,17 @@ def test_reg_object(reg):
         epochs = 6
 
     # Train
-    model.fit(
-        train_loader, epochs=epochs, test_loader=test_loader, save_model=True
-    )
+    ret = model.fit(train_loader, epochs=epochs, test_loader=test_loader)
+
+    # Extra step for Fast Geometric Ensemble
+    if isinstance(model, torchensemble.FastGeometricRegressor):
+        model.ensemble(ret, train_loader, test_loader=test_loader)
 
     # Test
-    prev_mse = model.predict(test_loader)
+    model.predict(test_loader)
 
     # Reload
     new_model = reg(estimator=MLP_reg(), n_estimators=n_estimators, cuda=False)
     io.load(new_model)
 
-    post_mse = new_model.predict(test_loader)
-
-    assert prev_mse == post_mse  # ensure the same performance
+    new_model.predict(test_loader)

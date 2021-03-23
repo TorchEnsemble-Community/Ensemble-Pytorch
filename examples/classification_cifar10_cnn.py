@@ -12,6 +12,7 @@ from torchensemble.voting import VotingClassifier
 from torchensemble.bagging import BaggingClassifier
 from torchensemble.gradient_boosting import GradientBoostingClassifier
 from torchensemble.snapshot_ensemble import SnapshotEnsembleClassifier
+from torchensemble.fast_geometric import FastGeometricClassifier
 
 from torchensemble.utils.logging import set_logger
 

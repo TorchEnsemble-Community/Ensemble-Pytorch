@@ -31,6 +31,33 @@ __model_doc = """
 """
 
 
+__seq_model_doc = """
+    Parameters
+    ----------
+    estimator : torch.nn.Module
+        The class or object of your base estimator.
+
+        - If :obj:`class`, it should inherit from :mod:`torch.nn.Module`.
+        - If :obj:`object`, it should be instantiated from a class inherited
+          from :mod:`torch.nn.Module`.
+    n_estimators : int
+        The number of base estimators in the ensemble.
+    estimator_args : dict, default=None
+        The dictionary of hyper-parameters used to instantiate base
+        estimators. This parameter will have no effect if ``estimator`` is a
+        base estimator object after instantiation.
+    cuda : bool, default=True
+
+        - If ``True``, use GPU to train and evaluate the ensemble.
+        - If ``False``, use CPU to train and evaluate the ensemble.
+
+    Attributes
+    ----------
+    estimators_ : torch.nn.ModuleList
+        An internal container that stores all fitted base estimators.
+"""
+
+
 __set_optimizer_doc = """
     Parameters
     ----------

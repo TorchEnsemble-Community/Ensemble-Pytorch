@@ -10,6 +10,8 @@ from .snapshot_ensemble import SnapshotEnsembleClassifier
 from .snapshot_ensemble import SnapshotEnsembleRegressor
 from .adversarial_training import AdversarialTrainingClassifier
 from .adversarial_training import AdversarialTrainingRegressor
+from .fast_geometric import FastGeometricClassifier
+from .fast_geometric import FastGeometricRegressor
 
 
 __all__ = [
@@ -25,4 +27,6 @@ __all__ = [
     "SnapshotEnsembleRegressor",
     "AdversarialTrainingClassifier",
     "AdversarialTrainingRegressor",
+    "FastGeometricClassifier",
+    "FastGeometricRegressor",
 ]

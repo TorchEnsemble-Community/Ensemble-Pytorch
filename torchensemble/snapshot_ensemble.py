@@ -208,7 +208,7 @@ class _BaseSnapshotEnsemble(BaseModule):
 
 
 @torchensemble_model_doc(
-    """Implementation on the SnapshotEnsembleClassifier.""", "model"
+    """Implementation on the SnapshotEnsembleClassifier.""", "seq_model"
 )
 class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble):
     def __init__(self, **kwargs):
@@ -372,7 +372,7 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble):
 
 
 @torchensemble_model_doc(
-    """Implementation on the SnapshotEnsembleRegressor.""", "model"
+    """Implementation on the SnapshotEnsembleRegressor.""", "seq_model"
 )
 class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble):
     def __init__(self, **kwargs):
