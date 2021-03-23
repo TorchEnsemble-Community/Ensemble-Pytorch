@@ -30,7 +30,7 @@ Ensemble PyTorch Documentation
 | |:homes:| `GitHub <https://github.com/xuyxu/Ensemble-Pytorch>`__ | |:book:| `ReadtheDocs <https://readthedocs.org/projects/ensemble-pytorch/>`__ | |:hammer_and_wrench:| `Codecov <https://codecov.io/gh/xuyxu/Ensemble-Pytorch>`__
 |
 
-**Ensemble-PyTorch** implements a collection of ensemble methods in PyTorch. It provides:
+Ensemble PyTorch is a unified ensemble framework for PyTorch to improve the performance and robustness of your deep learning model. It provides:
 
 * |:arrow_up_small:| Easy ways to improve the performance and robustness of your deep learning model.
 * |:eyes:| Easy-to-use APIs on training and evaluating the ensemble.
@@ -43,34 +43,37 @@ Guidepost
 
 * To get started, please refer to `Quick Start <./quick_start.html>`__;
 * To learn more about ensemble methods supported, please refer to `Introduction <./introduction.html>`__;
-* If you are confused on which ensemble method to use, instructions in `Guidance <./guide.html>`__ may be helpful.
+* If you are confused on which ensemble method to use, our `experiments <./experiment.html>`__ and the instructions in `guidance <./guide.html>`__ may be helpful.
 
 Minimal Example on How to Use
 -----------------------------
 
 .. code:: python
 
-    from torchensemble import ensemble_method           # import ensemble (e.g., VotingClassifier)
+    from torchensemble import VotingClassifier             # a classic ensemble method
 
-    # Load your dataset
+    # Load your data
     train_loader = DataLoader(...)
     test_loader = DataLoader(...)
 
     # Define the ensemble
-    model = ensemble_method(estimator=base_estimator,   # your deep learning model
-                            n_estimators=10)            # the number of base estimators
+    model = VotingClassifier(estimator=base_estimator,     # your deep learning model
+                             n_estimators=10)              # the number of base estimators
 
     # Set the optimizer
-    model.set_optimizer("Adam",                         # parameter optimizer
-                        lr=learning_rate,               # learning rate of the optimizer
-                        weight_decay=weight_decay)      # weight decay of the optimizer
+    model.set_optimizer("Adam",                            # parameter optimizer
+                        lr=learning_rate,                  # learning rate of the optimizer
+                        weight_decay=weight_decay)         # weight decay of the optimizer
+
+    # Set the scheduler
+    model.set_scheduler("CosineAnnealingLR", T_max=epochs) # optional
 
     # Train
     model.fit(train_loader,
-              epochs=epochs)                            # the number of training epochs
+              epochs=epochs)                               # the number of training epochs
 
     # Evaluate
-    accuracy = model.predict(test_loader)               # evaluate the ensemble
+    acc = model.predict(test_loader)                       # testing accuracy
 
 Content
 -------
