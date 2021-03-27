@@ -12,7 +12,8 @@ import torch.nn.functional as F
 import warnings
 from joblib import Parallel, delayed
 
-from ._base import BaseModule, torchensemble_model_doc
+from ._base import BaseClassifier, BaseRegressor
+from ._base import torchensemble_model_doc
 from .utils import io
 from .utils import set_module
 from .utils import operator as op
@@ -86,7 +87,7 @@ def _parallel_fit_per_epoch(
 @torchensemble_model_doc(
     """Implementation on the VotingClassifier.""", "model"
 )
-class VotingClassifier(BaseModule):
+class VotingClassifier(BaseClassifier):
     @torchensemble_model_doc(
         """Implementation on the data forwarding in VotingClassifier.""",
         "classifier_forward",
@@ -246,29 +247,17 @@ class VotingClassifier(BaseModule):
         if save_model and not test_loader:
             io.save(self, save_dir, self.logger)
 
-    @torchensemble_model_doc(
-        """Implementation on the evaluating stage of VotingClassifier.""",
-        "classifier_predict",
-    )
-    def predict(self, test_loader):
-        self.eval()
-        correct = 0
-        total = 0
+    @torchensemble_model_doc(item="classifier_evaluate")
+    def evaluate(self, test_loader, return_loss=False):
+        return super().evaluate(test_loader, return_loss)
 
-        for _, (data, target) in enumerate(test_loader):
-            data, target = data.to(self.device), target.to(self.device)
-            output = self.forward(data)
-            _, predicted = torch.max(output.data, 1)
-            correct += (predicted == target).sum().item()
-            total += target.size(0)
-
-        acc = 100 * correct / total
-
-        return acc
+    @torchensemble_model_doc(item="predict")
+    def predict(self, X, return_numpy=True):
+        return super().predict(X, return_numpy)
 
 
 @torchensemble_model_doc("""Implementation on the VotingRegressor.""", "model")
-class VotingRegressor(BaseModule):
+class VotingRegressor(BaseRegressor):
     @torchensemble_model_doc(
         """Implementation on the data forwarding in VotingRegressor.""",
         "regressor_forward",
@@ -419,18 +408,10 @@ class VotingRegressor(BaseModule):
         if save_model and not test_loader:
             io.save(self, save_dir, self.logger)
 
-    @torchensemble_model_doc(
-        """Implementation on the evaluating stage of VotingRegressor.""",
-        "regressor_predict",
-    )
-    def predict(self, test_loader):
-        self.eval()
-        mse = 0
-        criterion = nn.MSELoss()
+    @torchensemble_model_doc(item="regressor_evaluate")
+    def evaluate(self, test_loader):
+        return super().evaluate(test_loader)
 
-        for batch_idx, (data, target) in enumerate(test_loader):
-            data, target = data.to(self.device), target.to(self.device)
-            output = self.forward(data)
-            mse += criterion(output, target)
-
-        return mse / len(test_loader)
+    @torchensemble_model_doc(item="predict")
+    def predict(self, X, return_numpy=True):
+        return super().predict(X, return_numpy)

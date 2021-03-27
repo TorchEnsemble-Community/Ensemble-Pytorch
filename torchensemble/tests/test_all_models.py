@@ -116,14 +116,23 @@ def test_clf_class(clf):
     if isinstance(model, torchensemble.FastGeometricClassifier):
         model.ensemble(ret, train_loader, test_loader=test_loader)
 
-    # Test
-    model.predict(test_loader)
+    # Evaluate
+    model.evaluate(test_loader)
+
+    # Predict
+    for _, (data, target) in enumerate(test_loader):
+        model.predict(data)
+        break
 
     # Reload
     new_model = clf(estimator=MLP_clf, n_estimators=n_estimators, cuda=False)
     io.load(new_model)
 
-    new_model.predict(test_loader)
+    new_model.evaluate(test_loader)
+
+    for _, (data, target) in enumerate(test_loader):
+        new_model.predict(data)
+        break
 
 
 @pytest.mark.parametrize("clf", all_clf)
@@ -160,14 +169,23 @@ def test_clf_object(clf):
     if isinstance(model, torchensemble.FastGeometricClassifier):
         model.ensemble(ret, train_loader, test_loader=test_loader)
 
-    # Test
-    model.predict(test_loader)
+    # Evaluate
+    model.evaluate(test_loader)
+
+    # Predict
+    for _, (data, target) in enumerate(test_loader):
+        model.predict(data)
+        break
 
     # Reload
     new_model = clf(estimator=MLP_clf(), n_estimators=n_estimators, cuda=False)
     io.load(new_model)
 
-    new_model.predict(test_loader)
+    new_model.evaluate(test_loader)
+
+    for _, (data, target) in enumerate(test_loader):
+        new_model.predict(data)
+        break
 
 
 @pytest.mark.parametrize("reg", all_reg)
@@ -204,14 +222,23 @@ def test_reg_class(reg):
     if isinstance(model, torchensemble.FastGeometricRegressor):
         model.ensemble(ret, train_loader, test_loader=test_loader)
 
-    # Test
-    model.predict(test_loader)
+    # Evaluate
+    model.evaluate(test_loader)
+
+    # Predict
+    for _, (data, target) in enumerate(test_loader):
+        model.predict(data)
+        break
 
     # Reload
     new_model = reg(estimator=MLP_reg, n_estimators=n_estimators, cuda=False)
     io.load(new_model)
 
-    new_model.predict(test_loader)
+    new_model.evaluate(test_loader)
+
+    for _, (data, target) in enumerate(test_loader):
+        new_model.predict(data)
+        break
 
 
 @pytest.mark.parametrize("reg", all_reg)
@@ -248,11 +275,20 @@ def test_reg_object(reg):
     if isinstance(model, torchensemble.FastGeometricRegressor):
         model.ensemble(ret, train_loader, test_loader=test_loader)
 
-    # Test
-    model.predict(test_loader)
+    # Evaluate
+    model.evaluate(test_loader)
+
+    # Predict
+    for _, (data, target) in enumerate(test_loader):
+        model.predict(data)
+        break
 
     # Reload
     new_model = reg(estimator=MLP_reg(), n_estimators=n_estimators, cuda=False)
     io.load(new_model)
 
-    new_model.predict(test_loader)
+    new_model.evaluate(test_loader)
+
+    for _, (data, target) in enumerate(test_loader):
+        new_model.predict(data)
+        break

@@ -1,6 +1,6 @@
 """
   Gradient boosting is a classic sequential ensemble method. At each iteration,
-  the learning target of a new base estimator is to fit the pseudo residual
+  the learning target of a new base estimator is to fit the pseudo residuals
   computed based on the ground truth and the output from base estimators
   fitted before, using ordinary least square.
 """
@@ -13,7 +13,8 @@ import warnings
 import torch.nn as nn
 import torch.nn.functional as F
 
-from ._base import BaseModule, torchensemble_model_doc
+from ._base import BaseModule, BaseClassifier, BaseRegressor
+from ._base import torchensemble_model_doc
 from .utils import io
 from .utils import set_module
 from .utils import operator as op
@@ -324,7 +325,7 @@ class _BaseGradientBoosting(BaseModule):
 @_gradient_boosting_model_doc(
     """Implementation on the GradientBoostingClassifier.""", "model"
 )
-class GradientBoostingClassifier(_BaseGradientBoosting):
+class GradientBoostingClassifier(_BaseGradientBoosting, BaseClassifier):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.is_classification = True
@@ -423,31 +424,19 @@ class GradientBoostingClassifier(_BaseGradientBoosting):
 
         return proba
 
-    @torchensemble_model_doc(
-        """Implementation on the evaluating stage of GradientBoostingClassifier.""",  # noqa: E501
-        "classifier_predict",
-    )
-    def predict(self, test_loader):
-        self.eval()
-        correct = 0
-        total = 0
+    @torchensemble_model_doc(item="classifier_evaluate")
+    def evaluate(self, test_loader, return_loss=False):
+        return super().evaluate(test_loader, return_loss)
 
-        for _, (data, target) in enumerate(test_loader):
-            data, target = data.to(self.device), target.to(self.device)
-            output = self.forward(data)
-            _, predicted = torch.max(output.data, 1)
-            correct += (predicted == target).sum().item()
-            total += target.size(0)
-
-        acc = 100 * correct / total
-
-        return acc
+    @torchensemble_model_doc(item="predict")
+    def predict(self, X, return_numpy=True):
+        return super().predict(X, return_numpy)
 
 
 @_gradient_boosting_model_doc(
     """Implementation on the GradientBoostingRegressor.""", "model"
 )
-class GradientBoostingRegressor(_BaseGradientBoosting):
+class GradientBoostingRegressor(_BaseGradientBoosting, BaseRegressor):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.is_classification = False
@@ -540,18 +529,10 @@ class GradientBoostingRegressor(_BaseGradientBoosting):
 
         return pred
 
-    @torchensemble_model_doc(
-        """Implementation on the evaluating stage of GradientBoostingRegressor.""",  # noqa: E501
-        "regressor_predict",
-    )
-    def predict(self, test_loader):
-        self.eval()
-        mse = 0
-        criterion = nn.MSELoss()
+    @torchensemble_model_doc(item="regressor_evaluate")
+    def evaluate(self, test_loader):
+        return super().evaluate(test_loader)
 
-        for batch_idx, (data, target) in enumerate(test_loader):
-            data, target = data.to(self.device), target.to(self.device)
-            output = self.forward(data)
-            mse += criterion(output, target)
-
-        return mse / len(test_loader)
+    @torchensemble_model_doc(item="predict")
+    def predict(self, X, return_numpy=True):
+        return super().predict(X, return_numpy)
