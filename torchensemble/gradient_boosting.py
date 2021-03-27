@@ -60,15 +60,16 @@ __fit_doc = """
     Parameters
     ----------
     train_loader : torch.utils.data.DataLoader
-        A :mod:`torch.utils.data.DataLoader` container that contains the
-        training data.
+        A data loader that contains the training data.
     epochs : int, default=100
         The number of training epochs per base estimator.
+    use_reduction_sum : bool, default=True
+        Whether to set ``reduction="sum"`` for the internal mean squared
+        error used to fit each base estimator.
     log_interval : int, default=100
         The number of batches to wait before logging the training status.
     test_loader : torch.utils.data.DataLoader, default=None
-        A :mod:`torch.utils.data.DataLoader` container that contains the
-        evaluating data.
+        A data loader that contains the evaluating data.
 
         - If ``None``, no validation is conducted after each base
           estimator being trained.
@@ -80,7 +81,7 @@ __fit_doc = """
         adding the base estimator fitted in current iteration, the internal
         counter on early stopping will increase by one. When the value of
         the internal counter reaches ``early_stopping_rounds``, the
-        training stage  will terminate instantly.
+        training stage will terminate instantly.
     save_model : bool, default=True
         Specify whether to save the model parameters.
 
@@ -227,6 +228,7 @@ class _BaseGradientBoosting(BaseModule):
         self,
         train_loader,
         epochs=100,
+        use_reduction_sum=True,
         log_interval=100,
         test_loader=None,
         early_stopping_rounds=2,
@@ -243,7 +245,9 @@ class _BaseGradientBoosting(BaseModule):
         )
 
         # Utils
-        criterion = nn.MSELoss(reduction="sum")
+        criterion = (
+            nn.MSELoss(reduction="sum") if use_reduction_sum else nn.MSELoss()
+        )
         n_counter = 0  # a counter on early stopping
 
         for est_idx, estimator in enumerate(self.estimators_):
@@ -397,6 +401,7 @@ class GradientBoostingClassifier(_BaseGradientBoosting, BaseClassifier):
         self,
         train_loader,
         epochs=100,
+        use_reduction_sum=True,
         log_interval=100,
         test_loader=None,
         early_stopping_rounds=2,
@@ -503,6 +508,7 @@ class GradientBoostingRegressor(_BaseGradientBoosting, BaseRegressor):
         self,
         train_loader,
         epochs=100,
+        use_reduction_sum=True,
         log_interval=100,
         test_loader=None,
         early_stopping_rounds=2,
