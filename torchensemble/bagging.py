@@ -137,6 +137,7 @@ class BaggingClassifier(BaseModule):
         test_loader=None,
         save_model=True,
         save_dir=None,
+        tb_logger=None,
     ):
 
         self._validate_parameters(epochs, log_interval)
@@ -239,6 +240,8 @@ class BaggingClassifier(BaseModule):
                             " % | Historical Best: {:.3f} %"
                         )
                         self.logger.info(msg.format(epoch, acc, best_acc))
+                        if tb_logger:
+                            tb_logger.add_scalar("bagging/Validation_Acc", acc, epoch)
 
                 # Update the scheduler
                 with warnings.catch_warnings():
@@ -319,6 +322,7 @@ class BaggingRegressor(BaseModule):
         test_loader=None,
         save_model=True,
         save_dir=None,
+        tb_logger=None,
     ):
 
         self._validate_parameters(epochs, log_interval)
@@ -416,6 +420,8 @@ class BaggingRegressor(BaseModule):
                             " {:.5f} | Historical Best: {:.5f}"
                         )
                         self.logger.info(msg.format(epoch, mse, best_mse))
+                        if tb_logger:
+                            tb_logger.add_scalar("bagging/Validation_MSE", mse, epoch)
 
                 # Update the scheduler
                 with warnings.catch_warnings():

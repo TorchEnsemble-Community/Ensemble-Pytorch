@@ -245,6 +245,7 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble):
         test_loader=None,
         save_model=True,
         save_dir=None,
+        tb_logger=None,
     ):
         self._validate_parameters(lr_clip, epochs, log_interval)
         self.n_outputs = self._decide_n_outputs(
@@ -304,6 +305,8 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble):
                                 batch_size,
                             )
                         )
+                        if tb_logger:
+                            tb_logger.add_scalar("snapshot_ensemble/Train_Loss", loss, epoch)
 
                 # Snapshot ensemble updates the learning rate per iteration
                 # instead of per epoch.
@@ -346,6 +349,8 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble):
                     self.logger.info(
                         msg.format(len(self.estimators_), acc, best_acc)
                     )
+                    if tb_logger:
+                        tb_logger.add_scalar("snapshot_ensemble/Validation_Acc", acc, epoch)
 
         if save_model and not test_loader:
             io.save(self, save_dir, self.logger)
@@ -408,6 +413,7 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble):
         test_loader=None,
         save_model=True,
         save_dir=None,
+        tb_logger=None,
     ):
         self._validate_parameters(lr_clip, epochs, log_interval)
         self.n_outputs = self._decide_n_outputs(
@@ -461,6 +467,8 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble):
                                 loss,
                             )
                         )
+                        if tb_logger:
+                            tb_logger.add_scalar("snapshot_ensemble/Train_Loss", loss, epoch)
 
                 # Snapshot ensemble updates the learning rate per iteration
                 # instead of per epoch.
@@ -499,6 +507,8 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble):
                     self.logger.info(
                         msg.format(len(self.estimators_), mse, best_mse)
                     )
+                    if tb_logger:
+                        tb_logger.add_scalar("snapshot_ensemble/Validation_MSE", mse, epoch)
 
         if save_model and not test_loader:
             io.save(self, save_dir, self.logger)

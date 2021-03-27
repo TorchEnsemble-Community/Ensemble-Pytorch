@@ -71,6 +71,7 @@ class FusionClassifier(BaseModule):
         test_loader=None,
         save_model=True,
         save_dir=None,
+        tb_logger=None,
     ):
 
         # Instantiate base estimators and set attributes
@@ -146,6 +147,8 @@ class FusionClassifier(BaseModule):
                         " % | Historical Best: {:.3f} %"
                     )
                     self.logger.info(msg.format(epoch, acc, best_acc))
+                    if tb_logger:
+                        tb_logger.add_scalar("fusion/Validation_Acc", acc, epoch)
 
             # Update the scheduler
             if hasattr(self, "scheduler_"):
@@ -215,6 +218,7 @@ class FusionRegressor(BaseModule):
         test_loader=None,
         save_model=True,
         save_dir=None,
+        tb_logger=None,
     ):
         # Instantiate base estimators and set attributes
         for _ in range(self.n_estimators):
@@ -276,6 +280,8 @@ class FusionRegressor(BaseModule):
                         " Historical Best: {:.5f}"
                     )
                     self.logger.info(msg.format(epoch, mse, best_mse))
+                    if tb_logger:
+                        tb_logger.add_scalar("fusion/Validation_MSE", mse, epoch)
 
             # Update the scheduler
             if hasattr(self, "scheduler_"):

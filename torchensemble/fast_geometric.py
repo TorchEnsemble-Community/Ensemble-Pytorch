@@ -243,7 +243,7 @@ class FastGeometricClassifier(_BaseFastGeometric):
         "fit",
     )
     def fit(
-        self, train_loader, epochs=100, log_interval=100, test_loader=None
+        self, train_loader, epochs=100, log_interval=100, test_loader=None, tb_logger=None,
     ):
         self._validate_parameters(epochs, log_interval)
         self.n_outputs = self._decide_n_outputs(
@@ -302,6 +302,8 @@ class FastGeometricClassifier(_BaseFastGeometric):
                                 batch_size,
                             )
                         )
+                        if tb_logger:
+                            tb_logger.add_scalar("fast_geometric/Train_Loss", loss, epoch)
 
             # Validation
             if test_loader:
@@ -326,6 +328,8 @@ class FastGeometricClassifier(_BaseFastGeometric):
                         "Validation Acc: {:.3f} % | Historical Best: {:.3f} %"
                     )
                     self.logger.info(msg.format(acc, best_acc))
+                    if tb_logger:
+                        tb_logger.add_scalar("fast_geometric/Validation_Acc", acc, epoch)
 
             if self.use_scheduler_:
                 scheduler.step()
@@ -351,6 +355,7 @@ class FastGeometricClassifier(_BaseFastGeometric):
         test_loader=None,
         save_model=True,
         save_dir=None,
+        tb_logger=None,
     ):
 
         # Set the internal optimizer
@@ -405,6 +410,8 @@ class FastGeometricClassifier(_BaseFastGeometric):
                                 batch_size,
                             )
                         )
+                        if tb_logger:
+                            tb_logger.add_scalar("fast_geometric/Train_Loss", loss, epoch)
 
             # Update the ensemble
             if (epoch % cycle + 1) == cycle // 2:
@@ -441,6 +448,8 @@ class FastGeometricClassifier(_BaseFastGeometric):
                     self.logger.info(
                         msg.format(len(self.estimators_), acc, best_acc)
                     )
+                    if tb_logger:
+                        tb_logger.add_scalar("fast_geometric/Validation_Acc", acc, epoch)
                 updated = False  # reset the updating flag
             epoch += 1
 
@@ -529,6 +538,7 @@ class FastGeometricRegressor(_BaseFastGeometric):
         test_loader=None,
         save_model=True,
         save_dir=None,
+        tb_logger=None,
     ):
         self._validate_parameters(epochs, log_interval)
         self.n_outputs = self._decide_n_outputs(
@@ -572,6 +582,8 @@ class FastGeometricRegressor(_BaseFastGeometric):
                     with torch.no_grad():
                         msg = "Epoch: {:03d} | Batch: {:03d} | Loss: {:.5f}"
                         self.logger.info(msg.format(epoch, batch_idx, loss))
+                        if tb_logger:
+                            tb_logger.add_scalar("fast_geometric/Train_Loss", loss, epoch)
 
             # Validation
             if test_loader:
@@ -594,6 +606,8 @@ class FastGeometricRegressor(_BaseFastGeometric):
                         " Historical Best: {:.5f}"
                     )
                     self.logger.info(msg.format(epoch, mse, best_mse))
+                    if tb_logger:
+                        tb_logger.add_scalar("fast_geometric/Validation_MSE", mse, epoch)
 
             if self.use_scheduler_:
                 scheduler.step()
@@ -619,6 +633,7 @@ class FastGeometricRegressor(_BaseFastGeometric):
         test_loader=None,
         save_model=True,
         save_dir=None,
+        tb_logger=None,
     ):
 
         # Set the internal optimizer
@@ -657,6 +672,8 @@ class FastGeometricRegressor(_BaseFastGeometric):
                     with torch.no_grad():
                         msg = "Epoch: {:03d} | Batch: {:03d} | Loss: {:.5f}"
                         self.logger.info(msg.format(epoch, batch_idx, loss))
+                        if tb_logger:
+                            tb_logger.add_scalar("fast_geometric/Train_Loss", loss, epoch)
 
             # Update the ensemble
             if (epoch % cycle + 1) == cycle // 2:
@@ -688,6 +705,8 @@ class FastGeometricRegressor(_BaseFastGeometric):
                         " Historical Best: {:.5f}"
                     )
                     self.logger.info(msg.format(epoch, mse, best_mse))
+                    if tb_logger:
+                        tb_logger.add_scalar("fast_geometric/Validation_MSE", mse, epoch)
                 updated = False  # reset the updating flag
             epoch += 1
 

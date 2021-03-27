@@ -264,6 +264,7 @@ class AdversarialTrainingClassifier(_BaseAdversarialTraining):
         test_loader=None,
         save_model=True,
         save_dir=None,
+        tb_logger=None,
     ):
 
         self._validate_parameters(epochs, epsilon, log_interval)
@@ -367,6 +368,8 @@ class AdversarialTrainingClassifier(_BaseAdversarialTraining):
                             " % | Historical Best: {:.3f} %"
                         )
                         self.logger.info(msg.format(epoch, acc, best_acc))
+                        if tb_logger:
+                            tb_logger.add_scalar("adversarial_training/Validation_Acc", acc, epoch)
 
                 # Update the scheduler
                 with warnings.catch_warnings():
@@ -454,6 +457,7 @@ class AdversarialTrainingRegressor(_BaseAdversarialTraining):
         test_loader=None,
         save_model=True,
         save_dir=None,
+        tb_logger=None,
     ):
 
         self._validate_parameters(epochs, epsilon, log_interval)
@@ -552,6 +556,8 @@ class AdversarialTrainingRegressor(_BaseAdversarialTraining):
                             " {:.5f} | Historical Best: {:.5f}"
                         )
                         self.logger.info(msg.format(epoch, mse, best_mse))
+                        if tb_logger:
+                            tb_logger.add_scalar("adversirial_training/Validation_MSE", mse, epoch)
 
                 # Update the scheduler
                 with warnings.catch_warnings():

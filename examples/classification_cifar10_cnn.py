@@ -14,7 +14,7 @@ from torchensemble.gradient_boosting import GradientBoostingClassifier
 from torchensemble.snapshot_ensemble import SnapshotEnsembleClassifier
 from torchensemble.fast_geometric import FastGeometricClassifier
 
-from torchensemble.utils.logging import set_logger
+from torchensemble.utils.logging import set_logger, init_tb_logger
 
 
 def display_records(records, logger):
@@ -51,14 +51,14 @@ class LeNet5(nn.Module):
 if __name__ == "__main__":
 
     # Hyper-parameters
-    n_estimators = 10
+    n_estimators = 2
     lr = 1e-3
     weight_decay = 5e-4
-    epochs = 100
+    epochs = 2
 
     # Utils
-    batch_size = 128
-    data_dir = "../../Dataset/cifar"  # MODIFY THIS IF YOU WANT
+    batch_size = 4
+    data_dir = "G:/Data/cifar"  # MODIFY THIS IF YOU WANT
     records = []
     torch.manual_seed(0)
 
@@ -97,7 +97,7 @@ if __name__ == "__main__":
         shuffle=True,
     )
 
-    logger = set_logger("classification_cifar10_cnn")
+    logger, tb_logger = set_logger("classification_cifar10_cnn", use_tb_logger=True)
 
     # FusionClassifier
     model = FusionClassifier(
@@ -109,7 +109,7 @@ if __name__ == "__main__":
 
     # Training
     tic = time.time()
-    model.fit(train_loader, epochs=epochs)
+    model.fit(train_loader, epochs=epochs, tb_logger=tb_logger)
     toc = time.time()
     training_time = toc - tic
 
@@ -132,7 +132,7 @@ if __name__ == "__main__":
     model.set_optimizer("Adam", lr=lr, weight_decay=weight_decay)
 
     tic = time.time()
-    model.fit(train_loader, epochs=epochs)
+    model.fit(train_loader, epochs=epochs, tb_logger=tb_logger)
     toc = time.time()
     training_time = toc - tic
 
@@ -154,7 +154,7 @@ if __name__ == "__main__":
     model.set_optimizer("Adam", lr=lr, weight_decay=weight_decay)
 
     tic = time.time()
-    model.fit(train_loader, epochs=epochs)
+    model.fit(train_loader, epochs=epochs, tb_logger=tb_logger)
     toc = time.time()
     training_time = toc - tic
 
@@ -176,7 +176,7 @@ if __name__ == "__main__":
     model.set_optimizer("Adam", lr=lr, weight_decay=weight_decay)
 
     tic = time.time()
-    model.fit(train_loader, epochs=epochs)
+    model.fit(train_loader, epochs=epochs, tb_logger=tb_logger)
     toc = time.time()
     training_time = toc - tic
 
@@ -203,7 +203,7 @@ if __name__ == "__main__":
     model.set_optimizer("Adam", lr=lr, weight_decay=weight_decay)
 
     tic = time.time()
-    model.fit(train_loader, epochs=epochs)
+    model.fit(train_loader, epochs=epochs, tb_logger=tb_logger)
     toc = time.time()
     training_time = toc - tic
 
@@ -223,3 +223,6 @@ if __name__ == "__main__":
 
     # Print results on different ensemble methods
     display_records(records, logger)
+
+    if tb_logger:
+        tb_logger.close()

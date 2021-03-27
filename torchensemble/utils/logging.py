@@ -1,9 +1,10 @@
 import os
 import time
 import logging
+import datetime
 
 
-def set_logger(log_file=None, log_console_level="info", log_file_level=None):
+def set_logger(log_file=None, log_console_level="info", log_file_level=None, use_tb_logger=False):
     """Bind the default logger with console and file stream output."""
 
     def _get_level(level):
@@ -62,4 +63,16 @@ def set_logger(log_file=None, log_console_level="info", log_file_level=None):
         _logger.addHandler(fh)
     _logger.setLevel("DEBUG")
 
-    return _logger
+    tb_logger = None
+    if use_tb_logger:
+        tb_log_path = os.path.join(log_path, log_file + rq + '_tb_logger')
+        os.mkdir(tb_log_path)
+        tb_logger = init_tb_logger(log_dir=tb_log_path)
+
+    return _logger, tb_logger
+
+
+def init_tb_logger(log_dir):
+    from torch.utils.tensorboard import SummaryWriter
+    tb_logger = SummaryWriter(log_dir=log_dir)
+    return tb_logger
