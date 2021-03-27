@@ -193,10 +193,7 @@ class BaseModule(nn.Module):
         Implementation on the training stage of the ensemble.
         """
 
-    @abc.abstractmethod
-    def evaluate(self, test_loader, return_loss=False):
-        """Docstrings decorated by downstream models."""
-
+    @torch.no_grad()
     def predict(self, X, return_numpy=True):
         """Docstrings decorated by downstream models."""
         self.eval()
@@ -209,11 +206,12 @@ class BaseModule(nn.Module):
             pred = self.forward(X)
         else:
             msg = (
-                "The type of X should be one of {{torch.Tensor, np.ndarray}}."
+                "The type of input X should be one of {{torch.Tensor,"
+                " np.ndarray}}."
             )
             raise ValueError(msg)
 
-        pred = pred.detach().cpu()
+        pred = pred.cpu()
         if return_numpy:
             return pred.numpy()
 
@@ -227,6 +225,7 @@ class BaseClassifier(BaseModule, nn.Module):
     Please use the derived classes instead.
     """
 
+    @torch.no_grad()
     def evaluate(self, test_loader, return_loss=False):
         """Docstrings decorated by downstream models."""
         self.eval()
@@ -259,6 +258,7 @@ class BaseRegressor(BaseModule, nn.Module):
     Please use the derived classes instead.
     """
 
+    @torch.no_grad()
     def evaluate(self, test_loader):
         """Docstrings decorated by downstream models."""
         self.eval()
