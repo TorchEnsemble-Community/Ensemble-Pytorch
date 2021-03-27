@@ -724,7 +724,7 @@ class FastGeometricRegressor(_BaseFastGeometric, BaseRegressor):
             output = self.forward(data)
             mse += criterion(output, target)
 
-        return mse / len(test_loader)
+        return float(mse) / len(test_loader)
 
     @torchensemble_model_doc(item="predict")
     def predict(self, X, return_numpy=True):
