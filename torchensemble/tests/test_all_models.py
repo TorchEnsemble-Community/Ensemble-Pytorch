@@ -2,14 +2,15 @@ import torch
 import pytest
 import numpy as np
 import torch.nn as nn
-from torch.utils.data import TensorDataset, DataLoader
 from numpy.testing import assert_array_equal
+from torch.utils.data import TensorDataset, DataLoader
 
 import torchensemble
 from torchensemble.utils import io
 from torchensemble.utils.logging import set_logger
 
 
+# All classifiers
 all_clf = [
     torchensemble.FusionClassifier,
     torchensemble.VotingClassifier,
@@ -21,6 +22,7 @@ all_clf = [
 ]
 
 
+# All regressors
 all_reg = [
     torchensemble.FusionRegressor,
     torchensemble.VotingRegressor,
@@ -32,10 +34,8 @@ all_reg = [
 ]
 
 
-# Remove randomness
 np.random.seed(0)
 torch.manual_seed(0)
-
 set_logger("pytest_all_models")
 
 
@@ -75,6 +75,7 @@ y_train_clf = torch.LongTensor(np.array(([0, 0, 1, 1])))
 y_train_reg = torch.FloatTensor(np.array(([0.1, 0.2, 0.3, 0.4])))
 y_train_reg = y_train_reg.view(-1, 1)
 
+
 # Testing data
 numpy_X_test = np.array(([0.5, 0.5], [0.6, 0.6]))
 X_test = torch.Tensor(numpy_X_test)
@@ -107,7 +108,7 @@ def test_clf_class(clf):
     test = TensorDataset(X_test, y_test_clf)
     test_loader = DataLoader(test, batch_size=2, shuffle=False)
 
-    # Snapshot ensemble needs more epochs
+    # Snapshot Ensemble needs more epochs
     if isinstance(model, torchensemble.SnapshotEnsembleClassifier):
         epochs = 6
 
@@ -160,7 +161,7 @@ def test_clf_object(clf):
     test = TensorDataset(X_test, y_test_clf)
     test_loader = DataLoader(test, batch_size=2, shuffle=False)
 
-    # Snapshot ensemble needs more epochs
+    # Snapshot Ensemble needs more epochs
     if isinstance(model, torchensemble.SnapshotEnsembleClassifier):
         epochs = 6
 
@@ -213,7 +214,7 @@ def test_reg_class(reg):
     test = TensorDataset(X_test, y_test_reg)
     test_loader = DataLoader(test, batch_size=2, shuffle=False)
 
-    # Snapshot ensemble needs more epochs
+    # Snapshot Ensemble needs more epochs
     if isinstance(model, torchensemble.SnapshotEnsembleRegressor):
         epochs = 6
 
@@ -266,7 +267,7 @@ def test_reg_object(reg):
     test = TensorDataset(X_test, y_test_reg)
     test_loader = DataLoader(test, batch_size=2, shuffle=False)
 
-    # Snapshot ensemble needs more epochs
+    # Snapshot Ensemble needs more epochs
     if isinstance(model, torchensemble.SnapshotEnsembleRegressor):
         epochs = 6
 
@@ -298,8 +299,8 @@ def test_reg_object(reg):
 
 def test_predict():
 
-    ensemble = all_clf[0]
-    model = ensemble(estimator=MLP_clf, n_estimators=2, cuda=False)
+    fusion = all_clf[0]  # FusionClassifier
+    model = fusion(estimator=MLP_clf, n_estimators=2, cuda=False)
     model.set_optimizer("Adam", lr=1e-3, weight_decay=5e-4)
 
     train = TensorDataset(X_train, y_train_clf)
