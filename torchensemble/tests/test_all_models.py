@@ -3,6 +3,7 @@ import pytest
 import numpy as np
 import torch.nn as nn
 from torch.utils.data import TensorDataset, DataLoader
+from numpy.testing import assert_array_equal
 
 import torchensemble
 from torchensemble.utils import io
@@ -75,7 +76,8 @@ y_train_reg = torch.FloatTensor(np.array(([0.1, 0.2, 0.3, 0.4])))
 y_train_reg = y_train_reg.view(-1, 1)
 
 # Testing data
-X_test = torch.Tensor(np.array(([0.5, 0.5], [0.6, 0.6])))
+numpy_X_test = np.array(([0.5, 0.5], [0.6, 0.6]))
+X_test = torch.Tensor(numpy_X_test)
 
 y_test_clf = torch.LongTensor(np.array(([1, 0])))
 y_test_reg = torch.FloatTensor(np.array(([0.5, 0.6])))
@@ -292,3 +294,20 @@ def test_reg_object(reg):
     for _, (data, target) in enumerate(test_loader):
         new_model.predict(data)
         break
+
+
+def test_predict():
+
+    ensemble = all_clf[0]
+    model = ensemble(estimator=MLP_clf, n_estimators=2, cuda=False)
+    model.set_optimizer("Adam", lr=1e-3, weight_decay=5e-4)
+
+    train = TensorDataset(X_train, y_train_clf)
+    train_loader = DataLoader(train, batch_size=2, shuffle=False)
+    model.fit(train_loader, epochs=1)
+
+    assert_array_equal(model.predict(X_test), model.predict(numpy_X_test))
+
+    with pytest.raises(ValueError) as excinfo:
+        model.predict([X_test])  # list
+    assert "The type of X should be one of" in str(excinfo.value)

@@ -162,13 +162,13 @@ class BaseModule(nn.Module):
     @abc.abstractmethod
     def set_optimizer(self, optimizer_name, **kwargs):
         """
-        Implementation on the process of setting the optimizer.
+        Implementation on setting the parameter optimizer.
         """
 
     @abc.abstractmethod
     def set_scheduler(self, scheduler_name, **kwargs):
         """
-        Implementation on the process of setting the scheduler.
+        Implementation on setting the learning rate scheduler.
         """
 
     @abc.abstractmethod
@@ -195,10 +195,7 @@ class BaseModule(nn.Module):
 
     @abc.abstractmethod
     def evaluate(self, test_loader, return_loss=False):
-        """
-        Compute the metrics of the ensemble given the testing dataloader and
-        optionally the testing loss.
-        """
+        """Docstrings decorated by downstream models."""
 
     def predict(self, X, return_numpy=True):
         """Docstrings decorated by downstream models."""
