@@ -12,7 +12,6 @@ from torchensemble.voting import VotingClassifier
 from torchensemble.bagging import BaggingClassifier
 from torchensemble.gradient_boosting import GradientBoostingClassifier
 from torchensemble.snapshot_ensemble import SnapshotEnsembleClassifier
-from torchensemble.fast_geometric import FastGeometricClassifier
 
 from torchensemble.utils.logging import set_logger
 
@@ -115,7 +114,7 @@ if __name__ == "__main__":
 
     # Evaluating
     tic = time.time()
-    testing_acc = model.predict(test_loader)
+    testing_acc = model.evaluate(test_loader)
     toc = time.time()
     evaluating_time = toc - tic
 
@@ -131,13 +130,15 @@ if __name__ == "__main__":
     # Set the optimizer
     model.set_optimizer("Adam", lr=lr, weight_decay=weight_decay)
 
+    # Training
     tic = time.time()
     model.fit(train_loader, epochs=epochs)
     toc = time.time()
     training_time = toc - tic
 
+    # Evaluating
     tic = time.time()
-    testing_acc = model.predict(test_loader)
+    testing_acc = model.evaluate(test_loader)
     toc = time.time()
     evaluating_time = toc - tic
 
@@ -153,13 +154,15 @@ if __name__ == "__main__":
     # Set the optimizer
     model.set_optimizer("Adam", lr=lr, weight_decay=weight_decay)
 
+    # Training
     tic = time.time()
     model.fit(train_loader, epochs=epochs)
     toc = time.time()
     training_time = toc - tic
 
+    # Evaluating
     tic = time.time()
-    testing_acc = model.predict(test_loader)
+    testing_acc = model.evaluate(test_loader)
     toc = time.time()
     evaluating_time = toc - tic
 
@@ -175,13 +178,15 @@ if __name__ == "__main__":
     # Set the optimizer
     model.set_optimizer("Adam", lr=lr, weight_decay=weight_decay)
 
+    # Training
     tic = time.time()
     model.fit(train_loader, epochs=epochs)
     toc = time.time()
     training_time = toc - tic
 
+    # Evaluating
     tic = time.time()
-    testing_acc = model.predict(test_loader)
+    testing_acc = model.evaluate(test_loader)
     toc = time.time()
     evaluating_time = toc - tic
 
@@ -202,13 +207,15 @@ if __name__ == "__main__":
     # Set the optimizer
     model.set_optimizer("Adam", lr=lr, weight_decay=weight_decay)
 
+    # Training
     tic = time.time()
     model.fit(train_loader, epochs=epochs)
     toc = time.time()
     training_time = toc - tic
 
+    # Evaluating
     tic = time.time()
-    testing_acc = model.predict(test_loader)
+    testing_acc = model.evaluate(test_loader)
     toc = time.time()
     evaluating_time = toc - tic
 
