@@ -218,7 +218,7 @@ class BaseModule(nn.Module):
         return pred
 
 
-class BaseClassifier(BaseModule, nn.Module):
+class BaseClassifier(BaseModule):
     """Base class for all ensemble classifiers.
 
     WARNING: This class cannot be used directly.
@@ -251,7 +251,7 @@ class BaseClassifier(BaseModule, nn.Module):
         return acc
 
 
-class BaseRegressor(BaseModule, nn.Module):
+class BaseRegressor(BaseModule):
     """Base class for all ensemble regressors.
 
     WARNING: This class cannot be used directly.

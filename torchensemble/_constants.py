@@ -125,16 +125,17 @@ __predict_doc = """
     Parameters
     ----------
     X : {Tensor, ndarray}
-        A testing data loader, or a batch of data in the form of Pytorch
-        tensor or Numpy array.
+        A data batch in the form of tensor or Numpy array.
     return_numpy : bool, default=True
         Whether to convert the predictions into a Numpy array.
 
+    Returns
+    -------
     pred : Array of shape (n_samples, n_outputs)
         For classifiers, ``n_outputs`` is the number of distinct classes. For
         regressors, ``n_output`` is the number of target variables.
 
-        - If ``return_numpy`` is ``False``, the result is a Pytorch tensor.
+        - If ``return_numpy`` is ``False``, the result is a tensor.
         - If ``return_numpy`` is ``True``, the result is a Numpy array.
 """
 
@@ -160,7 +161,7 @@ __classification_evaluate_doc = """
     Parameters
     ----------
     test_loader : torch.utils.data.DataLoader
-        A :mod:`torch.utils.data.DataLoader` that contains the testing data.
+        A data loader that contains the testing data.
     return_loss : bool, default=False
         Whether to return the average cross-entropy loss over all batches
         in the ``test_loader``.
@@ -196,8 +197,7 @@ __regression_evaluate_doc = """
     Parameters
     ----------
     test_loader : torch.utils.data.DataLoader
-        A :mod:`torch.utils.data.DataLoader` container that contains the
-        evaluating data.
+        A data loader that contains the testing data.
 
     Returns
     -------
