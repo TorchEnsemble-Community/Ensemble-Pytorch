@@ -2,6 +2,7 @@ import torch
 import pytest
 import numpy as np
 import torch.nn as nn
+from numpy.testing import assert_array_equal
 from torch.utils.data import TensorDataset, DataLoader
 
 import torchensemble
@@ -9,6 +10,7 @@ from torchensemble.utils import io
 from torchensemble.utils.logging import set_logger
 
 
+# All classifiers
 all_clf = [
     torchensemble.FusionClassifier,
     torchensemble.VotingClassifier,
@@ -20,6 +22,7 @@ all_clf = [
 ]
 
 
+# All regressors
 all_reg = [
     torchensemble.FusionRegressor,
     torchensemble.VotingRegressor,
@@ -31,10 +34,8 @@ all_reg = [
 ]
 
 
-# Remove randomness
 np.random.seed(0)
 torch.manual_seed(0)
-
 set_logger("pytest_all_models")
 
 
@@ -74,8 +75,10 @@ y_train_clf = torch.LongTensor(np.array(([0, 0, 1, 1])))
 y_train_reg = torch.FloatTensor(np.array(([0.1, 0.2, 0.3, 0.4])))
 y_train_reg = y_train_reg.view(-1, 1)
 
+
 # Testing data
-X_test = torch.Tensor(np.array(([0.5, 0.5], [0.6, 0.6])))
+numpy_X_test = np.array(([0.5, 0.5], [0.6, 0.6]))
+X_test = torch.Tensor(numpy_X_test)
 
 y_test_clf = torch.LongTensor(np.array(([1, 0])))
 y_test_reg = torch.FloatTensor(np.array(([0.5, 0.6])))
@@ -105,7 +108,7 @@ def test_clf_class(clf):
     test = TensorDataset(X_test, y_test_clf)
     test_loader = DataLoader(test, batch_size=2, shuffle=False)
 
-    # Snapshot ensemble needs more epochs
+    # Snapshot Ensemble needs more epochs
     if isinstance(model, torchensemble.SnapshotEnsembleClassifier):
         epochs = 6
 
@@ -116,14 +119,23 @@ def test_clf_class(clf):
     if isinstance(model, torchensemble.FastGeometricClassifier):
         model.ensemble(ret, train_loader, test_loader=test_loader)
 
-    # Test
-    model.predict(test_loader)
+    # Evaluate
+    model.evaluate(test_loader)
+
+    # Predict
+    for _, (data, target) in enumerate(test_loader):
+        model.predict(data)
+        break
 
     # Reload
     new_model = clf(estimator=MLP_clf, n_estimators=n_estimators, cuda=False)
     io.load(new_model)
 
-    new_model.predict(test_loader)
+    new_model.evaluate(test_loader)
+
+    for _, (data, target) in enumerate(test_loader):
+        new_model.predict(data)
+        break
 
 
 @pytest.mark.parametrize("clf", all_clf)
@@ -149,7 +161,7 @@ def test_clf_object(clf):
     test = TensorDataset(X_test, y_test_clf)
     test_loader = DataLoader(test, batch_size=2, shuffle=False)
 
-    # Snapshot ensemble needs more epochs
+    # Snapshot Ensemble needs more epochs
     if isinstance(model, torchensemble.SnapshotEnsembleClassifier):
         epochs = 6
 
@@ -160,14 +172,23 @@ def test_clf_object(clf):
     if isinstance(model, torchensemble.FastGeometricClassifier):
         model.ensemble(ret, train_loader, test_loader=test_loader)
 
-    # Test
-    model.predict(test_loader)
+    # Evaluate
+    model.evaluate(test_loader)
+
+    # Predict
+    for _, (data, target) in enumerate(test_loader):
+        model.predict(data)
+        break
 
     # Reload
     new_model = clf(estimator=MLP_clf(), n_estimators=n_estimators, cuda=False)
     io.load(new_model)
 
-    new_model.predict(test_loader)
+    new_model.evaluate(test_loader)
+
+    for _, (data, target) in enumerate(test_loader):
+        new_model.predict(data)
+        break
 
 
 @pytest.mark.parametrize("reg", all_reg)
@@ -193,7 +214,7 @@ def test_reg_class(reg):
     test = TensorDataset(X_test, y_test_reg)
     test_loader = DataLoader(test, batch_size=2, shuffle=False)
 
-    # Snapshot ensemble needs more epochs
+    # Snapshot Ensemble needs more epochs
     if isinstance(model, torchensemble.SnapshotEnsembleRegressor):
         epochs = 6
 
@@ -204,14 +225,23 @@ def test_reg_class(reg):
     if isinstance(model, torchensemble.FastGeometricRegressor):
         model.ensemble(ret, train_loader, test_loader=test_loader)
 
-    # Test
-    model.predict(test_loader)
+    # Evaluate
+    model.evaluate(test_loader)
+
+    # Predict
+    for _, (data, target) in enumerate(test_loader):
+        model.predict(data)
+        break
 
     # Reload
     new_model = reg(estimator=MLP_reg, n_estimators=n_estimators, cuda=False)
     io.load(new_model)
 
-    new_model.predict(test_loader)
+    new_model.evaluate(test_loader)
+
+    for _, (data, target) in enumerate(test_loader):
+        new_model.predict(data)
+        break
 
 
 @pytest.mark.parametrize("reg", all_reg)
@@ -237,7 +267,7 @@ def test_reg_object(reg):
     test = TensorDataset(X_test, y_test_reg)
     test_loader = DataLoader(test, batch_size=2, shuffle=False)
 
-    # Snapshot ensemble needs more epochs
+    # Snapshot Ensemble needs more epochs
     if isinstance(model, torchensemble.SnapshotEnsembleRegressor):
         epochs = 6
 
@@ -248,11 +278,37 @@ def test_reg_object(reg):
     if isinstance(model, torchensemble.FastGeometricRegressor):
         model.ensemble(ret, train_loader, test_loader=test_loader)
 
-    # Test
-    model.predict(test_loader)
+    # Evaluate
+    model.evaluate(test_loader)
+
+    # Predict
+    for _, (data, target) in enumerate(test_loader):
+        model.predict(data)
+        break
 
     # Reload
     new_model = reg(estimator=MLP_reg(), n_estimators=n_estimators, cuda=False)
     io.load(new_model)
 
-    new_model.predict(test_loader)
+    new_model.evaluate(test_loader)
+
+    for _, (data, target) in enumerate(test_loader):
+        new_model.predict(data)
+        break
+
+
+def test_predict():
+
+    fusion = all_clf[0]  # FusionClassifier
+    model = fusion(estimator=MLP_clf, n_estimators=2, cuda=False)
+    model.set_optimizer("Adam", lr=1e-3, weight_decay=5e-4)
+
+    train = TensorDataset(X_train, y_train_clf)
+    train_loader = DataLoader(train, batch_size=2, shuffle=False)
+    model.fit(train_loader, epochs=1)
+
+    assert_array_equal(model.predict(X_test), model.predict(numpy_X_test))
+
+    with pytest.raises(ValueError) as excinfo:
+        model.predict([X_test])  # list
+    assert "The type of input X should be one of" in str(excinfo.value)

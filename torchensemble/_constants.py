@@ -119,6 +119,27 @@ __fit_doc = """
 """
 
 
+__predict_doc = """
+    Return the predictions of the ensemble given the testing data.
+
+    Parameters
+    ----------
+    X : {Tensor, ndarray}
+        A data batch in the form of tensor or Numpy array.
+    return_numpy : bool, default=True
+        Whether to convert the predictions into a Numpy array.
+
+    Returns
+    -------
+    pred : Array of shape (n_samples, n_outputs)
+        For classifiers, ``n_outputs`` is the number of distinct classes. For
+        regressors, ``n_output`` is the number of target variables.
+
+        - If ``return_numpy`` is ``False``, the result is a tensor.
+        - If ``return_numpy`` is ``True``, the result is a Numpy array.
+"""
+
+
 __classification_forward_doc = """
     Parameters
     ----------
@@ -133,17 +154,25 @@ __classification_forward_doc = """
 """
 
 
-__classification_predict_doc = """
+__classification_evaluate_doc = """
+    Compute the classification accuracy of the ensemble given the testing
+    dataloader and optionally the average cross-entropy loss.
+
     Parameters
     ----------
     test_loader : torch.utils.data.DataLoader
-        A :mod:`torch.utils.data.DataLoader` container that contains the
-        evaluating data.
+        A data loader that contains the testing data.
+    return_loss : bool, default=False
+        Whether to return the average cross-entropy loss over all batches
+        in the ``test_loader``.
 
     Returns
     -------
     accuracy : float
-        The testing accuracy of the fitted ensemble on ``test_loader``.
+        The classification accuracy of the fitted ensemble on ``test_loader``.
+    loss : float
+        The average cross-entropy loss of the fitted ensemble on
+        ``test_loader``, only available when ``return_loss`` is True.
 """
 
 
@@ -161,16 +190,18 @@ __regression_forward_doc = """
 """
 
 
-__regression_predict_doc = """
+__regression_evaluate_doc = """
+    Compute the mean squared error (MSE) of the ensemble given the testing
+    dataloader.
+
     Parameters
     ----------
     test_loader : torch.utils.data.DataLoader
-        A :mod:`torch.utils.data.DataLoader` container that contains the
-        evaluating data.
+        A data loader that contains the testing data.
 
     Returns
     -------
     mse : float
-        The testing mean squared error (MSE) of the fitted ensemble on
+        The testing mean squared error of the fitted ensemble on
         ``test_loader``.
 """

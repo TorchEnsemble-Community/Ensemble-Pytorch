@@ -3,12 +3,13 @@ import copy
 import torch
 import logging
 import warnings
+import numpy as np
 import torch.nn as nn
 
 from . import _constants as const
 
 
-def torchensemble_model_doc(header, item):
+def torchensemble_model_doc(header="", item="model"):
     """
     A decorator on obtaining documentation for different methods in the
     ensemble. This decorator is modified from `sklearn.py` in XGBoost.
@@ -27,12 +28,13 @@ def torchensemble_model_doc(header, item):
             "model": const.__model_doc,
             "seq_model": const.__seq_model_doc,
             "fit": const.__fit_doc,
+            "predict": const.__predict_doc,
             "set_optimizer": const.__set_optimizer_doc,
             "set_scheduler": const.__set_scheduler_doc,
             "classifier_forward": const.__classification_forward_doc,
-            "classifier_predict": const.__classification_predict_doc,
+            "classifier_evaluate": const.__classification_evaluate_doc,
             "regressor_forward": const.__regression_forward_doc,
-            "regressor_predict": const.__regression_predict_doc,
+            "regressor_evaluate": const.__regression_evaluate_doc,
         }
         return __doc[item]
 
@@ -45,7 +47,7 @@ def torchensemble_model_doc(header, item):
     return adddoc
 
 
-class BaseModule(abc.ABC, nn.Module):
+class BaseModule(nn.Module):
     """Base class for all ensembles.
 
     WARNING: This class cannot be used directly.
@@ -160,13 +162,13 @@ class BaseModule(abc.ABC, nn.Module):
     @abc.abstractmethod
     def set_optimizer(self, optimizer_name, **kwargs):
         """
-        Implementation on the process of setting the optimizer.
+        Implementation on setting the parameter optimizer.
         """
 
     @abc.abstractmethod
     def set_scheduler(self, scheduler_name, **kwargs):
         """
-        Implementation on the process of setting the scheduler.
+        Implementation on setting the learning rate scheduler.
         """
 
     @abc.abstractmethod
@@ -191,8 +193,81 @@ class BaseModule(abc.ABC, nn.Module):
         Implementation on the training stage of the ensemble.
         """
 
-    @abc.abstractmethod
-    def predict(self, test_loader):
-        """
-        Implementation on the evaluating stage of the ensemble.
-        """
+    @torch.no_grad()
+    def predict(self, X, return_numpy=True):
+        """Docstrings decorated by downstream models."""
+        self.eval()
+        pred = None
+
+        if isinstance(X, torch.Tensor):
+            pred = self.forward(X.to(self.device))
+        elif isinstance(X, np.ndarray):
+            X = torch.Tensor(X).to(self.device)
+            pred = self.forward(X)
+        else:
+            msg = (
+                "The type of input X should be one of {{torch.Tensor,"
+                " np.ndarray}}."
+            )
+            raise ValueError(msg)
+
+        pred = pred.cpu()
+        if return_numpy:
+            return pred.numpy()
+
+        return pred
+
+
+class BaseClassifier(BaseModule):
+    """Base class for all ensemble classifiers.
+
+    WARNING: This class cannot be used directly.
+    Please use the derived classes instead.
+    """
+
+    @torch.no_grad()
+    def evaluate(self, test_loader, return_loss=False):
+        """Docstrings decorated by downstream models."""
+        self.eval()
+        correct = 0
+        total = 0
+        criterion = nn.CrossEntropyLoss()
+        loss = 0.0
+
+        for _, (data, target) in enumerate(test_loader):
+            data, target = data.to(self.device), target.to(self.device)
+            output = self.forward(data)
+            _, predicted = torch.max(output.data, 1)
+            correct += (predicted == target).sum().item()
+            total += target.size(0)
+            loss += criterion(output, target)
+
+        acc = 100 * correct / total
+        loss /= len(test_loader)
+
+        if return_loss:
+            return acc, float(loss)
+
+        return acc
+
+
+class BaseRegressor(BaseModule):
+    """Base class for all ensemble regressors.
+
+    WARNING: This class cannot be used directly.
+    Please use the derived classes instead.
+    """
+
+    @torch.no_grad()
+    def evaluate(self, test_loader):
+        """Docstrings decorated by downstream models."""
+        self.eval()
+        mse = 0.0
+        criterion = nn.MSELoss()
+
+        for _, (data, target) in enumerate(test_loader):
+            data, target = data.to(self.device), target.to(self.device)
+            output = self.forward(data)
+            mse += criterion(output, target)
+
+        return float(mse) / len(test_loader)

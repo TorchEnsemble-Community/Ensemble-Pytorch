@@ -1,8 +1,8 @@
 """
   In fusion-based ensemble, predictions from all base estimators are
   first aggregated as an average output. After then, the training loss is
-  computed based on this average output and the ground-truth. The training loss
-  is then back-propagated to all base estimators simultaneously.
+  computed based on this average output and the ground-truth. The training
+  loss is then back-propagated to all base estimators simultaneously.
 """
 
 
@@ -10,7 +10,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from ._base import BaseModule, torchensemble_model_doc
+from ._base import BaseClassifier, BaseRegressor
+from ._base import torchensemble_model_doc
 from .utils import io
 from .utils import set_module
 from .utils import operator as op
@@ -22,7 +23,7 @@ __all__ = ["FusionClassifier", "FusionRegressor"]
 @torchensemble_model_doc(
     """Implementation on the FusionClassifier.""", "model"
 )
-class FusionClassifier(BaseModule):
+class FusionClassifier(BaseClassifier):
     def _forward(self, x):
         """
         Implementation on the internal data forwarding in FusionClassifier.
@@ -154,34 +155,23 @@ class FusionClassifier(BaseModule):
         if save_model and not test_loader:
             io.save(self, save_dir, self.logger)
 
-    @torchensemble_model_doc(
-        """Implementation on the evaluating stage of FusionClassifier.""",
-        "classifier_predict",
-    )
-    def predict(self, test_loader):
-        self.eval()
-        correct = 0
-        total = 0
+    @torchensemble_model_doc(item="classifier_evaluate")
+    def evaluate(self, test_loader, return_loss=False):
+        return super().evaluate(test_loader, return_loss)
 
-        for _, (data, target) in enumerate(test_loader):
-            data, target = data.to(self.device), target.to(self.device)
-            output = self.forward(data)
-            _, predicted = torch.max(output.data, 1)
-            correct += (predicted == target).sum().item()
-            total += target.size(0)
-
-        acc = 100 * correct / total
-
-        return acc
+    @torchensemble_model_doc(item="predict")
+    def predict(self, X, return_numpy=True):
+        return super().predict(X, return_numpy)
 
 
 @torchensemble_model_doc("""Implementation on the FusionRegressor.""", "model")
-class FusionRegressor(BaseModule):
+class FusionRegressor(BaseRegressor):
     @torchensemble_model_doc(
         """Implementation on the data forwarding in FusionRegressor.""",
         "regressor_forward",
     )
     def forward(self, x):
+        # Average
         outputs = [estimator(x) for estimator in self.estimators_]
         pred = op.average(outputs)
 
@@ -258,7 +248,7 @@ class FusionRegressor(BaseModule):
             if test_loader:
                 self.eval()
                 with torch.no_grad():
-                    mse = 0
+                    mse = 0.0
                     for _, (data, target) in enumerate(test_loader):
                         data = data.to(self.device)
                         target = target.to(self.device)
@@ -284,18 +274,10 @@ class FusionRegressor(BaseModule):
         if save_model and not test_loader:
             io.save(self, save_dir, self.logger)
 
-    @torchensemble_model_doc(
-        """Implementation on the evaluating stage of FusionRegressor.""",
-        "regressor_predict",
-    )
-    def predict(self, test_loader):
-        self.eval()
-        mse = 0
-        criterion = nn.MSELoss()
+    @torchensemble_model_doc(item="regressor_evaluate")
+    def evaluate(self, test_loader):
+        return super().evaluate(test_loader)
 
-        for batch_idx, (data, target) in enumerate(test_loader):
-            data, target = data.to(self.device), target.to(self.device)
-            output = self.forward(data)
-            mse += criterion(output, target)
-
-        return mse / len(test_loader)
+    @torchensemble_model_doc(item="predict")
+    def predict(self, X, return_numpy=True):
+        return super().predict(X, return_numpy)
