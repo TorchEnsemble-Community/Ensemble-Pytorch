@@ -457,7 +457,7 @@ class GradientBoostingRegressor(_BaseGradientBoosting, BaseRegressor):
     def _handle_early_stopping(self, test_loader, est_idx):
         # Compute the validation MSE of base estimators fitted so far
         self.eval()
-        mse = 0
+        mse = 0.0
         flag = False
         criterion = nn.MSELoss()
         with torch.no_grad():

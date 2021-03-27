@@ -521,7 +521,7 @@ class AdversarialTrainingRegressor(_BaseAdversarialTraining, BaseRegressor):
                 if test_loader:
                     self.eval()
                     with torch.no_grad():
-                        mse = 0
+                        mse = 0.0
                         for _, (data, target) in enumerate(test_loader):
                             data = data.to(self.device)
                             target = target.to(self.device)

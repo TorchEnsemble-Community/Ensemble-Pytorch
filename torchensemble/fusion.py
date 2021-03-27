@@ -171,6 +171,7 @@ class FusionRegressor(BaseRegressor):
         "regressor_forward",
     )
     def forward(self, x):
+        # Average
         outputs = [estimator(x) for estimator in self.estimators_]
         pred = op.average(outputs)
 
@@ -247,7 +248,7 @@ class FusionRegressor(BaseRegressor):
             if test_loader:
                 self.eval()
                 with torch.no_grad():
-                    mse = 0
+                    mse = 0.0
                     for _, (data, target) in enumerate(test_loader):
                         data = data.to(self.device)
                         target = target.to(self.device)

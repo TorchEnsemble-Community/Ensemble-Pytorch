@@ -465,7 +465,7 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble, BaseRegressor):
             if test_loader and counter % n_iters_per_estimator == 0:
                 self.eval()
                 with torch.no_grad():
-                    mse = 0
+                    mse = 0.0
                     for _, (data, target) in enumerate(test_loader):
                         data = data.to(self.device)
                         target = target.to(self.device)

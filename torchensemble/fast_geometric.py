@@ -586,7 +586,7 @@ class FastGeometricRegressor(_BaseFastGeometric, BaseRegressor):
             if test_loader:
                 estimator_.eval()
                 with torch.no_grad():
-                    mse = 0
+                    mse = 0.0
                     for _, (data, target) in enumerate(test_loader):
                         data = data.to(self.device)
                         target = target.to(self.device)
@@ -679,7 +679,7 @@ class FastGeometricRegressor(_BaseFastGeometric, BaseRegressor):
             if test_loader and updated:
                 self.eval()
                 with torch.no_grad():
-                    mse = 0
+                    mse = 0.0
                     for _, (data, target) in enumerate(test_loader):
                         data = data.to(self.device)
                         target = target.to(self.device)

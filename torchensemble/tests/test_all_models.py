@@ -310,4 +310,4 @@ def test_predict():
 
     with pytest.raises(ValueError) as excinfo:
         model.predict([X_test])  # list
-    assert "The type of X should be one of" in str(excinfo.value)
+    assert "The type of input X should be one of" in str(excinfo.value)
