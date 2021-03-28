@@ -263,6 +263,7 @@ class _BaseGradientBoosting(BaseModule):
 
             # Training loop
             estimator.train()
+            total_iters = 0
             for epoch in range(epochs):
                 for batch_idx, (data, target) in enumerate(train_loader):
 
@@ -288,7 +289,8 @@ class _BaseGradientBoosting(BaseModule):
                             msg.format(est_idx, epoch, batch_idx, loss)
                         )
                         if tb_logger:
-                            tb_logger.add_scalar("gradient_boosting/Train_Loss", loss, epoch)
+                            tb_logger.add_scalar("gradient_boosting/Train_Loss", loss, total_iters)
+                    total_iters += 1
 
                 if self.use_scheduler_:
                     learner_scheduler.step()

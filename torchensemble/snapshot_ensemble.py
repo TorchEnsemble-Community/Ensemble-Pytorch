@@ -270,6 +270,7 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble):
 
         # Training loop
         estimator_.train()
+        total_iters = 0
         for epoch in range(epochs):
             for batch_idx, (data, target) in enumerate(train_loader):
 
@@ -306,12 +307,13 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble):
                             )
                         )
                         if tb_logger:
-                            tb_logger.add_scalar("snapshot_ensemble/Train_Loss", loss, epoch)
+                            tb_logger.add_scalar("snapshot_ensemble/Train_Loss", loss, total_iters)
 
                 # Snapshot ensemble updates the learning rate per iteration
                 # instead of per epoch.
                 scheduler.step()
                 counter += 1
+                total_iters += 1
 
             if counter % n_iters_per_estimator == 0:
 
@@ -438,6 +440,7 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble):
 
         # Training loop
         estimator_.train()
+        total_iters = 0
         for epoch in range(epochs):
             for batch_idx, (data, target) in enumerate(train_loader):
 
@@ -468,12 +471,13 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble):
                             )
                         )
                         if tb_logger:
-                            tb_logger.add_scalar("snapshot_ensemble/Train_Loss", loss, epoch)
+                            tb_logger.add_scalar("snapshot_ensemble/Train_Loss", loss, total_iters)
 
                 # Snapshot ensemble updates the learning rate per iteration
                 # instead of per epoch.
                 scheduler.step()
                 counter += 1
+                total_iters += 1
 
             if counter % n_iters_per_estimator == 0:
                 # Generate and save the snapshot

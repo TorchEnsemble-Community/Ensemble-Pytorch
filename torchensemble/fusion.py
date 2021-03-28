@@ -92,6 +92,7 @@ class FusionClassifier(BaseModule):
         # Utils
         criterion = nn.CrossEntropyLoss()
         best_acc = 0.0
+        total_iters = 0
 
         # Training loop
         for epoch in range(epochs):
@@ -121,6 +122,9 @@ class FusionClassifier(BaseModule):
                                 epoch, batch_idx, loss, correct, data.size(0)
                             )
                         )
+                        if tb_logger:
+                            tb_logger.add_scalar("fusion/Train_Loss", loss, total_iters)
+                total_iters += 1
 
             # Validation
             if test_loader:
@@ -238,6 +242,7 @@ class FusionRegressor(BaseModule):
         # Utils
         criterion = nn.MSELoss()
         best_mse = float("inf")
+        total_iters = 0
 
         # Training loop
         for epoch in range(epochs):
@@ -257,6 +262,9 @@ class FusionRegressor(BaseModule):
                     with torch.no_grad():
                         msg = "Epoch: {:03d} | Batch: {:03d} | Loss: {:.5f}"
                         self.logger.info(msg.format(epoch, batch_idx, loss))
+                        if tb_logger:
+                            tb_logger.add_scalar("fusion/Train_Loss", loss, total_iters)
+                total_iters += 1
 
             # Validation
             if test_loader:

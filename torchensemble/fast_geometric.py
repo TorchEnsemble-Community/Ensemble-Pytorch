@@ -647,6 +647,7 @@ class FastGeometricRegressor(_BaseFastGeometric):
         n_iters = len(train_loader)
         updated = False
         epoch = 0
+        total_iters = 0
 
         while len(self.estimators_) < self.n_estimators:
 
@@ -673,12 +674,15 @@ class FastGeometricRegressor(_BaseFastGeometric):
                         msg = "Epoch: {:03d} | Batch: {:03d} | Loss: {:.5f}"
                         self.logger.info(msg.format(epoch, batch_idx, loss))
                         if tb_logger:
-                            tb_logger.add_scalar("fast_geometric/Train_Loss", loss, epoch)
+                            tb_logger.add_scalar("fast_geometric/Est_{}/Train_Loss".format(len(self.estimators_)),
+                                                                                           loss, total_iters)
+                total_iters += 1
 
             # Update the ensemble
             if (epoch % cycle + 1) == cycle // 2:
                 self.estimators_.append(copy.deepcopy(estimator))
                 updated = True
+                total_iters = 0
 
                 msg = "Save the base estimator with index: {}"
                 self.logger.info(msg.format(len(self.estimators_) - 1))
