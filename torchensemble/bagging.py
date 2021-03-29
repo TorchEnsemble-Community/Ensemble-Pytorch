@@ -241,7 +241,9 @@ class BaggingClassifier(BaseModule):
                         )
                         self.logger.info(msg.format(epoch, acc, best_acc))
                         if tb_logger:
-                            tb_logger.add_scalar("bagging/Validation_Acc", acc, epoch)
+                            tb_logger.add_scalar(
+                                "bagging/Validation_Acc", acc, epoch
+                            )
 
                 # Update the scheduler
                 with warnings.catch_warnings():
@@ -421,7 +423,9 @@ class BaggingRegressor(BaseModule):
                         )
                         self.logger.info(msg.format(epoch, mse, best_mse))
                         if tb_logger:
-                            tb_logger.add_scalar("bagging/Validation_MSE", mse, epoch)
+                            tb_logger.add_scalar(
+                                "bagging/Validation_MSE", mse, epoch
+                            )
 
                 # Update the scheduler
                 with warnings.catch_warnings():

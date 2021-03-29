@@ -26,3 +26,14 @@ def test_logger():
     with pytest.raises(ValueError) as excinfo:
         set_logger("Loglevel_INVALID", "INVALID")
     assert "INVALID" in str(excinfo.value)
+
+
+def test_tb_logger():
+    logger, tb_logger = set_logger(
+        "Tensorboard_Logger", "DEBUG", use_tb_logger=True
+    )
+    _record(logger)
+    if tb_logger:
+        for i in range(5):
+            tb_logger.add_scalar("test", 2 * i, i)
+        tb_logger.close()

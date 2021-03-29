@@ -93,6 +93,11 @@ __fit_doc = """
         - If ``None``, the model will be saved in the current directory.
         - If not ``None``, the model will be saved in the specified
           directory: ``save_dir``.
+    tb_logger : tensorboard.SummaryWriter, default=None
+        Specify whether the data will be recorded by tensorboard writer
+
+        - If ``None``, the data will not be recorded
+        - If not ``None``, the data wiil be recorded by the given ``tb_logger``
 """
 
 
@@ -289,7 +294,13 @@ class _BaseGradientBoosting(BaseModule):
                             msg.format(est_idx, epoch, batch_idx, loss)
                         )
                         if tb_logger:
-                            tb_logger.add_scalar("gradient_boosting/Train_Loss", loss, total_iters)
+                            tb_logger.add_scalar(
+                                "gradient_boosting/Est_{}/Train_Loss".format(
+                                    est_idx
+                                ),
+                                loss,
+                                total_iters,
+                            )
                     total_iters += 1
 
                 if self.use_scheduler_:
@@ -297,7 +308,9 @@ class _BaseGradientBoosting(BaseModule):
 
             # Validation
             if test_loader:
-                flag = self._handle_early_stopping(test_loader, est_idx, tb_logger)
+                flag = self._handle_early_stopping(
+                    test_loader, est_idx, tb_logger
+                )
 
                 if flag:
                     n_counter += 1
@@ -377,7 +390,9 @@ class GradientBoostingClassifier(_BaseGradientBoosting):
         msg = "Validation Acc: {:.3f} % | Historical Best: {:.3f} %"
         self.logger.info(msg.format(acc, self.best_acc))
         if tb_logger:
-            tb_logger.add_scalar("gradient_boosting/Validation_Acc", acc, est_idx)
+            tb_logger.add_scalar(
+                "gradient_boosting/Validation_Acc", acc, est_idx
+            )
 
         return flag
 
@@ -499,7 +514,9 @@ class GradientBoostingRegressor(_BaseGradientBoosting):
         msg = "Validation MSE: {:.5f} | Historical Best: {:.5f}"
         self.logger.info(msg.format(mse, self.best_mse))
         if tb_logger:
-            tb_logger.add_scalar("gradient_boosting/Validation_MSE", mse, est_idx)
+            tb_logger.add_scalar(
+                "gradient_boosting/Validation_MSE", mse, est_idx
+            )
 
         return flag
 

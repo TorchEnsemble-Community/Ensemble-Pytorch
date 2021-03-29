@@ -12,9 +12,8 @@ from torchensemble.voting import VotingClassifier
 from torchensemble.bagging import BaggingClassifier
 from torchensemble.gradient_boosting import GradientBoostingClassifier
 from torchensemble.snapshot_ensemble import SnapshotEnsembleClassifier
-from torchensemble.fast_geometric import FastGeometricClassifier
 
-from torchensemble.utils.logging import set_logger, init_tb_logger
+from torchensemble.utils.logging import set_logger
 
 
 def display_records(records, logger):
@@ -51,14 +50,14 @@ class LeNet5(nn.Module):
 if __name__ == "__main__":
 
     # Hyper-parameters
-    n_estimators = 2
+    n_estimators = 10
     lr = 1e-3
     weight_decay = 5e-4
-    epochs = 2
+    epochs = 100
 
     # Utils
-    batch_size = 4
-    data_dir = "G:/Data/cifar"  # MODIFY THIS IF YOU WANT
+    batch_size = 128
+    data_dir = "../../Dataset/cifar"  # MODIFY THIS IF YOU WANT
     records = []
     torch.manual_seed(0)
 
@@ -97,7 +96,9 @@ if __name__ == "__main__":
         shuffle=True,
     )
 
-    logger, tb_logger = set_logger("classification_cifar10_cnn", use_tb_logger=True)
+    logger, tb_logger = set_logger(
+        "classification_cifar10_cnn", use_tb_logger=True
+    )
 
     # FusionClassifier
     model = FusionClassifier(

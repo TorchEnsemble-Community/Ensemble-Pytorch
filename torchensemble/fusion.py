@@ -123,7 +123,9 @@ class FusionClassifier(BaseModule):
                             )
                         )
                         if tb_logger:
-                            tb_logger.add_scalar("fusion/Train_Loss", loss, total_iters)
+                            tb_logger.add_scalar(
+                                "fusion/Train_Loss", loss, total_iters
+                            )
                 total_iters += 1
 
             # Validation
@@ -152,7 +154,9 @@ class FusionClassifier(BaseModule):
                     )
                     self.logger.info(msg.format(epoch, acc, best_acc))
                     if tb_logger:
-                        tb_logger.add_scalar("fusion/Validation_Acc", acc, epoch)
+                        tb_logger.add_scalar(
+                            "fusion/Validation_Acc", acc, epoch
+                        )
 
             # Update the scheduler
             if hasattr(self, "scheduler_"):
@@ -263,7 +267,9 @@ class FusionRegressor(BaseModule):
                         msg = "Epoch: {:03d} | Batch: {:03d} | Loss: {:.5f}"
                         self.logger.info(msg.format(epoch, batch_idx, loss))
                         if tb_logger:
-                            tb_logger.add_scalar("fusion/Train_Loss", loss, total_iters)
+                            tb_logger.add_scalar(
+                                "fusion/Train_Loss", loss, total_iters
+                            )
                 total_iters += 1
 
             # Validation
@@ -289,7 +295,9 @@ class FusionRegressor(BaseModule):
                     )
                     self.logger.info(msg.format(epoch, mse, best_mse))
                     if tb_logger:
-                        tb_logger.add_scalar("fusion/Validation_MSE", mse, epoch)
+                        tb_logger.add_scalar(
+                            "fusion/Validation_MSE", mse, epoch
+                        )
 
             # Update the scheduler
             if hasattr(self, "scheduler_"):

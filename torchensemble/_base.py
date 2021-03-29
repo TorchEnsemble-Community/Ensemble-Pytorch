@@ -186,6 +186,7 @@ class BaseModule(abc.ABC, nn.Module):
         test_loader=None,
         save_model=True,
         save_dir=None,
+        tb_logger=None,
     ):
         """
         Implementation on the training stage of the ensemble.

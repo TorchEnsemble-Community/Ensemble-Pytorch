@@ -67,6 +67,11 @@ __fit_doc = """
         - If ``None``, the model will be saved in the current directory.
         - If not ``None``, the model will be saved in the specified
           directory: ``save_dir``.
+    tb_logger : tensorboard.SummaryWriter, default=None
+        Specify whether the data will be recorded by tensorboard writer
+
+        - If ``None``, the data will not be recorded
+        - If not ``None``, the data wiil be recorded by the given ``tb_logger``
 """
 
 
@@ -307,7 +312,11 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble):
                             )
                         )
                         if tb_logger:
-                            tb_logger.add_scalar("snapshot_ensemble/Train_Loss", loss, total_iters)
+                            tb_logger.add_scalar(
+                                "snapshot_ensemble/Train_Loss",
+                                loss,
+                                total_iters,
+                            )
 
                 # Snapshot ensemble updates the learning rate per iteration
                 # instead of per epoch.
@@ -352,7 +361,9 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble):
                         msg.format(len(self.estimators_), acc, best_acc)
                     )
                     if tb_logger:
-                        tb_logger.add_scalar("snapshot_ensemble/Validation_Acc", acc, epoch)
+                        tb_logger.add_scalar(
+                            "snapshot_ensemble/Validation_Acc", acc, epoch
+                        )
 
         if save_model and not test_loader:
             io.save(self, save_dir, self.logger)
@@ -471,7 +482,11 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble):
                             )
                         )
                         if tb_logger:
-                            tb_logger.add_scalar("snapshot_ensemble/Train_Loss", loss, total_iters)
+                            tb_logger.add_scalar(
+                                "snapshot_ensemble/Train_Loss",
+                                loss,
+                                total_iters,
+                            )
 
                 # Snapshot ensemble updates the learning rate per iteration
                 # instead of per epoch.
@@ -512,7 +527,9 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble):
                         msg.format(len(self.estimators_), mse, best_mse)
                     )
                     if tb_logger:
-                        tb_logger.add_scalar("snapshot_ensemble/Validation_MSE", mse, epoch)
+                        tb_logger.add_scalar(
+                            "snapshot_ensemble/Validation_MSE", mse, epoch
+                        )
 
         if save_model and not test_loader:
             io.save(self, save_dir, self.logger)

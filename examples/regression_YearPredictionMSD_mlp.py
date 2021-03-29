@@ -98,7 +98,9 @@ if __name__ == "__main__":
     train_loader, test_loader = load_data(batch_size)
     print("Finish loading data...\n")
 
-    logger, tb_logger = set_logger("regression_YearPredictionMSD_mlp")
+    logger, tb_logger = set_logger(
+        "regression_YearPredictionMSD_mlp", use_tb_logger=True
+    )
 
     # FusionRegressor
     model = FusionRegressor(
