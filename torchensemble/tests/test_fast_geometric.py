@@ -62,7 +62,7 @@ def test_fast_geometric_workflow_clf():
 
     # Training
     with pytest.raises(RuntimeError) as excinfo:
-        model.predict(test_loader)
+        model.evaluate(test_loader)
     assert "Please call the `ensemble` method to build" in str(excinfo.value)
 
 
@@ -81,5 +81,5 @@ def test_fast_geometric_workflow_reg():
 
     # Training
     with pytest.raises(RuntimeError) as excinfo:
-        model.predict(test_loader)
+        model.evaluate(test_loader)
     assert "Please call the `ensemble` method to build" in str(excinfo.value)

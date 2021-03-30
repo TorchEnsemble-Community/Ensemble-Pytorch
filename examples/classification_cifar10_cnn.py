@@ -116,7 +116,7 @@ if __name__ == "__main__":
 
     # Evaluating
     tic = time.time()
-    testing_acc = model.predict(test_loader)
+    testing_acc = model.evaluate(test_loader)
     toc = time.time()
     evaluating_time = toc - tic
 
@@ -132,13 +132,15 @@ if __name__ == "__main__":
     # Set the optimizer
     model.set_optimizer("Adam", lr=lr, weight_decay=weight_decay)
 
+    # Training
     tic = time.time()
     model.fit(train_loader, epochs=epochs, tb_logger=tb_logger)
     toc = time.time()
     training_time = toc - tic
 
+    # Evaluating
     tic = time.time()
-    testing_acc = model.predict(test_loader)
+    testing_acc = model.evaluate(test_loader)
     toc = time.time()
     evaluating_time = toc - tic
 
@@ -154,13 +156,15 @@ if __name__ == "__main__":
     # Set the optimizer
     model.set_optimizer("Adam", lr=lr, weight_decay=weight_decay)
 
+    # Training
     tic = time.time()
     model.fit(train_loader, epochs=epochs, tb_logger=tb_logger)
     toc = time.time()
     training_time = toc - tic
 
+    # Evaluating
     tic = time.time()
-    testing_acc = model.predict(test_loader)
+    testing_acc = model.evaluate(test_loader)
     toc = time.time()
     evaluating_time = toc - tic
 
@@ -176,13 +180,15 @@ if __name__ == "__main__":
     # Set the optimizer
     model.set_optimizer("Adam", lr=lr, weight_decay=weight_decay)
 
+    # Training
     tic = time.time()
     model.fit(train_loader, epochs=epochs, tb_logger=tb_logger)
     toc = time.time()
     training_time = toc - tic
 
+    # Evaluating
     tic = time.time()
-    testing_acc = model.predict(test_loader)
+    testing_acc = model.evaluate(test_loader)
     toc = time.time()
     evaluating_time = toc - tic
 
@@ -203,13 +209,15 @@ if __name__ == "__main__":
     # Set the optimizer
     model.set_optimizer("Adam", lr=lr, weight_decay=weight_decay)
 
+    # Training
     tic = time.time()
     model.fit(train_loader, epochs=epochs, tb_logger=tb_logger)
     toc = time.time()
     training_time = toc - tic
 
+    # Evaluating
     tic = time.time()
-    testing_acc = model.predict(test_loader)
+    testing_acc = model.evaluate(test_loader)
     toc = time.time()
     evaluating_time = toc - tic
 

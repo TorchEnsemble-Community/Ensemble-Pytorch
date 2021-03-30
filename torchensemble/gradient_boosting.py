@@ -1,6 +1,6 @@
 """
   Gradient boosting is a classic sequential ensemble method. At each iteration,
-  the learning target of a new base estimator is to fit the pseudo residual
+  the learning target of a new base estimator is to fit the pseudo residuals
   computed based on the ground truth and the output from base estimators
   fitted before, using ordinary least square.
 """
@@ -13,7 +13,8 @@ import warnings
 import torch.nn as nn
 import torch.nn.functional as F
 
-from ._base import BaseModule, torchensemble_model_doc
+from ._base import BaseModule, BaseClassifier, BaseRegressor
+from ._base import torchensemble_model_doc
 from .utils import io
 from .utils import set_module
 from .utils import operator as op
@@ -59,15 +60,16 @@ __fit_doc = """
     Parameters
     ----------
     train_loader : torch.utils.data.DataLoader
-        A :mod:`torch.utils.data.DataLoader` container that contains the
-        training data.
+        A data loader that contains the training data.
     epochs : int, default=100
         The number of training epochs per base estimator.
+    use_reduction_sum : bool, default=True
+        Whether to set ``reduction="sum"`` for the internal mean squared
+        error used to fit each base estimator.
     log_interval : int, default=100
         The number of batches to wait before logging the training status.
     test_loader : torch.utils.data.DataLoader, default=None
-        A :mod:`torch.utils.data.DataLoader` container that contains the
-        evaluating data.
+        A data loader that contains the evaluating data.
 
         - If ``None``, no validation is conducted after each base
           estimator being trained.
@@ -79,7 +81,7 @@ __fit_doc = """
         adding the base estimator fitted in current iteration, the internal
         counter on early stopping will increase by one. When the value of
         the internal counter reaches ``early_stopping_rounds``, the
-        training stage  will terminate instantly.
+        training stage will terminate instantly.
     save_model : bool, default=True
         Specify whether to save the model parameters.
 
@@ -231,6 +233,7 @@ class _BaseGradientBoosting(BaseModule):
         self,
         train_loader,
         epochs=100,
+        use_reduction_sum=True,
         log_interval=100,
         test_loader=None,
         early_stopping_rounds=2,
@@ -248,7 +251,9 @@ class _BaseGradientBoosting(BaseModule):
         )
 
         # Utils
-        criterion = nn.MSELoss(reduction="sum")
+        criterion = (
+            nn.MSELoss(reduction="sum") if use_reduction_sum else nn.MSELoss()
+        )
         n_counter = 0  # a counter on early stopping
 
         for est_idx, estimator in enumerate(self.estimators_):
@@ -342,7 +347,7 @@ class _BaseGradientBoosting(BaseModule):
 @_gradient_boosting_model_doc(
     """Implementation on the GradientBoostingClassifier.""", "model"
 )
-class GradientBoostingClassifier(_BaseGradientBoosting):
+class GradientBoostingClassifier(_BaseGradientBoosting, BaseClassifier):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.is_classification = True
@@ -418,6 +423,7 @@ class GradientBoostingClassifier(_BaseGradientBoosting):
         self,
         train_loader,
         epochs=100,
+        use_reduction_sum=True,
         log_interval=100,
         test_loader=None,
         early_stopping_rounds=2,
@@ -447,31 +453,19 @@ class GradientBoostingClassifier(_BaseGradientBoosting):
 
         return proba
 
-    @torchensemble_model_doc(
-        """Implementation on the evaluating stage of GradientBoostingClassifier.""",  # noqa: E501
-        "classifier_predict",
-    )
-    def predict(self, test_loader):
-        self.eval()
-        correct = 0
-        total = 0
+    @torchensemble_model_doc(item="classifier_evaluate")
+    def evaluate(self, test_loader, return_loss=False):
+        return super().evaluate(test_loader, return_loss)
 
-        for _, (data, target) in enumerate(test_loader):
-            data, target = data.to(self.device), target.to(self.device)
-            output = self.forward(data)
-            _, predicted = torch.max(output.data, 1)
-            correct += (predicted == target).sum().item()
-            total += target.size(0)
-
-        acc = 100 * correct / total
-
-        return acc
+    @torchensemble_model_doc(item="predict")
+    def predict(self, X, return_numpy=True):
+        return super().predict(X, return_numpy)
 
 
 @_gradient_boosting_model_doc(
     """Implementation on the GradientBoostingRegressor.""", "model"
 )
-class GradientBoostingRegressor(_BaseGradientBoosting):
+class GradientBoostingRegressor(_BaseGradientBoosting, BaseRegressor):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.is_classification = False
@@ -492,7 +486,7 @@ class GradientBoostingRegressor(_BaseGradientBoosting):
     def _handle_early_stopping(self, test_loader, est_idx, tb_logger):
         # Compute the validation MSE of base estimators fitted so far
         self.eval()
-        mse = 0
+        mse = 0.0
         flag = False
         criterion = nn.MSELoss()
         with torch.no_grad():
@@ -542,6 +536,7 @@ class GradientBoostingRegressor(_BaseGradientBoosting):
         self,
         train_loader,
         epochs=100,
+        use_reduction_sum=True,
         log_interval=100,
         test_loader=None,
         early_stopping_rounds=2,
@@ -570,18 +565,10 @@ class GradientBoostingRegressor(_BaseGradientBoosting):
 
         return pred
 
-    @torchensemble_model_doc(
-        """Implementation on the evaluating stage of GradientBoostingRegressor.""",  # noqa: E501
-        "regressor_predict",
-    )
-    def predict(self, test_loader):
-        self.eval()
-        mse = 0
-        criterion = nn.MSELoss()
+    @torchensemble_model_doc(item="regressor_evaluate")
+    def evaluate(self, test_loader):
+        return super().evaluate(test_loader)
 
-        for batch_idx, (data, target) in enumerate(test_loader):
-            data, target = data.to(self.device), target.to(self.device)
-            output = self.forward(data)
-            mse += criterion(output, target)
-
-        return mse / len(test_loader)
+    @torchensemble_model_doc(item="predict")
+    def predict(self, X, return_numpy=True):
+        return super().predict(X, return_numpy)

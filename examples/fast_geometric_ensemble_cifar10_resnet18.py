@@ -176,7 +176,7 @@ if __name__ == "__main__":
     )
 
     # Evaluate
-    acc = model.predict(test_loader)
+    acc = model.evaluate(test_loader)
     print("Testing Acc: {:.3f}".format(acc))
 
     if tb_logger:

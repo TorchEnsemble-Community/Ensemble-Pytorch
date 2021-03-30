@@ -116,7 +116,7 @@ if __name__ == "__main__":
     training_time = toc - tic
 
     tic = time.time()
-    testing_mse = model.predict(test_loader)
+    testing_mse = model.evaluate(test_loader)
     toc = time.time()
     evaluating_time = toc - tic
 
@@ -138,7 +138,7 @@ if __name__ == "__main__":
     training_time = toc - tic
 
     tic = time.time()
-    testing_mse = model.predict(test_loader)
+    testing_mse = model.evaluate(test_loader)
     toc = time.time()
     evaluating_time = toc - tic
 
@@ -160,7 +160,7 @@ if __name__ == "__main__":
     training_time = toc - tic
 
     tic = time.time()
-    testing_mse = model.predict(test_loader)
+    testing_mse = model.evaluate(test_loader)
     toc = time.time()
     evaluating_time = toc - tic
 
@@ -182,7 +182,7 @@ if __name__ == "__main__":
     training_time = toc - tic
 
     tic = time.time()
-    testing_mse = model.predict(test_loader)
+    testing_mse = model.evaluate(test_loader)
     toc = time.time()
     evaluating_time = toc - tic
 
@@ -209,7 +209,7 @@ if __name__ == "__main__":
     training_time = toc - tic
 
     tic = time.time()
-    testing_acc = model.predict(test_loader)
+    testing_acc = model.evaluate(test_loader)
     toc = time.time()
     evaluating_time = toc - tic
 

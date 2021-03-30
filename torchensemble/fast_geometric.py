@@ -17,7 +17,8 @@ import warnings
 import torch.nn as nn
 import torch.nn.functional as F
 
-from ._base import BaseModule, torchensemble_model_doc
+from ._base import BaseModule, BaseClassifier, BaseRegressor
+from ._base import torchensemble_model_doc
 from .utils import io
 from .utils import set_module
 from .utils import operator as op
@@ -207,7 +208,7 @@ class _BaseFastGeometric(BaseModule):
 @torchensemble_model_doc(
     """Implementation on the FastGeometricClassifier.""", "seq_model"
 )
-class FastGeometricClassifier(_BaseFastGeometric):
+class FastGeometricClassifier(_BaseFastGeometric, BaseClassifier):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.is_classification = True
@@ -475,11 +476,8 @@ class FastGeometricClassifier(_BaseFastGeometric):
             io.save(self, save_dir, self.logger)
         self.is_fitted_ = True
 
-    @torchensemble_model_doc(
-        """Implementation on the evaluating stage of FastGeometricClassifier.""",  # noqa: E501
-        "classifier_predict",
-    )
-    def predict(self, test_loader):
+    @torchensemble_model_doc(item="classifier_evaluate")
+    def evaluate(self, test_loader, return_loss=False):
 
         if len(self.estimators_) == 0:
             msg = (
@@ -492,6 +490,8 @@ class FastGeometricClassifier(_BaseFastGeometric):
         self.eval()
         correct = 0
         total = 0
+        criterion = nn.CrossEntropyLoss()
+        loss = 0.0
 
         for _, (data, target) in enumerate(test_loader):
             data, target = data.to(self.device), target.to(self.device)
@@ -499,16 +499,25 @@ class FastGeometricClassifier(_BaseFastGeometric):
             _, predicted = torch.max(output.data, 1)
             correct += (predicted == target).sum().item()
             total += target.size(0)
+            loss += criterion(output, target)
 
         acc = 100 * correct / total
+        loss /= len(test_loader)
+
+        if return_loss:
+            return acc, float(loss)
 
         return acc
+
+    @torchensemble_model_doc(item="predict")
+    def predict(self, X, return_numpy=True):
+        return super().predict(X, return_numpy)
 
 
 @torchensemble_model_doc(
     """Implementation on the FastGeometricRegressor.""", "seq_model"
 )
-class FastGeometricRegressor(_BaseFastGeometric):
+class FastGeometricRegressor(_BaseFastGeometric, BaseRegressor):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.is_classification = False
@@ -609,7 +618,7 @@ class FastGeometricRegressor(_BaseFastGeometric):
             if test_loader:
                 estimator_.eval()
                 with torch.no_grad():
-                    mse = 0
+                    mse = 0.0
                     for _, (data, target) in enumerate(test_loader):
                         data = data.to(self.device)
                         target = target.to(self.device)
@@ -718,7 +727,7 @@ class FastGeometricRegressor(_BaseFastGeometric):
             if test_loader and updated:
                 self.eval()
                 with torch.no_grad():
-                    mse = 0
+                    mse = 0.0
                     for _, (data, target) in enumerate(test_loader):
                         data = data.to(self.device)
                         target = target.to(self.device)
@@ -747,11 +756,8 @@ class FastGeometricRegressor(_BaseFastGeometric):
             io.save(self, save_dir, self.logger)
         self.is_fitted_ = True
 
-    @torchensemble_model_doc(
-        """Implementation on the evaluating stage of FastGeometricRegressor.""",  # noqa: E501
-        "regressor_predict",
-    )
-    def predict(self, test_loader):
+    @torchensemble_model_doc(item="regressor_evaluate")
+    def evaluate(self, test_loader):
 
         if len(self.estimators_) == 0:
             msg = (
@@ -762,7 +768,7 @@ class FastGeometricRegressor(_BaseFastGeometric):
             raise RuntimeError(msg)
 
         self.eval()
-        mse = 0
+        mse = 0.0
         criterion = nn.MSELoss()
 
         for batch_idx, (data, target) in enumerate(test_loader):
@@ -770,4 +776,8 @@ class FastGeometricRegressor(_BaseFastGeometric):
             output = self.forward(data)
             mse += criterion(output, target)
 
-        return mse / len(test_loader)
+        return float(mse) / len(test_loader)
+
+    @torchensemble_model_doc(item="predict")
+    def predict(self, X, return_numpy=True):
+        return super().predict(X, return_numpy)
