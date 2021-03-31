@@ -77,7 +77,15 @@ def set_logger(
 
 
 def init_tb_logger(log_dir):
-    from torch.utils.tensorboard import SummaryWriter
-
+    try:
+        SummaryWriter = __import__("torch.utils.tensorboard.SummaryWriter")
+    except ModuleNotFoundError:
+        msg = (
+            "Cannot load the module torch when building the "
+            "ImageScanner. Please make sure that tensorboard is"
+            " installed."
+        )
+        raise ModuleNotFoundError(msg)
+    
     tb_logger = SummaryWriter(log_dir=log_dir)
     return tb_logger
