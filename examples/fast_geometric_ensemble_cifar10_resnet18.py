@@ -136,7 +136,7 @@ if __name__ == "__main__":
     )
 
     # Set the Logger
-    logger, tb_logger = set_logger(
+    logger = set_logger(
         "FastGeometricClassifier_cifar10_resnet", use_tb_logger=True
     )
 
@@ -161,7 +161,6 @@ if __name__ == "__main__":
         train_loader,
         epochs=epochs,
         test_loader=test_loader,
-        tb_logger=tb_logger,
     )
 
     # Ensemble
@@ -172,12 +171,8 @@ if __name__ == "__main__":
         lr_1=5e-2,
         lr_2=5e-4,
         test_loader=test_loader,
-        tb_logger=tb_logger,
     )
 
     # Evaluate
     acc = model.evaluate(test_loader)
     print("Testing Acc: {:.3f}".format(acc))
-
-    if tb_logger:
-        tb_logger.close()

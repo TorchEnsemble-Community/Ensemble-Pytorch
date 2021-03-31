@@ -7,6 +7,7 @@ import numpy as np
 import torch.nn as nn
 
 from . import _constants as const
+from .utils.logging import get_tb_logger
 
 
 def torchensemble_model_doc(header="", item="model"):
@@ -77,6 +78,7 @@ class BaseModule(nn.Module):
         self.device = torch.device("cuda" if cuda else "cpu")
         self.n_jobs = n_jobs
         self.logger = logging.getLogger()
+        self.tb_logger = get_tb_logger()
 
         self.estimators_ = nn.ModuleList()
         self.use_scheduler_ = False
@@ -188,7 +190,6 @@ class BaseModule(nn.Module):
         test_loader=None,
         save_model=True,
         save_dir=None,
-        tb_logger=None,
     ):
         """
         Implementation on the training stage of the ensemble.

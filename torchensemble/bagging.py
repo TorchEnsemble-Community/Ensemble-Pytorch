@@ -138,7 +138,6 @@ class BaggingClassifier(BaseClassifier):
         test_loader=None,
         save_model=True,
         save_dir=None,
-        tb_logger=None,
     ):
 
         self._validate_parameters(epochs, log_interval)
@@ -241,8 +240,8 @@ class BaggingClassifier(BaseClassifier):
                             " % | Historical Best: {:.3f} %"
                         )
                         self.logger.info(msg.format(epoch, acc, best_acc))
-                        if tb_logger:
-                            tb_logger.add_scalar(
+                        if self.tb_logger:
+                            self.tb_logger.add_scalar(
                                 "bagging/Validation_Acc", acc, epoch
                             )
 
@@ -313,7 +312,6 @@ class BaggingRegressor(BaseRegressor):
         test_loader=None,
         save_model=True,
         save_dir=None,
-        tb_logger=None,
     ):
 
         self._validate_parameters(epochs, log_interval)
@@ -411,8 +409,8 @@ class BaggingRegressor(BaseRegressor):
                             " {:.5f} | Historical Best: {:.5f}"
                         )
                         self.logger.info(msg.format(epoch, mse, best_mse))
-                        if tb_logger:
-                            tb_logger.add_scalar(
+                        if self.tb_logger:
+                            self.tb_logger.add_scalar(
                                 "bagging/Validation_MSE", mse, epoch
                             )
 

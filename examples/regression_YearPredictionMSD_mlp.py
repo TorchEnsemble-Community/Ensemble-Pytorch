@@ -98,9 +98,7 @@ if __name__ == "__main__":
     train_loader, test_loader = load_data(batch_size)
     print("Finish loading data...\n")
 
-    logger, tb_logger = set_logger(
-        "regression_YearPredictionMSD_mlp", use_tb_logger=True
-    )
+    logger = set_logger("regression_YearPredictionMSD_mlp", use_tb_logger=True)
 
     # FusionRegressor
     model = FusionRegressor(
@@ -111,7 +109,7 @@ if __name__ == "__main__":
     model.set_optimizer("Adam", lr=lr, weight_decay=weight_decay)
 
     tic = time.time()
-    model.fit(train_loader, epochs=epochs, tb_logger=tb_logger)
+    model.fit(train_loader, epochs=epochs)
     toc = time.time()
     training_time = toc - tic
 
@@ -133,7 +131,7 @@ if __name__ == "__main__":
     model.set_optimizer("Adam", lr=lr, weight_decay=weight_decay)
 
     tic = time.time()
-    model.fit(train_loader, epochs=epochs, tb_logger=tb_logger)
+    model.fit(train_loader, epochs=epochs)
     toc = time.time()
     training_time = toc - tic
 
@@ -155,7 +153,7 @@ if __name__ == "__main__":
     model.set_optimizer("Adam", lr=lr, weight_decay=weight_decay)
 
     tic = time.time()
-    model.fit(train_loader, epochs=epochs, tb_logger=tb_logger)
+    model.fit(train_loader, epochs=epochs)
     toc = time.time()
     training_time = toc - tic
 
@@ -177,7 +175,7 @@ if __name__ == "__main__":
     model.set_optimizer("Adam", lr=lr, weight_decay=weight_decay)
 
     tic = time.time()
-    model.fit(train_loader, epochs=epochs, tb_logger=tb_logger)
+    model.fit(train_loader, epochs=epochs)
     toc = time.time()
     training_time = toc - tic
 
@@ -204,7 +202,7 @@ if __name__ == "__main__":
     model.set_optimizer("Adam", lr=lr, weight_decay=weight_decay)
 
     tic = time.time()
-    model.fit(train_loader, epochs=epochs, tb_logger=tb_logger)
+    model.fit(train_loader, epochs=epochs)
     toc = time.time()
     training_time = toc - tic
 
@@ -224,6 +222,3 @@ if __name__ == "__main__":
 
     # Print results on different ensemble methods
     display_records(records, logger)
-
-    if tb_logger:
-        tb_logger.close()

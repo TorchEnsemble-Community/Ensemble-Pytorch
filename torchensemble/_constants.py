@@ -116,11 +116,6 @@ __fit_doc = """
         - If ``None``, the model will be saved in the current directory.
         - If not ``None``, the model will be saved in the specified
           directory: ``save_dir``.
-    tb_logger : tensorboard.SummaryWriter, default=None
-        Specify whether the data will be recorded by tensorboard writer
-
-        - If ``None``, the data will not be recorded
-        - If not ``None``, the data wiil be recorded by the given ``tb_logger``
 """
 
 

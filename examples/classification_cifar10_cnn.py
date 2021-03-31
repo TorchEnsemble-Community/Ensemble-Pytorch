@@ -96,9 +96,7 @@ if __name__ == "__main__":
         shuffle=True,
     )
 
-    logger, tb_logger = set_logger(
-        "classification_cifar10_cnn", use_tb_logger=True
-    )
+    logger = set_logger("classification_cifar10_cnn", use_tb_logger=True)
 
     # FusionClassifier
     model = FusionClassifier(
@@ -110,7 +108,7 @@ if __name__ == "__main__":
 
     # Training
     tic = time.time()
-    model.fit(train_loader, epochs=epochs, tb_logger=tb_logger)
+    model.fit(train_loader, epochs=epochs)
     toc = time.time()
     training_time = toc - tic
 
@@ -134,7 +132,7 @@ if __name__ == "__main__":
 
     # Training
     tic = time.time()
-    model.fit(train_loader, epochs=epochs, tb_logger=tb_logger)
+    model.fit(train_loader, epochs=epochs)
     toc = time.time()
     training_time = toc - tic
 
@@ -158,7 +156,7 @@ if __name__ == "__main__":
 
     # Training
     tic = time.time()
-    model.fit(train_loader, epochs=epochs, tb_logger=tb_logger)
+    model.fit(train_loader, epochs=epochs)
     toc = time.time()
     training_time = toc - tic
 
@@ -182,7 +180,7 @@ if __name__ == "__main__":
 
     # Training
     tic = time.time()
-    model.fit(train_loader, epochs=epochs, tb_logger=tb_logger)
+    model.fit(train_loader, epochs=epochs)
     toc = time.time()
     training_time = toc - tic
 
@@ -211,7 +209,7 @@ if __name__ == "__main__":
 
     # Training
     tic = time.time()
-    model.fit(train_loader, epochs=epochs, tb_logger=tb_logger)
+    model.fit(train_loader, epochs=epochs)
     toc = time.time()
     training_time = toc - tic
 
@@ -232,6 +230,3 @@ if __name__ == "__main__":
 
     # Print results on different ensemble methods
     display_records(records, logger)
-
-    if tb_logger:
-        tb_logger.close()

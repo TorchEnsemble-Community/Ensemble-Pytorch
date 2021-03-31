@@ -18,6 +18,7 @@ from ._base import torchensemble_model_doc
 from .utils import io
 from .utils import set_module
 from .utils import operator as op
+from .utils.logging import get_tb_logger
 
 
 __all__ = [
@@ -95,11 +96,6 @@ __fit_doc = """
         - If ``None``, the model will be saved in the current directory.
         - If not ``None``, the model will be saved in the specified
           directory: ``save_dir``.
-    tb_logger : tensorboard.SummaryWriter, default=None
-        Specify whether the data will be recorded by tensorboard writer
-
-        - If ``None``, the data will not be recorded
-        - If not ``None``, the data wiil be recorded by the given ``tb_logger``
 """
 
 
@@ -147,6 +143,7 @@ class _BaseGradientBoosting(BaseModule):
         self.shrinkage_rate = shrinkage_rate
         self.device = torch.device("cuda" if cuda else "cpu")
         self.logger = logging.getLogger()
+        self.tb_logger = get_tb_logger()
 
         self.estimators_ = nn.ModuleList()
         self.use_scheduler_ = False
@@ -190,7 +187,7 @@ class _BaseGradientBoosting(BaseModule):
             raise ValueError(msg.format(self.shrinkage_rate))
 
     @abc.abstractmethod
-    def _handle_early_stopping(self, test_loader, est_idx, tb_logger):
+    def _handle_early_stopping(self, test_loader, est_idx):
         """Decide whether to trigger the internal counter on early stopping."""
 
     def _staged_forward(self, x, est_idx):
@@ -239,7 +236,6 @@ class _BaseGradientBoosting(BaseModule):
         early_stopping_rounds=2,
         save_model=True,
         save_dir=None,
-        tb_logger=None,
     ):
 
         # Instantiate base estimators and set attributes
@@ -298,8 +294,8 @@ class _BaseGradientBoosting(BaseModule):
                         self.logger.info(
                             msg.format(est_idx, epoch, batch_idx, loss)
                         )
-                        if tb_logger:
-                            tb_logger.add_scalar(
+                        if self.tb_logger:
+                            self.tb_logger.add_scalar(
                                 "gradient_boosting/Est_{}/Train_Loss".format(
                                     est_idx
                                 ),
@@ -313,9 +309,7 @@ class _BaseGradientBoosting(BaseModule):
 
             # Validation
             if test_loader:
-                flag = self._handle_early_stopping(
-                    test_loader, est_idx, tb_logger
-                )
+                flag = self._handle_early_stopping(test_loader, est_idx)
 
                 if flag:
                     n_counter += 1
@@ -369,7 +363,7 @@ class GradientBoostingClassifier(_BaseGradientBoosting, BaseClassifier):
 
         return pseudo_residual
 
-    def _handle_early_stopping(self, test_loader, est_idx, tb_logger):
+    def _handle_early_stopping(self, test_loader, est_idx):
         # Compute the validation accuracy of base estimators fitted so far
         self.eval()
         correct = 0
@@ -394,8 +388,8 @@ class GradientBoostingClassifier(_BaseGradientBoosting, BaseClassifier):
 
         msg = "Validation Acc: {:.3f} % | Historical Best: {:.3f} %"
         self.logger.info(msg.format(acc, self.best_acc))
-        if tb_logger:
-            tb_logger.add_scalar(
+        if self.tb_logger:
+            self.tb_logger.add_scalar(
                 "gradient_boosting/Validation_Acc", acc, est_idx
             )
 
@@ -429,7 +423,6 @@ class GradientBoostingClassifier(_BaseGradientBoosting, BaseClassifier):
         early_stopping_rounds=2,
         save_model=True,
         save_dir=None,
-        tb_logger=None,
     ):
         super().fit(
             train_loader=train_loader,
@@ -439,7 +432,6 @@ class GradientBoostingClassifier(_BaseGradientBoosting, BaseClassifier):
             early_stopping_rounds=early_stopping_rounds,
             save_model=save_model,
             save_dir=save_dir,
-            tb_logger=tb_logger,
         )
 
     @torchensemble_model_doc(
@@ -483,7 +475,7 @@ class GradientBoostingRegressor(_BaseGradientBoosting, BaseRegressor):
 
         return pseudo_residual
 
-    def _handle_early_stopping(self, test_loader, est_idx, tb_logger):
+    def _handle_early_stopping(self, test_loader, est_idx):
         # Compute the validation MSE of base estimators fitted so far
         self.eval()
         mse = 0.0
@@ -507,8 +499,8 @@ class GradientBoostingRegressor(_BaseGradientBoosting, BaseRegressor):
 
         msg = "Validation MSE: {:.5f} | Historical Best: {:.5f}"
         self.logger.info(msg.format(mse, self.best_mse))
-        if tb_logger:
-            tb_logger.add_scalar(
+        if self.tb_logger:
+            self.tb_logger.add_scalar(
                 "gradient_boosting/Validation_MSE", mse, est_idx
             )
 
@@ -542,7 +534,6 @@ class GradientBoostingRegressor(_BaseGradientBoosting, BaseRegressor):
         early_stopping_rounds=2,
         save_model=True,
         save_dir=None,
-        tb_logger=None,
     ):
         super().fit(
             train_loader=train_loader,
@@ -552,7 +543,6 @@ class GradientBoostingRegressor(_BaseGradientBoosting, BaseRegressor):
             early_stopping_rounds=early_stopping_rounds,
             save_model=save_model,
             save_dir=save_dir,
-            tb_logger=tb_logger,
         )
 
     @torchensemble_model_doc(

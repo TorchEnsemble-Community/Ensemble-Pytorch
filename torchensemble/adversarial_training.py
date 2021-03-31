@@ -64,11 +64,6 @@ __fit_doc = """
         - If ``None``, the model will be saved in the current directory.
         - If not ``None``, the model will be saved in the specified
           directory: ``save_dir``.
-    tb_logger : tensorboard.SummaryWriter, default=None
-        Specify whether the data will be recorded by tensorboard writer
-
-        - If ``None``, the data will not be recorded
-        - If not ``None``, the data wiil be recorded by the given ``tb_logger``
 """
 
 
@@ -270,7 +265,6 @@ class AdversarialTrainingClassifier(_BaseAdversarialTraining, BaseClassifier):
         test_loader=None,
         save_model=True,
         save_dir=None,
-        tb_logger=None,
     ):
 
         self._validate_parameters(epochs, epsilon, log_interval)
@@ -374,8 +368,8 @@ class AdversarialTrainingClassifier(_BaseAdversarialTraining, BaseClassifier):
                             " % | Historical Best: {:.3f} %"
                         )
                         self.logger.info(msg.format(epoch, acc, best_acc))
-                        if tb_logger:
-                            tb_logger.add_scalar(
+                        if self.tb_logger:
+                            self.tb_logger.add_scalar(
                                 "adversarial_training/Validation_Acc",
                                 acc,
                                 epoch,
@@ -455,7 +449,6 @@ class AdversarialTrainingRegressor(_BaseAdversarialTraining, BaseRegressor):
         test_loader=None,
         save_model=True,
         save_dir=None,
-        tb_logger=None,
     ):
 
         self._validate_parameters(epochs, epsilon, log_interval)
@@ -554,8 +547,8 @@ class AdversarialTrainingRegressor(_BaseAdversarialTraining, BaseRegressor):
                             " {:.5f} | Historical Best: {:.5f}"
                         )
                         self.logger.info(msg.format(epoch, mse, best_mse))
-                        if tb_logger:
-                            tb_logger.add_scalar(
+                        if self.tb_logger:
+                            self.tb_logger.add_scalar(
                                 "adversirial_training/Validation_MSE",
                                 mse,
                                 epoch,

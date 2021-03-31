@@ -72,7 +72,6 @@ class FusionClassifier(BaseClassifier):
         test_loader=None,
         save_model=True,
         save_dir=None,
-        tb_logger=None,
     ):
 
         # Instantiate base estimators and set attributes
@@ -123,8 +122,8 @@ class FusionClassifier(BaseClassifier):
                                 epoch, batch_idx, loss, correct, data.size(0)
                             )
                         )
-                        if tb_logger:
-                            tb_logger.add_scalar(
+                        if self.tb_logger:
+                            self.tb_logger.add_scalar(
                                 "fusion/Train_Loss", loss, total_iters
                             )
                 total_iters += 1
@@ -154,8 +153,8 @@ class FusionClassifier(BaseClassifier):
                         " % | Historical Best: {:.3f} %"
                     )
                     self.logger.info(msg.format(epoch, acc, best_acc))
-                    if tb_logger:
-                        tb_logger.add_scalar(
+                    if self.tb_logger:
+                        self.tb_logger.add_scalar(
                             "fusion/Validation_Acc", acc, epoch
                         )
 
@@ -216,7 +215,6 @@ class FusionRegressor(BaseRegressor):
         test_loader=None,
         save_model=True,
         save_dir=None,
-        tb_logger=None,
     ):
         # Instantiate base estimators and set attributes
         for _ in range(self.n_estimators):
@@ -256,8 +254,8 @@ class FusionRegressor(BaseRegressor):
                     with torch.no_grad():
                         msg = "Epoch: {:03d} | Batch: {:03d} | Loss: {:.5f}"
                         self.logger.info(msg.format(epoch, batch_idx, loss))
-                        if tb_logger:
-                            tb_logger.add_scalar(
+                        if self.tb_logger:
+                            self.tb_logger.add_scalar(
                                 "fusion/Train_Loss", loss, total_iters
                             )
                 total_iters += 1
@@ -284,8 +282,8 @@ class FusionRegressor(BaseRegressor):
                         " Historical Best: {:.5f}"
                     )
                     self.logger.info(msg.format(epoch, mse, best_mse))
-                    if tb_logger:
-                        tb_logger.add_scalar(
+                    if self.tb_logger:
+                        self.tb_logger.add_scalar(
                             "fusion/Validation_MSE", mse, epoch
                         )
 

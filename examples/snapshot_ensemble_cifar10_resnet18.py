@@ -136,7 +136,7 @@ if __name__ == "__main__":
     )
 
     # Set the Logger
-    logger, tb_logger = set_logger(
+    logger = set_logger(
         "snapshot_ensemble_cifar10_resnet18", use_tb_logger=True
     )
 
@@ -158,8 +158,4 @@ if __name__ == "__main__":
         train_loader,
         epochs=epochs,
         test_loader=test_loader,
-        tb_logger=tb_logger,
     )
-
-    if tb_logger:
-        tb_logger.close()

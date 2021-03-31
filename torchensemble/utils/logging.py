@@ -3,6 +3,10 @@ import time
 import logging
 
 
+_tb_logger = None
+__all__ = ["set_logger", "get_tb_logger"]
+
+
 def set_logger(
     log_file=None,
     log_console_level="info",
@@ -68,12 +72,13 @@ def set_logger(
     _logger.setLevel("DEBUG")
 
     if use_tb_logger:
-        tb_log_path = os.path.join(log_path, log_file + rq + "_tb_logger")
+        tb_log_path = os.path.join(
+            log_path, log_file + "-" + rq + "_tb_logger"
+        )
         os.mkdir(tb_log_path)
-        tb_logger = init_tb_logger(log_dir=tb_log_path)
-        return _logger, tb_logger
-    else:
-        return _logger
+        init_tb_logger(log_dir=tb_log_path)
+
+    return _logger
 
 
 def init_tb_logger(log_dir):
@@ -87,5 +92,11 @@ def init_tb_logger(log_dir):
         )
         raise ModuleNotFoundError(msg)
 
-    tb_logger = SummaryWriter(log_dir=log_dir)
-    return tb_logger
+    global _tb_logger
+
+    if not _tb_logger:
+        _tb_logger = SummaryWriter(log_dir=log_dir)
+
+
+def get_tb_logger():
+    return _tb_logger
