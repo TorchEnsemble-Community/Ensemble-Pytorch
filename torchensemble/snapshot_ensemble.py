@@ -10,7 +10,6 @@
 """
 
 
-import copy
 import math
 import torch
 import logging
@@ -110,9 +109,6 @@ class _BaseSnapshotEnsemble(BaseModule):
 
         self.device = torch.device("cuda" if cuda else "cpu")
         self.logger = logging.getLogger()
-
-        # Used to generate snapshots
-        self.dummy_estimator_ = self._make_estimator()
 
         self.estimators_ = nn.ModuleList()
 
@@ -255,9 +251,11 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble, BaseClassifier):
             train_loader, self.is_classification
         )
 
+        estimator = self._make_estimator()
+
         # Set the optimizer and scheduler
         optimizer = set_module.set_optimizer(
-            self.dummy_estimator_, self.optimizer_name, **self.optimizer_args
+            estimator, self.optimizer_name, **self.optimizer_args
         )
 
         scheduler = self._set_scheduler(optimizer, epochs * len(train_loader))
@@ -269,7 +267,7 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble, BaseClassifier):
         n_iters_per_estimator = epochs * len(train_loader) // self.n_estimators
 
         # Training loop
-        self.dummy_estimator_.train()
+        estimator.train()
         for epoch in range(epochs):
             for batch_idx, (data, target) in enumerate(train_loader):
 
@@ -280,7 +278,7 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble, BaseClassifier):
                 optimizer = self._clip_lr(optimizer, lr_clip)
 
                 optimizer.zero_grad()
-                output = self.dummy_estimator_(data)
+                output = estimator(data)
                 loss = criterion(output, target)
                 loss.backward()
                 optimizer.step()
@@ -314,7 +312,8 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble, BaseClassifier):
             if counter % n_iters_per_estimator == 0:
 
                 # Generate and save the snapshot
-                snapshot = copy.deepcopy(self.dummy_estimator_)
+                snapshot = self._make_estimator()
+                snapshot.load_state_dict(estimator.state_dict())
                 self.estimators_.append(snapshot)
 
                 msg = "Save the snapshot model with index: {}"
@@ -403,9 +402,11 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble, BaseRegressor):
             train_loader, self.is_classification
         )
 
+        estimator = self._make_estimator()
+
         # Set the optimizer and scheduler
         optimizer = set_module.set_optimizer(
-            self.dummy_estimator_, self.optimizer_name, **self.optimizer_args
+            estimator, self.optimizer_name, **self.optimizer_args
         )
 
         scheduler = self._set_scheduler(optimizer, epochs * len(train_loader))
@@ -417,7 +418,7 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble, BaseRegressor):
         n_iters_per_estimator = epochs * len(train_loader) // self.n_estimators
 
         # Training loop
-        self.dummy_estimator_.train()
+        estimator.train()
         for epoch in range(epochs):
             for batch_idx, (data, target) in enumerate(train_loader):
 
@@ -427,7 +428,7 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble, BaseRegressor):
                 optimizer = self._clip_lr(optimizer, lr_clip)
 
                 optimizer.zero_grad()
-                output = self.dummy_estimator_(data)
+                output = estimator(data)
                 loss = criterion(output, target)
                 loss.backward()
                 optimizer.step()
@@ -455,7 +456,8 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble, BaseRegressor):
 
             if counter % n_iters_per_estimator == 0:
                 # Generate and save the snapshot
-                snapshot = copy.deepcopy(self.dummy_estimator_)
+                snapshot = self._make_estimator()
+                snapshot.load_state_dict(estimator.state_dict())
                 self.estimators_.append(snapshot)
 
                 msg = "Save the snapshot model with index: {}"
