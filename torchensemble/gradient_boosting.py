@@ -18,6 +18,7 @@ from ._base import torchensemble_model_doc
 from .utils import io
 from .utils import set_module
 from .utils import operator as op
+from .utils.logging import get_tb_logger
 
 
 __all__ = [
@@ -142,6 +143,7 @@ class _BaseGradientBoosting(BaseModule):
         self.shrinkage_rate = shrinkage_rate
         self.device = torch.device("cuda" if cuda else "cpu")
         self.logger = logging.getLogger()
+        self.tb_logger = get_tb_logger()
 
         self.estimators_ = nn.ModuleList()
         self.use_scheduler_ = False
@@ -267,6 +269,7 @@ class _BaseGradientBoosting(BaseModule):
 
             # Training loop
             estimator.train()
+            total_iters = 0
             for epoch in range(epochs):
                 for batch_idx, (data, target) in enumerate(train_loader):
 
@@ -291,6 +294,15 @@ class _BaseGradientBoosting(BaseModule):
                         self.logger.info(
                             msg.format(est_idx, epoch, batch_idx, loss)
                         )
+                        if self.tb_logger:
+                            self.tb_logger.add_scalar(
+                                "gradient_boosting/Est_{}/Train_Loss".format(
+                                    est_idx
+                                ),
+                                loss,
+                                total_iters,
+                            )
+                    total_iters += 1
 
                 if self.use_scheduler_:
                     learner_scheduler.step()
@@ -376,6 +388,10 @@ class GradientBoostingClassifier(_BaseGradientBoosting, BaseClassifier):
 
         msg = "Validation Acc: {:.3f} % | Historical Best: {:.3f} %"
         self.logger.info(msg.format(acc, self.best_acc))
+        if self.tb_logger:
+            self.tb_logger.add_scalar(
+                "gradient_boosting/Validation_Acc", acc, est_idx
+            )
 
         return flag
 
@@ -483,6 +499,10 @@ class GradientBoostingRegressor(_BaseGradientBoosting, BaseRegressor):
 
         msg = "Validation MSE: {:.5f} | Historical Best: {:.5f}"
         self.logger.info(msg.format(mse, self.best_mse))
+        if self.tb_logger:
+            self.tb_logger.add_scalar(
+                "gradient_boosting/Validation_MSE", mse, est_idx
+            )
 
         return flag
 

@@ -92,6 +92,7 @@ class FusionClassifier(BaseClassifier):
         # Utils
         criterion = nn.CrossEntropyLoss()
         best_acc = 0.0
+        total_iters = 0
 
         # Training loop
         for epoch in range(epochs):
@@ -121,6 +122,11 @@ class FusionClassifier(BaseClassifier):
                                 epoch, batch_idx, loss, correct, data.size(0)
                             )
                         )
+                        if self.tb_logger:
+                            self.tb_logger.add_scalar(
+                                "fusion/Train_Loss", loss, total_iters
+                            )
+                total_iters += 1
 
             # Validation
             if test_loader:
@@ -147,6 +153,10 @@ class FusionClassifier(BaseClassifier):
                         " % | Historical Best: {:.3f} %"
                     )
                     self.logger.info(msg.format(epoch, acc, best_acc))
+                    if self.tb_logger:
+                        self.tb_logger.add_scalar(
+                            "fusion/Validation_Acc", acc, epoch
+                        )
 
             # Update the scheduler
             if hasattr(self, "scheduler_"):
@@ -224,6 +234,7 @@ class FusionRegressor(BaseRegressor):
         # Utils
         criterion = nn.MSELoss()
         best_mse = float("inf")
+        total_iters = 0
 
         # Training loop
         for epoch in range(epochs):
@@ -243,6 +254,11 @@ class FusionRegressor(BaseRegressor):
                     with torch.no_grad():
                         msg = "Epoch: {:03d} | Batch: {:03d} | Loss: {:.5f}"
                         self.logger.info(msg.format(epoch, batch_idx, loss))
+                        if self.tb_logger:
+                            self.tb_logger.add_scalar(
+                                "fusion/Train_Loss", loss, total_iters
+                            )
+                total_iters += 1
 
             # Validation
             if test_loader:
@@ -266,6 +282,10 @@ class FusionRegressor(BaseRegressor):
                         " Historical Best: {:.5f}"
                     )
                     self.logger.info(msg.format(epoch, mse, best_mse))
+                    if self.tb_logger:
+                        self.tb_logger.add_scalar(
+                            "fusion/Validation_MSE", mse, epoch
+                        )
 
             # Update the scheduler
             if hasattr(self, "scheduler_"):

@@ -22,6 +22,7 @@ from ._base import torchensemble_model_doc
 from .utils import io
 from .utils import set_module
 from .utils import operator as op
+from .utils.logging import get_tb_logger
 
 
 __all__ = [
@@ -139,6 +140,7 @@ class _BaseFastGeometric(BaseModule):
 
         self.device = torch.device("cuda" if cuda else "cpu")
         self.logger = logging.getLogger()
+        self.tb_logger = get_tb_logger()
 
         self.estimators_ = nn.ModuleList()
         self.use_scheduler_ = False
@@ -244,7 +246,11 @@ class FastGeometricClassifier(_BaseFastGeometric, BaseClassifier):
         "fit",
     )
     def fit(
-        self, train_loader, epochs=100, log_interval=100, test_loader=None
+        self,
+        train_loader,
+        epochs=100,
+        log_interval=100,
+        test_loader=None,
     ):
         self._validate_parameters(epochs, log_interval)
         self.n_outputs = self._decide_n_outputs(
@@ -268,6 +274,7 @@ class FastGeometricClassifier(_BaseFastGeometric, BaseClassifier):
         # Utils
         criterion = nn.CrossEntropyLoss()
         best_acc = 0.0
+        total_iters = 0
 
         for epoch in range(epochs):
 
@@ -303,6 +310,13 @@ class FastGeometricClassifier(_BaseFastGeometric, BaseClassifier):
                                 batch_size,
                             )
                         )
+                        if self.tb_logger:
+                            self.tb_logger.add_scalar(
+                                "fast_geometric/Base_Est/Train_Loss",
+                                loss,
+                                total_iters,
+                            )
+                total_iters += 1
 
             # Validation
             if test_loader:
@@ -327,6 +341,12 @@ class FastGeometricClassifier(_BaseFastGeometric, BaseClassifier):
                         "Validation Acc: {:.3f} % | Historical Best: {:.3f} %"
                     )
                     self.logger.info(msg.format(acc, best_acc))
+                    if self.tb_logger:
+                        self.tb_logger.add_scalar(
+                            "fast_geometric/Base_Est/Validation_Acc",
+                            acc,
+                            epoch,
+                        )
 
             if self.use_scheduler_:
                 scheduler.step()
@@ -365,6 +385,7 @@ class FastGeometricClassifier(_BaseFastGeometric, BaseClassifier):
         n_iters = len(train_loader)
         updated = False
         epoch = 0
+        total_iters = 0
 
         while len(self.estimators_) < self.n_estimators:
 
@@ -406,11 +427,22 @@ class FastGeometricClassifier(_BaseFastGeometric, BaseClassifier):
                                 batch_size,
                             )
                         )
+                        if self.tb_logger:
+                            self.tb_logger.add_scalar(
+                                "fast_geometric/Ensemble-Est_{}".format(
+                                    len(self.estimators_)
+                                )
+                                + "/Train_Loss",
+                                loss,
+                                total_iters,
+                            )
+                total_iters += 1
 
             # Update the ensemble
             if (epoch % cycle + 1) == cycle // 2:
                 self.estimators_.append(copy.deepcopy(estimator))
                 updated = True
+                total_iters = 0
 
                 msg = "Save the base estimator with index: {}"
                 self.logger.info(msg.format(len(self.estimators_) - 1))
@@ -442,6 +474,12 @@ class FastGeometricClassifier(_BaseFastGeometric, BaseClassifier):
                     self.logger.info(
                         msg.format(len(self.estimators_), acc, best_acc)
                     )
+                    if self.tb_logger:
+                        self.tb_logger.add_scalar(
+                            "fast_geometric/Ensemble_Est/Validation_Acc",
+                            acc,
+                            len(self.estimators_),
+                        )
                 updated = False  # reset the updating flag
             epoch += 1
 
@@ -561,6 +599,7 @@ class FastGeometricRegressor(_BaseFastGeometric, BaseRegressor):
         # Utils
         criterion = nn.MSELoss()
         best_mse = float("inf")
+        total_iters = 0
 
         for epoch in range(epochs):
 
@@ -581,6 +620,13 @@ class FastGeometricRegressor(_BaseFastGeometric, BaseRegressor):
                     with torch.no_grad():
                         msg = "Epoch: {:03d} | Batch: {:03d} | Loss: {:.5f}"
                         self.logger.info(msg.format(epoch, batch_idx, loss))
+                        if self.tb_logger:
+                            self.tb_logger.add_scalar(
+                                "fast_geometric/Base_Est/Train_Loss",
+                                loss,
+                                total_iters,
+                            )
+                total_iters += 1
 
             # Validation
             if test_loader:
@@ -603,6 +649,12 @@ class FastGeometricRegressor(_BaseFastGeometric, BaseRegressor):
                         " Historical Best: {:.5f}"
                     )
                     self.logger.info(msg.format(epoch, mse, best_mse))
+                    if self.tb_logger:
+                        self.tb_logger.add_scalar(
+                            "fast_geometric/Base_Est/Validation_MSE",
+                            mse,
+                            epoch,
+                        )
 
             if self.use_scheduler_:
                 scheduler.step()
@@ -641,6 +693,7 @@ class FastGeometricRegressor(_BaseFastGeometric, BaseRegressor):
         n_iters = len(train_loader)
         updated = False
         epoch = 0
+        total_iters = 0
 
         while len(self.estimators_) < self.n_estimators:
 
@@ -666,11 +719,22 @@ class FastGeometricRegressor(_BaseFastGeometric, BaseRegressor):
                     with torch.no_grad():
                         msg = "Epoch: {:03d} | Batch: {:03d} | Loss: {:.5f}"
                         self.logger.info(msg.format(epoch, batch_idx, loss))
+                        if self.tb_logger:
+                            self.tb_logger.add_scalar(
+                                "fast_geometric/Ensemble-Est_{}".format(
+                                    len(self.estimators_)
+                                )
+                                + "/Train_Loss",
+                                loss,
+                                total_iters,
+                            )
+                total_iters += 1
 
             # Update the ensemble
             if (epoch % cycle + 1) == cycle // 2:
                 self.estimators_.append(copy.deepcopy(estimator))
                 updated = True
+                total_iters = 0
 
                 msg = "Save the base estimator with index: {}"
                 self.logger.info(msg.format(len(self.estimators_) - 1))
@@ -697,6 +761,12 @@ class FastGeometricRegressor(_BaseFastGeometric, BaseRegressor):
                         " Historical Best: {:.5f}"
                     )
                     self.logger.info(msg.format(epoch, mse, best_mse))
+                    if self.tb_logger:
+                        self.tb_logger.add_scalar(
+                            "fast_geometric/Ensemble_Est/Validation_MSE",
+                            mse,
+                            len(self.estimators_),
+                        )
                 updated = False  # reset the updating flag
             epoch += 1
 

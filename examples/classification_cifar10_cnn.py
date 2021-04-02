@@ -96,7 +96,7 @@ if __name__ == "__main__":
         shuffle=True,
     )
 
-    logger = set_logger("classification_cifar10_cnn")
+    logger = set_logger("classification_cifar10_cnn", use_tb_logger=True)
 
     # FusionClassifier
     model = FusionClassifier(

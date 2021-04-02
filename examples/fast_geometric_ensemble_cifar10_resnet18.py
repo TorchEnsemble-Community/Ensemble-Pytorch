@@ -136,7 +136,9 @@ if __name__ == "__main__":
     )
 
     # Set the Logger
-    logger = set_logger("FastGeometricClassifier_cifar10_resnet")
+    logger = set_logger(
+        "FastGeometricClassifier_cifar10_resnet", use_tb_logger=True
+    )
 
     # Choose the Ensemble Method
     model = FastGeometricClassifier(
@@ -155,7 +157,11 @@ if __name__ == "__main__":
     model.set_scheduler("CosineAnnealingLR", T_max=epochs)
 
     # Train
-    estimator = model.fit(train_loader, epochs=epochs, test_loader=test_loader)
+    estimator = model.fit(
+        train_loader,
+        epochs=epochs,
+        test_loader=test_loader,
+    )
 
     # Ensemble
     model.ensemble(

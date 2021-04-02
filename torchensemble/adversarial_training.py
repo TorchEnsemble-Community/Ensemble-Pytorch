@@ -368,6 +368,12 @@ class AdversarialTrainingClassifier(_BaseAdversarialTraining, BaseClassifier):
                             " % | Historical Best: {:.3f} %"
                         )
                         self.logger.info(msg.format(epoch, acc, best_acc))
+                        if self.tb_logger:
+                            self.tb_logger.add_scalar(
+                                "adversarial_training/Validation_Acc",
+                                acc,
+                                epoch,
+                            )
 
                 # Update the scheduler
                 with warnings.catch_warnings():
@@ -541,6 +547,12 @@ class AdversarialTrainingRegressor(_BaseAdversarialTraining, BaseRegressor):
                             " {:.5f} | Historical Best: {:.5f}"
                         )
                         self.logger.info(msg.format(epoch, mse, best_mse))
+                        if self.tb_logger:
+                            self.tb_logger.add_scalar(
+                                "adversirial_training/Validation_MSE",
+                                mse,
+                                epoch,
+                            )
 
                 # Update the scheduler
                 with warnings.catch_warnings():

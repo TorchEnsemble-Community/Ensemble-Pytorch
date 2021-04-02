@@ -26,7 +26,7 @@ def set_optimizer(model, optimizer_name, **kwargs):
         )
 
     optimizer_cls = getattr(
-        importlib.import_module('torch.optim'), optimizer_name
+        importlib.import_module("torch.optim"), optimizer_name
     )
     optimizer = optimizer_cls(model.parameters(), **kwargs)
 
@@ -80,7 +80,7 @@ def set_scheduler(optimizer, scheduler_name, **kwargs):
         )
 
     scheduler_cls = getattr(
-        importlib.import_module('torch.optim.lr_scheduler'), scheduler_name
+        importlib.import_module("torch.optim.lr_scheduler"), scheduler_name
     )
     scheduler = scheduler_cls(optimizer, **kwargs)
 

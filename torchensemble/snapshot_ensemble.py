@@ -23,6 +23,7 @@ from ._base import torchensemble_model_doc
 from .utils import io
 from .utils import set_module
 from .utils import operator as op
+from .utils.logging import get_tb_logger
 
 
 __all__ = [
@@ -109,6 +110,7 @@ class _BaseSnapshotEnsemble(BaseModule):
 
         self.device = torch.device("cuda" if cuda else "cpu")
         self.logger = logging.getLogger()
+        self.tb_logger = get_tb_logger()
 
         self.estimators_ = nn.ModuleList()
 
@@ -264,6 +266,7 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble, BaseClassifier):
         criterion = nn.CrossEntropyLoss()
         best_acc = 0.0
         counter = 0  # a counter on generating snapshots
+        total_iters = 0
         n_iters_per_estimator = epochs * len(train_loader) // self.n_estimators
 
         # Training loop
@@ -303,11 +306,20 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble, BaseClassifier):
                                 batch_size,
                             )
                         )
+                        if self.tb_logger:
+                            self.tb_logger.add_scalar(
+                                "snapshot_ensemble/Train_Loss",
+                                loss,
+                                total_iters,
+                            )
+                        else:
+                            print("None")
 
                 # Snapshot ensemble updates the learning rate per iteration
                 # instead of per epoch.
                 scheduler.step()
                 counter += 1
+                total_iters += 1
 
             if counter % n_iters_per_estimator == 0:
 
@@ -346,6 +358,12 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble, BaseClassifier):
                     self.logger.info(
                         msg.format(len(self.estimators_), acc, best_acc)
                     )
+                    if self.tb_logger:
+                        self.tb_logger.add_scalar(
+                            "snapshot_ensemble/Validation_Acc",
+                            acc,
+                            len(self.estimators_),
+                        )
 
         if save_model and not test_loader:
             io.save(self, save_dir, self.logger)
@@ -415,6 +433,7 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble, BaseRegressor):
         criterion = nn.MSELoss()
         best_mse = float("inf")
         counter = 0  # a counter on generating snapshots
+        total_iters = 0
         n_iters_per_estimator = epochs * len(train_loader) // self.n_estimators
 
         # Training loop
@@ -448,11 +467,18 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble, BaseRegressor):
                                 loss,
                             )
                         )
+                        if self.tb_logger:
+                            self.tb_logger.add_scalar(
+                                "snapshot_ensemble/Train_Loss",
+                                loss,
+                                total_iters,
+                            )
 
                 # Snapshot ensemble updates the learning rate per iteration
                 # instead of per epoch.
                 scheduler.step()
                 counter += 1
+                total_iters += 1
 
             if counter % n_iters_per_estimator == 0:
                 # Generate and save the snapshot
@@ -487,6 +513,12 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble, BaseRegressor):
                     self.logger.info(
                         msg.format(len(self.estimators_), mse, best_mse)
                     )
+                    if self.tb_logger:
+                        self.tb_logger.add_scalar(
+                            "snapshot_ensemble/Validation_MSE",
+                            mse,
+                            len(self.estimators_),
+                        )
 
         if save_model and not test_loader:
             io.save(self, save_dir, self.logger)
