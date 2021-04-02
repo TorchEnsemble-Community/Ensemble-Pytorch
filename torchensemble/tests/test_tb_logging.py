@@ -2,7 +2,6 @@ import torch
 import pytest
 import numpy as np
 import torch.nn as nn
-from numpy.testing import assert_array_equal
 from torch.utils.data import TensorDataset, DataLoader
 
 import torchensemble
