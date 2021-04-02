@@ -11,7 +11,7 @@ def set_logger(
     log_file=None,
     log_console_level="info",
     log_file_level=None,
-    use_tb_logger=True,
+    use_tb_logger=False,
 ):
     """Bind the default logger with console and file stream output."""
 
