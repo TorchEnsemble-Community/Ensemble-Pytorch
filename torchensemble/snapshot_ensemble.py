@@ -266,6 +266,7 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble, BaseClassifier):
         criterion = nn.CrossEntropyLoss()
         best_acc = 0.0
         counter = 0  # a counter on generating snapshots
+        total_iters = 0
         n_iters_per_estimator = epochs * len(train_loader) // self.n_estimators
 
         # Training loop
@@ -432,6 +433,7 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble, BaseRegressor):
         criterion = nn.MSELoss()
         best_mse = float("inf")
         counter = 0  # a counter on generating snapshots
+        total_iters = 0
         n_iters_per_estimator = epochs * len(train_loader) // self.n_estimators
 
         # Training loop
