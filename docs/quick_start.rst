@@ -57,7 +57,13 @@ Ensemble-PyTorch uses a global logger to track and print the intermediate inform
 
     logger = set_logger("classification_mnist_mlp")
 
-Using the logger, all intermediate information will be printed on the command line and saved to the specified text file: classification_mnist_mlp.
+With this logger, all intermediate information will be printed on the command line and saved to the specified text file: ``classification_mnist_mlp``. Besides, you can use tensorboard to have a better visualization result on training and evaluating the ensemble.
+
+.. code-block:: bash
+
+    tensorboard --logdir=logs/
+
+The tensorboard feature can be disabled by passing ``use_tb_logger=False`` into the method :meth:`set_logger`.
 
 Choose the Ensemble
 -------------------
