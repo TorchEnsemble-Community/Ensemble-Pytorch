@@ -112,11 +112,7 @@ def test_clf_class(clf):
         epochs = 6
 
     # Train
-    ret = model.fit(train_loader, epochs=epochs, test_loader=test_loader)
-
-    # Extra step for Fast Geometric Ensemble
-    if isinstance(model, torchensemble.FastGeometricClassifier):
-        model.ensemble(ret, train_loader, test_loader=test_loader)
+    model.fit(train_loader, epochs=epochs, test_loader=test_loader)
 
     # Evaluate
     model.evaluate(test_loader)
@@ -165,11 +161,7 @@ def test_clf_object(clf):
         epochs = 6
 
     # Train
-    ret = model.fit(train_loader, epochs=epochs, test_loader=test_loader)
-
-    # Extra step for Fast Geometric Ensemble
-    if isinstance(model, torchensemble.FastGeometricClassifier):
-        model.ensemble(ret, train_loader, test_loader=test_loader)
+    model.fit(train_loader, epochs=epochs, test_loader=test_loader)
 
     # Evaluate
     model.evaluate(test_loader)
@@ -218,11 +210,7 @@ def test_reg_class(reg):
         epochs = 6
 
     # Train
-    ret = model.fit(train_loader, epochs=epochs, test_loader=test_loader)
-
-    # Extra step for Fast Geometric Ensemble
-    if isinstance(model, torchensemble.FastGeometricRegressor):
-        model.ensemble(ret, train_loader, test_loader=test_loader)
+    model.fit(train_loader, epochs=epochs, test_loader=test_loader)
 
     # Evaluate
     model.evaluate(test_loader)
@@ -271,11 +259,7 @@ def test_reg_object(reg):
         epochs = 6
 
     # Train
-    ret = model.fit(train_loader, epochs=epochs, test_loader=test_loader)
-
-    # Extra step for Fast Geometric Ensemble
-    if isinstance(model, torchensemble.FastGeometricRegressor):
-        model.ensemble(ret, train_loader, test_loader=test_loader)
+    model.fit(train_loader, epochs=epochs, test_loader=test_loader)
 
     # Evaluate
     model.evaluate(test_loader)

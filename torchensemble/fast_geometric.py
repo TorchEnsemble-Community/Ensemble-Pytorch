@@ -10,7 +10,6 @@
 """
 
 
-import copy
 import torch
 import logging
 import warnings
@@ -37,38 +36,6 @@ __fit_doc = """
     ----------
     train_loader : torch.utils.data.DataLoader
         A :mod:`DataLoader` container that contains the training data.
-    epochs : int, default=100
-        The number of training epochs used to fit the dummy base estimator.
-    log_interval : int, default=100
-        The number of batches to wait before logging the training status.
-    test_loader : torch.utils.data.DataLoader, default=None
-        A :mod:`DataLoader` container that contains the evaluating data.
-
-        - If ``None``, no validation is conducted during the training stage
-          of the dummy base estimator.
-        - If not ``None``, the dummy base estimator will be evaluated on this
-          dataloader after each training epoch, and the checkpoint with the
-          best validation performance will be reserved.
-
-    Returns
-    -------
-    estimator_ : :obj:`object`
-        The fitted base estimator.
-
-        - If test_loader is ``None``, the base estimator fully trained will be
-          returned.
-        - If test_loader is not ``None``, the base estimator with the best
-          validation performance will be returned.
-"""
-
-
-__fge_doc = """
-    Parameters
-    ----------
-    estimator : :obj:`object`
-        The fitted base estimator.
-    train_loader : torch.utils.data.DataLoader
-        A :mod:`DataLoader` container that contains the training data.
     cycle : int, default=4
         The number of cycles used to build each base estimator in the ensemble.
     lr_1 : float, default=5e-2
@@ -77,6 +44,10 @@ __fge_doc = """
     lr_2 : float, default=1e-4
         ``alpha_2`` in original paper used to adjust the learning rate, also
         serves as the smallest learning rate of the internal optimizer.
+    epochs : int, default=100
+        The number of training epochs used to fit the dummy base estimator.
+    log_interval : int, default=100
+        The number of batches to wait before logging the training status.
     test_loader : torch.utils.data.DataLoader, default=None
         A :mod:`DataLoader` container that contains the evaluating data.
 
@@ -84,8 +55,6 @@ __fge_doc = """
           estimator being generated.
         - If not ``None``, the ensemble will be evaluated on this
           dataloader after each base estimator being generated.
-    log_interval : int, default=100
-        The number of batches to wait before logging the training status.
     save_model : bool, default=True
         Specify whether to save the model parameters.
 
@@ -109,7 +78,7 @@ def _fast_geometric_model_doc(header, item="fit"):
 
     def get_doc(item):
         """Return selected item"""
-        __doc = {"fit": __fit_doc, "fge": __fge_doc}
+        __doc = {"fit": __fit_doc}
         return __doc[item]
 
     def adddoc(cls):
@@ -248,18 +217,25 @@ class FastGeometricClassifier(_BaseFastGeometric, BaseClassifier):
     def fit(
         self,
         train_loader,
+        cycle=4,
+        lr_1=5e-2,
+        lr_2=1e-4,
         epochs=100,
         log_interval=100,
         test_loader=None,
+        save_model=True,
+        save_dir=None,
     ):
         self._validate_parameters(epochs, log_interval)
         self.n_outputs = self._decide_n_outputs(
             train_loader, self.is_classification
         )
 
-        # A dummy base estimator
+        # ====================================================================
+        #                Train the dummy estimator (estimator_)
+        # ====================================================================
+
         estimator_ = self._make_estimator()
-        ret_estimator = None
 
         # Set the optimizer and scheduler
         optimizer = set_module.set_optimizer(
@@ -273,7 +249,6 @@ class FastGeometricClassifier(_BaseFastGeometric, BaseClassifier):
 
         # Utils
         criterion = nn.CrossEntropyLoss()
-        best_acc = 0.0
         total_iters = 0
 
         for epoch in range(epochs):
@@ -318,79 +293,29 @@ class FastGeometricClassifier(_BaseFastGeometric, BaseClassifier):
                             )
                 total_iters += 1
 
-            # Validation
-            if test_loader:
-                estimator_.eval()
-                with torch.no_grad():
-                    correct = 0
-                    total = 0
-                    for _, (data, target) in enumerate(test_loader):
-                        data = data.to(self.device)
-                        target = target.to(self.device)
-                        output = estimator_(data)
-                        _, predicted = torch.max(output.data, 1)
-                        correct += (predicted == target).sum().item()
-                        total += target.size(0)
-                    acc = 100 * correct / total
-
-                    if acc > best_acc:
-                        best_acc = acc
-                        ret_estimator = copy.deepcopy(estimator_)
-
-                    msg = (
-                        "Validation Acc: {:.3f} % | Historical Best: {:.3f} %"
-                    )
-                    self.logger.info(msg.format(acc, best_acc))
-                    if self.tb_logger:
-                        self.tb_logger.add_scalar(
-                            "fast_geometric/Base_Est/Validation_Acc",
-                            acc,
-                            epoch,
-                        )
-
             if self.use_scheduler_:
                 scheduler.step()
 
-        # Extra step if `test_loader` is None
-        if ret_estimator is None:
-            ret_estimator = copy.deepcopy(estimator_)
-
-        return ret_estimator
-
-    @_fast_geometric_model_doc(
-        """Implementation on the ensembling stage of FastGeometricClassifier.""",  # noqa: E501
-        "fge",
-    )
-    def ensemble(
-        self,
-        estimator,
-        train_loader,
-        cycle=4,
-        lr_1=5e-2,
-        lr_2=1e-4,
-        log_interval=100,
-        test_loader=None,
-        save_model=True,
-        save_dir=None,
-    ):
+        # ====================================================================
+        #                        Generate the ensemble
+        # ====================================================================
 
         # Set the internal optimizer
+        estimator_.zero_grad()
         optimizer = set_module.set_optimizer(
-            estimator, self.optimizer_name, **self.optimizer_args
+            estimator_, self.optimizer_name, **self.optimizer_args
         )
 
         # Utils
-        criterion = nn.CrossEntropyLoss()
         best_acc = 0.0
         n_iters = len(train_loader)
         updated = False
         epoch = 0
-        total_iters = 0
 
         while len(self.estimators_) < self.n_estimators:
 
             # Training
-            estimator.train()
+            estimator_.train()
             for batch_idx, (data, target) in enumerate(train_loader):
 
                 # Update learning rate
@@ -402,7 +327,7 @@ class FastGeometricClassifier(_BaseFastGeometric, BaseClassifier):
                 data, target = data.to(self.device), target.to(self.device)
 
                 optimizer.zero_grad()
-                output = estimator(data)
+                output = estimator_(data)
                 loss = criterion(output, target)
                 loss.backward()
                 optimizer.step()
@@ -440,7 +365,9 @@ class FastGeometricClassifier(_BaseFastGeometric, BaseClassifier):
 
             # Update the ensemble
             if (epoch % cycle + 1) == cycle // 2:
-                self.estimators_.append(copy.deepcopy(estimator))
+                base_estimator = self._make_estimator()
+                base_estimator.load_state_dict(estimator_.state_dict())
+                self.estimators_.append(base_estimator)
                 updated = True
                 total_iters = 0
 
@@ -485,40 +412,10 @@ class FastGeometricClassifier(_BaseFastGeometric, BaseClassifier):
 
         if save_model and not test_loader:
             io.save(self, save_dir, self.logger)
-        self.is_fitted_ = True
 
     @torchensemble_model_doc(item="classifier_evaluate")
     def evaluate(self, test_loader, return_loss=False):
-
-        if len(self.estimators_) == 0:
-            msg = (
-                "Please call the `ensemble` method to build the ensemble"
-                " first."
-            )
-            self.logger.error(msg)
-            raise RuntimeError(msg)
-
-        self.eval()
-        correct = 0
-        total = 0
-        criterion = nn.CrossEntropyLoss()
-        loss = 0.0
-
-        for _, (data, target) in enumerate(test_loader):
-            data, target = data.to(self.device), target.to(self.device)
-            output = self.forward(data)
-            _, predicted = torch.max(output.data, 1)
-            correct += (predicted == target).sum().item()
-            total += target.size(0)
-            loss += criterion(output, target)
-
-        acc = 100 * correct / total
-        loss /= len(test_loader)
-
-        if return_loss:
-            return acc, float(loss)
-
-        return acc
+        return super().evaluate(test_loader, return_loss)
 
     @torchensemble_model_doc(item="predict")
     def predict(self, X, return_numpy=True):
@@ -570,7 +467,9 @@ class FastGeometricRegressor(_BaseFastGeometric, BaseRegressor):
     def fit(
         self,
         train_loader,
-        lr_clip=None,
+        cycle=4,
+        lr_1=5e-2,
+        lr_2=1e-4,
         epochs=100,
         log_interval=100,
         test_loader=None,
@@ -582,9 +481,11 @@ class FastGeometricRegressor(_BaseFastGeometric, BaseRegressor):
             train_loader, self.is_classification
         )
 
-        # A dummy base estimator
+        # ====================================================================
+        #                Train the dummy estimator (estimator_)
+        # ====================================================================
+
         estimator_ = self._make_estimator()
-        ret_estimator = None
 
         # Set the optimizer and scheduler
         optimizer = set_module.set_optimizer(
@@ -598,7 +499,6 @@ class FastGeometricRegressor(_BaseFastGeometric, BaseRegressor):
 
         # Utils
         criterion = nn.MSELoss()
-        best_mse = float("inf")
         total_iters = 0
 
         for epoch in range(epochs):
@@ -628,77 +528,29 @@ class FastGeometricRegressor(_BaseFastGeometric, BaseRegressor):
                             )
                 total_iters += 1
 
-            # Validation
-            if test_loader:
-                estimator_.eval()
-                with torch.no_grad():
-                    mse = 0.0
-                    for _, (data, target) in enumerate(test_loader):
-                        data = data.to(self.device)
-                        target = target.to(self.device)
-                        output = estimator_(data)
-                        mse += criterion(output, target)
-                    mse /= len(test_loader)
-
-                    if mse < best_mse:
-                        best_mse = mse
-                        ret_estimator = copy.deepcopy(estimator_)
-
-                    msg = (
-                        "Epoch: {:03d} | Validation MSE: {:.5f} |"
-                        " Historical Best: {:.5f}"
-                    )
-                    self.logger.info(msg.format(epoch, mse, best_mse))
-                    if self.tb_logger:
-                        self.tb_logger.add_scalar(
-                            "fast_geometric/Base_Est/Validation_MSE",
-                            mse,
-                            epoch,
-                        )
-
             if self.use_scheduler_:
                 scheduler.step()
 
-        # Extra step if `test_loader` is None
-        if ret_estimator is None:
-            ret_estimator = copy.deepcopy(estimator_)
-
-        return estimator_
-
-    @_fast_geometric_model_doc(
-        """Implementation on the ensembling stage of FastGeometricRegressor.""",  # noqa: E501
-        "fge",
-    )
-    def ensemble(
-        self,
-        estimator,
-        train_loader,
-        cycle=4,
-        lr_1=5e-2,
-        lr_2=1e-4,
-        log_interval=100,
-        test_loader=None,
-        save_model=True,
-        save_dir=None,
-    ):
+        # ====================================================================
+        #                        Generate the ensemble
+        # ====================================================================
 
         # Set the internal optimizer
+        estimator_.zero_grad()
         optimizer = set_module.set_optimizer(
-            estimator, self.optimizer_name, **self.optimizer_args
+            estimator_, self.optimizer_name, **self.optimizer_args
         )
 
         # Utils
-        criterion = nn.MSELoss()
         best_mse = float("inf")
         n_iters = len(train_loader)
         updated = False
         epoch = 0
-        total_iters = 0
 
         while len(self.estimators_) < self.n_estimators:
 
             # Training
-            estimator.train()
+            estimator_.train()
             for batch_idx, (data, target) in enumerate(train_loader):
 
                 # Update learning rate
@@ -709,7 +561,7 @@ class FastGeometricRegressor(_BaseFastGeometric, BaseRegressor):
                 data, target = data.to(self.device), target.to(self.device)
 
                 optimizer.zero_grad()
-                output = estimator(data)
+                output = estimator_(data)
                 loss = criterion(output, target)
                 loss.backward()
                 optimizer.step()
@@ -732,7 +584,9 @@ class FastGeometricRegressor(_BaseFastGeometric, BaseRegressor):
 
             # Update the ensemble
             if (epoch % cycle + 1) == cycle // 2:
-                self.estimators_.append(copy.deepcopy(estimator))
+                base_estimator = self._make_estimator()
+                base_estimator.load_state_dict(estimator_.state_dict())
+                self.estimators_.append(base_estimator)
                 updated = True
                 total_iters = 0
 
@@ -772,29 +626,10 @@ class FastGeometricRegressor(_BaseFastGeometric, BaseRegressor):
 
         if save_model and not test_loader:
             io.save(self, save_dir, self.logger)
-        self.is_fitted_ = True
 
     @torchensemble_model_doc(item="regressor_evaluate")
     def evaluate(self, test_loader):
-
-        if len(self.estimators_) == 0:
-            msg = (
-                "Please call the `ensemble` method to build the ensemble"
-                " first."
-            )
-            self.logger.error(msg)
-            raise RuntimeError(msg)
-
-        self.eval()
-        mse = 0.0
-        criterion = nn.MSELoss()
-
-        for batch_idx, (data, target) in enumerate(test_loader):
-            data, target = data.to(self.device), target.to(self.device)
-            output = self.forward(data)
-            mse += criterion(output, target)
-
-        return float(mse) / len(test_loader)
+        return super().evaluate(test_loader)
 
     @torchensemble_model_doc(item="predict")
     def predict(self, X, return_numpy=True):

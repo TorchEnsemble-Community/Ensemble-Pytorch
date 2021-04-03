@@ -147,21 +147,6 @@ Reference:
     T. Garipov, P. Izmailov, D. Podoprikhin et al., Loss Surfaces, Mode
     Connectivity, and Fast Ensembling of DNNs, NeurIPS, 2018.
 
-Notice that unlike all ensembles above, using fast geometric ensemble (FGE) is
-**a two-staged process**. Concretely, you first need to call :meth:`fit` to
-build a dummy base estimator that will be used to generate ensembles. Second,
-you need to call :meth:`ensemble` to generate real base estimators in the
-ensemble. The pipeline is shown in the following code snippet:
-
-.. code:: python
-
-    model = FastGeometricClassifier(**ensemble_related_args)
-    estimator = model.fit(train_loader, **base_estimator_related_args)  # train the base estimator
-    model.ensemble(estimator, train_loader, **fge_related_args)  # generate the ensemble using the base estimator
-
-You can refer to scripts in `examples <https://github.com/xuyxu/Ensemble-Pytorch/tree/master/examples>`__ for
-a detailed example.
-
 FastGeometricClassifier
 ***********************
 
