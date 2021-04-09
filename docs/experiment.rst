@@ -1,10 +1,6 @@
 Experiments
 ===========
 
-.. warning::
-
-  This page is still under construction. We are sorry for the delay, which is caused by the prohibitively long time on running all experiments listed below.
-
 Setup
 ~~~~~
 
@@ -72,7 +68,14 @@ ResNet\@CIFAR-10
 ResNet\@CIFAR-100
 ~~~~~~~~~~~~~~~~~
 
-TBA.
+.. image:: ./_images/resnet_cifar100.png
+   :align: center
+   :width: 400
+
+* CIFAR-100 is a hard dataset for ResNet-18, and the testing acc of a single ResNet-18 estimator is around 76%
+* voting is the most effective ensemble in this case
+* fusion does not perform well in this case
+* the result of gradient boosting is omitted because of its prohibitively long training time
 
 Acknowledgement
 ~~~~~~~~~~~~~~~
