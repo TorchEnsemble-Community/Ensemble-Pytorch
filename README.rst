@@ -114,4 +114,3 @@ Package Dependency
 -  scikit-learn>=0.23.0
 -  torch>=1.4.0
 -  torchvision>=0.2.2
--  tensorboard==2.*
