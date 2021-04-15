@@ -92,6 +92,7 @@ def init_tb_logger(log_dir):
         raise ModuleNotFoundError(msg)
 
     from torch.utils.tensorboard import SummaryWriter
+
     global _tb_logger
 
     if not _tb_logger:
