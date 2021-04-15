@@ -4,6 +4,7 @@ Changelog
 Ver 0.1.*
 ---------
 
+* |Enhancement| Relax :mod:`tensorboard` as a soft dependency | `@xuyxu <https://github.com/xuyxu>`__
 * |Enhancement| |API| Simplify the training workflow of :class:`FastGeometricClassifier` and :class:`FastGeometricRegressor` | `@xuyxu <https://github.com/xuyxu>`__
 * |Feature| |API| Support TensorBoard logging in :meth:`set_logger` | `@zzzzwj <https://github.com/zzzzwj>`__
 * |Enhancement| |API| Add ``use_reduction_sum`` parameter for :meth:`fit` of Gradient Boosting | `@xuyxu <https://github.com/xuyxu>`__
