@@ -59,7 +59,8 @@ setup(
     maintainer="Yi-Xuan Xu",
     maintainer_email="xuyx@lamda.nju.edu.cn",
     description=(
-        "Implementations of scikit-learn like ensemble methods in Pytorch"
+        "A unified ensemble framework for PyTorch to improve the performance"
+        " and robustness of your deep learning model"
     ),
     license="BSD 3-Clause",
     url="https://github.com/xuyxu/Ensemble-Pytorch",
@@ -68,7 +69,7 @@ setup(
         "Documentation": "https://ensemble-pytorch.readthedocs.io",
         "Source Code": "https://github.com/xuyxu/Ensemble-Pytorch",
     },
-    version="0.1.2",
+    version="0.1.3",
     long_description=long_description,
     classifiers=[
         "Intended Audience :: Science/Research",
@@ -85,7 +86,7 @@ setup(
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
     ],
-    keywords=["PyTorch", "Ensemble Learning"],
+    keywords=["Deep Learning", "PyTorch", "Ensemble Learning"],
     packages=find_packages(),
     cmdclass=cmdclass,
     python_requires=">=3.6",
