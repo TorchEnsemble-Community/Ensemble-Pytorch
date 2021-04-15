@@ -83,15 +83,15 @@ def set_logger(
 
 def init_tb_logger(log_dir):
     try:
-        from torch.utils.tensorboard import SummaryWriter
+        import tensorboard  # noqa: F401
     except ModuleNotFoundError:
         msg = (
-            "Cannot load the module torch when building the "
-            "ImageScanner. Please make sure that tensorboard is"
-            " installed."
+            "Cannot load the module tensorboard. Please make sure that"
+            " tensorboard is installed."
         )
         raise ModuleNotFoundError(msg)
 
+    from torch.utils.tensorboard import SummaryWriter
     global _tb_logger
 
     if not _tb_logger:
