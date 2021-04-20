@@ -119,6 +119,19 @@ In the code snippet above, ``train_loader`` and ``test_loader`` is the PyTorch :
 
 Notice that the ``test_loader`` can also be passed to ``fit``, under the case, the ensemble will be evaluated on the ``test_loader`` after each training epoch.
 
+Save and Reload
+---------------
+
+By setting the ``save_model`` to ``True`` in the :meth:`fit` function of the ensemble, model parameters will be automatically saved to the specified path ``save_dir`` (By default, it will be saved in the same folder as the running script). After then, you can use the following code snippet to load the saved ensemble.
+
+.. code-block:: python
+
+    from torchensemble.utils import io
+
+    io.load(new_ensemble, save_dir)  # reload
+
+where :obj:`new_ensemble` is an ensemble instantiated in the same way as the original ensemble.
+
 Example on MNIST
 ----------------
 
