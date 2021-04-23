@@ -2,6 +2,7 @@
 
 
 import torch
+import numpy as np
 import torch.nn.functional as F
 
 
@@ -36,18 +37,49 @@ def onehot_encoding(label, n_classes):
     return onehot
 
 
-def pseudo_residual_classification(target, output, n_classes):
+def pseudo_residual_classification(target, output, n_classes, order=1):
     """
-    Compute the pseudo residual for classification with cross-entropyloss."""
-    y_onehot = onehot_encoding(target, n_classes)
+    Compute the pseudo residual for classification with cross-entropy loss.
 
-    return y_onehot - F.softmax(output, dim=1)
+    Parameters
+    ----------
+    target :
+
+    output :
+
+    n_classes :
+
+    order :
+
+    Returns
+    -------
+    residual :
+
+    """
+    residual = None
+
+    if order == 1:
+        y_onehot = onehot_encoding(target, n_classes)
+        residual = y_onehot - F.softmax(output, dim=1)
+    else:
+        n_samples = output.size(0)
+        # Generate pseudo targets
+        pseudo_targets = []
+        for k in range(n_classes):
+            y_binary = torch.ones(n_samples, 1)
+            y_binary[target != k, 0] *= -1
+            pseudo_targets.append(y_binary)
+        pseudo_targets = torch.cat(pseudo_targets, dim=1)
+
+    return residual
 
 
-def pseudo_residual_regression(target, output):
+def pseudo_residual_regression(target, output, order=1):
     """Compute the pseudo residual for regression with least square error."""
     if target.size() != output.size():
         msg = "The shape of target {} should be the same as output {}."
         raise ValueError(msg.format(target.size(), output.size()))
 
+    # The form of pesudo residuals of 1st and 2nd are the same, the parameter
+    # of `order` is preserved for consistencys
     return target - output

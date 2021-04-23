@@ -43,6 +43,8 @@ __model_doc = """
         The dictionary of hyper-parameters used to instantiate base
         estimators. This parameter will have no effect if ``estimator`` is a
         base estimator object after instantiation.
+    order : int, default=1
+        The order of computing pesudo residuals in gradient boosting.
     shrinkage_rate : float, default=1
         The shrinkage rate used in gradient boosting.
     cuda : bool, default=True
@@ -125,6 +127,7 @@ class _BaseGradientBoosting(BaseModule):
         estimator,
         n_estimators,
         estimator_args=None,
+        order=1,
         shrinkage_rate=1.0,
         cuda=True,
     ):
@@ -140,6 +143,7 @@ class _BaseGradientBoosting(BaseModule):
             )
             warnings.warn(msg, RuntimeWarning)
 
+        self.order = order
         self.shrinkage_rate = shrinkage_rate
         self.device = torch.device("cuda" if cuda else "cpu")
         self.logger = logging.getLogger()
@@ -177,6 +181,13 @@ class _BaseGradientBoosting(BaseModule):
             )
             self.logger.error(msg.format(early_stopping_rounds))
             raise ValueError(msg.format(early_stopping_rounds))
+
+        if self.order not in (1, 2):
+            msg = (
+                "Unsupported order for computing pseudo residuals, should"
+                " be one of {{1, 2}}, but got {} instead."
+            )
+            raise ValueError(msg.format(self.order))
 
         if not 0 < self.shrinkage_rate <= 1:
             msg = (
@@ -358,7 +369,7 @@ class GradientBoostingClassifier(_BaseGradientBoosting, BaseClassifier):
             ]
             output += op.sum_with_multiplicative(results, self.shrinkage_rate)
         pseudo_residual = op.pseudo_residual_classification(
-            y, output, self.n_outputs
+            y, output, self.n_outputs, self.order
         )
 
         return pseudo_residual
@@ -471,7 +482,7 @@ class GradientBoostingRegressor(_BaseGradientBoosting, BaseRegressor):
                 estimator(X) for estimator in self.estimators_[:est_idx]
             ]
             output = op.sum_with_multiplicative(results, self.shrinkage_rate)
-        pseudo_residual = op.pseudo_residual_regression(y, output)
+        pseudo_residual = op.pseudo_residual_regression(y, output, self.order)
 
         return pseudo_residual
 
