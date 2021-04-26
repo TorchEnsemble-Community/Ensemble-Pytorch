@@ -427,6 +427,7 @@ class GradientBoostingClassifier(_BaseGradientBoosting, BaseClassifier):
         super().fit(
             train_loader=train_loader,
             epochs=epochs,
+            use_reduction_sum=use_reduction_sum,
             log_interval=log_interval,
             test_loader=test_loader,
             early_stopping_rounds=early_stopping_rounds,
@@ -538,6 +539,7 @@ class GradientBoostingRegressor(_BaseGradientBoosting, BaseRegressor):
         super().fit(
             train_loader=train_loader,
             epochs=epochs,
+            use_reduction_sum=use_reduction_sum,
             log_interval=log_interval,
             test_loader=test_loader,
             early_stopping_rounds=early_stopping_rounds,
