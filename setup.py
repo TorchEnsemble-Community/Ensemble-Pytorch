@@ -76,7 +76,6 @@ setup(
         "Intended Audience :: Developers",
         "Topic :: Software Development",
         "Topic :: Scientific/Engineering",
-        "Development Status :: 4 - Beta",
         "Operating System :: Microsoft :: Windows",
         "Operating System :: POSIX",
         "Operating System :: Unix",
