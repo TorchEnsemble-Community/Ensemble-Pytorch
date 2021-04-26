@@ -4,7 +4,8 @@ Changelog
 Ver 0.1.*
 ---------
 
-* |Feature| |API| Support the second pseudo residual for Gradient Boosting | `@xuyxu <https://github.com/xuyxu>`__
+* |Feature| |API| Support second-order pseudo residual for Gradient Boosting | `@xuyxu <https://github.com/xuyxu>`__
+* |Fix| Fix missing functionality of ``use_reduction_sum`` for :meth:`fit` of Gradient Boosting | `@xuyxu <https://github.com/xuyxu>`__
 * |Enhancement| Relax :mod:`tensorboard` as a soft dependency | `@xuyxu <https://github.com/xuyxu>`__
 * |Enhancement| |API| Simplify the training workflow of :class:`FastGeometricClassifier` and :class:`FastGeometricRegressor` | `@xuyxu <https://github.com/xuyxu>`__
 * |Feature| |API| Support TensorBoard logging in :meth:`set_logger` | `@zzzzwj <https://github.com/zzzzwj>`__
