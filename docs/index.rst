@@ -1,4 +1,4 @@
-.. image:: ./_images/badge.png
+.. image:: ./_images/badge.svg
    :align: center
    :width: 400
 
