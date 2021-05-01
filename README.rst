@@ -26,7 +26,14 @@
 Ensemble PyTorch
 ================
 
-Ensemble PyTorch is a unified ensemble framework for PyTorch to improve the performance and robustness of your deep learning model. Please refer to our `documentation <https://ensemble-pytorch.readthedocs.io/>`__ for details.
+Ensemble PyTorch is a unified ensemble framework for PyTorch to easily improve the performance and robustness of your deep learning model.
+
+Resources
+---------
+
+* `Document <https://ensemble-pytorch.readthedocs.io/>`__
+* `Source Code <https://github.com/xuyxu/Ensemble-Pytorch>`__
+* `Experiment <https://ensemble-pytorch.readthedocs.io/en/stable/experiment.html>`__
 
 Installation
 ------------
@@ -49,17 +56,17 @@ To use the latest version, you need to install the package from source:
 
     $ git clone https://github.com/xuyxu/Ensemble-Pytorch.git
     $ cd Ensemble-Pytorch
-    $ pip install -r requirements.txt (Optional)
+    $ pip install -r requirements.txt
     $ python setup.py install
 
-Minimal Example on How to Use
------------------------------
+Example
+-------
 
 .. code:: python
 
-    from torchensemble import VotingClassifier             # a classic ensemble method
+    from torchensemble import VotingClassifier             # Voting is a classic ensemble strategy
 
-    # Load your data
+    # Load data
     train_loader = DataLoader(...)
     test_loader = DataLoader(...)
 
@@ -73,7 +80,7 @@ Minimal Example on How to Use
                         weight_decay=weight_decay)         # weight decay of the optimizer
 
     # Set the scheduler
-    model.set_scheduler("CosineAnnealingLR", T_max=epochs) # optional
+    model.set_scheduler("CosineAnnealingLR", T_max=epochs) # (optional) learning rate scheduler
 
     # Train
     model.fit(train_loader,
@@ -102,11 +109,6 @@ Supported Ensemble
 +-------------------------+------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------+
 | Fast Geometric Ensemble | Sequential |                                                                     `[NeurIPS'18] Loss Surfaces, Mode Connectivity, and Fast Ensembling of DNNs <https://arxiv.org/pdf/1802.10026;Loss>`__                                                                       |    fast_geometric.py    |
 +-------------------------+------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------+
-
-Experiment
-----------
-
-Please refer to the `experiment part <https://ensemble-pytorch.readthedocs.io/en/stable/experiment.html>`__ of our documentation.
 
 Package Dependency
 ------------------

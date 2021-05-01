@@ -70,7 +70,13 @@ During the training stage of each base estimator :math:`h^m`, an adversarial sam
 
 Same as Voting and Bagging, the output of ``AdversarialTrainingClassifier`` or ``AdversarialTrainingRegressor`` during the evaluating stage is the average over predictions from all base estimators.
 
+Fast Geometric Ensemble [3]_
+----------------------------
+
+Motivated by geometric insights on the loss surface of deep neural networks, Fast Geometirc Ensembling (FGE) is an efficient ensemble that uses a customized learning rate scheduler to generate base estimators, similar to snapshot ensemble.
+
 **References**
 
 .. [1] Huang Gao, Sharon Yixuan Li, Geoff Pleisset, et al., "Snapshot ensembles: Train 1, get m for free." ICLR, 2017.
 .. [2] Balaji Lakshminarayanan, Alexander Pritzel, Charles Blundell., "Simple and Scalable Predictive Uncertainty Estimation using Deep Ensembles." NIPS 2017.
+.. [3] Timur Garipov, Pavel Izmailov, Dmitrii Podoprikhin et al., "Loss Surfaces, Mode Connectivity, and Fast Ensembling of DNNs." NeurIPS, 2018.
