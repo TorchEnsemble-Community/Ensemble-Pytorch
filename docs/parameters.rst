@@ -1,7 +1,7 @@
 Parameters
 ==========
 
-This page provides the API reference of ``torchensemble``, please also refer to `Introduction <./introduction.html>`__ for details.
+This page provides the API reference of :mod:`torchensemble`.
 
 Fusion
 ------
@@ -48,7 +48,7 @@ Bagging
 In bagging-based ensemble methods, each base estimator is trained
 independently. In addition, sampling with replacement is conducted on the
 training data to further encourage the diversity between different base
-estimators in the ensemble model.
+estimators in the ensemble.
 
 BaggingClassifier
 *****************
@@ -71,7 +71,7 @@ computed based on the ground truth and the output from base estimators
 fitted before, using ordinary least square.
 
 .. tip::
-    The input argument ``shrinkage_rate`` in :mod:`gradient_boosting` is also known as learning rate in other gradient boosting libraries such as `XGBoost <https://xgboost.readthedocs.io/en/latest/>`__. However, its meaning is totally different from the meaning of learning rate in the context of parameter optimizer in deep learning.
+    The input argument ``shrinkage_rate`` in :class:`gradient_boosting` is also known as learning rate in other gradient boosting libraries such as `XGBoost <https://xgboost.readthedocs.io/en/latest/>`__. However, its meaning is totally different from the meaning of learning rate in the context of parameter optimizer in deep learning.
 
 GradientBoostingClassifier
 **************************
@@ -139,7 +139,7 @@ Fast Geometric Ensemble
 -----------------------
 
 Motivated by geometric insights on the loss surface of deep neural networks,
-Fast Geometirc Ensembling (FGE) is an efficient ensemble that uses a
+Fast Geometric Ensembling (FGE) is an efficient ensemble that uses a
 customized learning rate scheduler to generate base estimators, similar to
 snapshot ensemble.
 
