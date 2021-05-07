@@ -393,7 +393,6 @@ class AdversarialTrainingClassifier(_BaseAdversarialTraining, BaseClassifier):
     "model",
 )
 class AdversarialTrainingRegressor(_BaseAdversarialTraining, BaseRegressor):
-
     @torchensemble_model_doc(
         """Implementation on the data forwarding in AdversarialTrainingRegressor.""",  # noqa: E501
         "regressor_forward",
