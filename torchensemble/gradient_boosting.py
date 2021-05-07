@@ -21,11 +21,7 @@ from .utils import operator as op
 from .utils.logging import get_tb_logger
 
 
-__all__ = [
-    "_BaseGradientBoosting",
-    "GradientBoostingClassifier",
-    "GradientBoostingRegressor",
-]
+__all__ = ["GradientBoostingClassifier", "GradientBoostingRegressor"]
 
 
 __model_doc = """
@@ -209,23 +205,6 @@ class _BaseGradientBoosting(BaseModule):
 
         return out
 
-    @torchensemble_model_doc(
-        """Set the attributes on optimizer for Gradient Boosting.""",
-        "set_optimizer",
-    )
-    def set_optimizer(self, optimizer_name, **kwargs):
-        self.optimizer_name = optimizer_name
-        self.optimizer_args = kwargs
-
-    @torchensemble_model_doc(
-        """Set the attributes on scheduler for Gradient Boosting.""",
-        "set_scheduler",
-    )
-    def set_scheduler(self, scheduler_name, **kwargs):
-        self.scheduler_name = scheduler_name
-        self.scheduler_args = kwargs
-        self.use_scheduler_ = True
-
     def fit(
         self,
         train_loader,
@@ -242,9 +221,7 @@ class _BaseGradientBoosting(BaseModule):
         for _ in range(self.n_estimators):
             self.estimators_.append(self._make_estimator())
         self._validate_parameters(epochs, log_interval, early_stopping_rounds)
-        self.n_outputs = self._decide_n_outputs(
-            train_loader, self.is_classification
-        )
+        self.n_outputs = self._decide_n_outputs(train_loader)
 
         # Utils
         criterion = (
@@ -342,10 +319,6 @@ class _BaseGradientBoosting(BaseModule):
     """Implementation on the GradientBoostingClassifier.""", "model"
 )
 class GradientBoostingClassifier(_BaseGradientBoosting, BaseClassifier):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.is_classification = True
-
     def _pseudo_residual(self, X, y, est_idx):
         """Compute pseudo residuals in classification."""
         output = torch.zeros(X.size(0), self.n_outputs).to(self.device)
@@ -400,14 +373,14 @@ class GradientBoostingClassifier(_BaseGradientBoosting, BaseClassifier):
         "set_optimizer",
     )
     def set_optimizer(self, optimizer_name, **kwargs):
-        super().set_optimizer(optimizer_name=optimizer_name, **kwargs)
+        super().set_optimizer(optimizer_name, **kwargs)
 
     @torchensemble_model_doc(
         """Set the attributes on scheduler for GradientBoostingClassifier.""",
         "set_scheduler",
     )
     def set_scheduler(self, scheduler_name, **kwargs):
-        super().set_scheduler(scheduler_name=scheduler_name, **kwargs)
+        super().set_scheduler(scheduler_name, **kwargs)
 
     @_gradient_boosting_model_doc(
         """Implementation on the training stage of GradientBoostingClassifier.""",  # noqa: E501
@@ -459,10 +432,6 @@ class GradientBoostingClassifier(_BaseGradientBoosting, BaseClassifier):
     """Implementation on the GradientBoostingRegressor.""", "model"
 )
 class GradientBoostingRegressor(_BaseGradientBoosting, BaseRegressor):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.is_classification = False
-
     def _pseudo_residual(self, X, y, est_idx):
         """Compute pseudo residuals in regression."""
         output = torch.zeros_like(y).to(self.device)
@@ -512,14 +481,14 @@ class GradientBoostingRegressor(_BaseGradientBoosting, BaseRegressor):
         "set_optimizer",
     )
     def set_optimizer(self, optimizer_name, **kwargs):
-        super().set_optimizer(optimizer_name=optimizer_name, **kwargs)
+        super().set_optimizer(optimizer_name, **kwargs)
 
     @torchensemble_model_doc(
         """Set the attributes on scheduler for GradientBoostingRegressor.""",
         "set_scheduler",
     )
     def set_scheduler(self, scheduler_name, **kwargs):
-        super().set_scheduler(scheduler_name=scheduler_name, **kwargs)
+        super().set_scheduler(scheduler_name, **kwargs)
 
     @_gradient_boosting_model_doc(
         """Implementation on the training stage of GradientBoostingRegressor.""",  # noqa: E501

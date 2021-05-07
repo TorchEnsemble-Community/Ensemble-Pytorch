@@ -49,17 +49,14 @@ class FusionClassifier(BaseClassifier):
         "set_optimizer",
     )
     def set_optimizer(self, optimizer_name, **kwargs):
-        self.optimizer_name = optimizer_name
-        self.optimizer_args = kwargs
+        super().set_optimizer(optimizer_name, **kwargs)
 
     @torchensemble_model_doc(
         """Set the attributes on scheduler for FusionClassifier.""",
         "set_scheduler",
     )
     def set_scheduler(self, scheduler_name, **kwargs):
-        self.scheduler_name = scheduler_name
-        self.scheduler_args = kwargs
-        self.use_scheduler_ = True
+        super().set_scheduler(scheduler_name, **kwargs)
 
     @torchensemble_model_doc(
         """Implementation on the training stage of FusionClassifier.""", "fit"
@@ -78,7 +75,7 @@ class FusionClassifier(BaseClassifier):
         for _ in range(self.n_estimators):
             self.estimators_.append(self._make_estimator())
         self._validate_parameters(epochs, log_interval)
-        self.n_outputs = self._decide_n_outputs(train_loader, True)
+        self.n_outputs = self._decide_n_outputs(train_loader)
         optimizer = set_module.set_optimizer(
             self, self.optimizer_name, **self.optimizer_args
         )
@@ -192,17 +189,14 @@ class FusionRegressor(BaseRegressor):
         "set_optimizer",
     )
     def set_optimizer(self, optimizer_name, **kwargs):
-        self.optimizer_name = optimizer_name
-        self.optimizer_args = kwargs
+        super().set_optimizer(optimizer_name, **kwargs)
 
     @torchensemble_model_doc(
         """Set the attributes on scheduler for FusionRegressor.""",
         "set_scheduler",
     )
     def set_scheduler(self, scheduler_name, **kwargs):
-        self.scheduler_name = scheduler_name
-        self.scheduler_args = kwargs
-        self.use_scheduler_ = True
+        super().set_scheduler(scheduler_name, **kwargs)
 
     @torchensemble_model_doc(
         """Implementation on the training stage of FusionRegressor.""", "fit"
@@ -220,7 +214,7 @@ class FusionRegressor(BaseRegressor):
         for _ in range(self.n_estimators):
             self.estimators_.append(self._make_estimator())
         self._validate_parameters(epochs, log_interval)
-        self.n_outputs = self._decide_n_outputs(train_loader, False)
+        self.n_outputs = self._decide_n_outputs(train_loader)
         optimizer = set_module.set_optimizer(
             self, self.optimizer_name, **self.optimizer_args
         )

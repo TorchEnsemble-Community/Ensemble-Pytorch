@@ -95,37 +95,12 @@ class BaseModule(nn.Module):
         """Return the `index`-th base estimator in the ensemble."""
         return self.estimators_[index]
 
-    def _decide_n_outputs(self, train_loader, is_classification=True):
-        """
-        Decide the number of outputs according to the `train_loader`.
-
-        - If `is_classification` is True, the number of outputs equals the
-          number of distinct classes.
-        - If `is_classification` is False, the number of outputs equals the
-          number of target variables (e.g., `1` in univariate regression).
-        """
-        if is_classification:
-            if hasattr(train_loader.dataset, "classes"):
-                n_outputs = len(train_loader.dataset.classes)
-            # Infer `n_outputs` from the dataloader
-            else:
-                labels = []
-                for _, (_, target) in enumerate(train_loader):
-                    labels.append(target)
-                labels = torch.unique(torch.cat(labels))
-                n_outputs = labels.size(0)
-        else:
-            for _, (_, target) in enumerate(train_loader):
-                if len(target.size()) == 1:
-                    n_outputs = 1
-                else:
-                    n_outputs = target.size(1)
-                break
-
-        return n_outputs
+    @abc.abstractmethod
+    def _decide_n_outputs(self, train_loader):
+        """Decide the number of outputs according to the `train_loader`."""
 
     def _make_estimator(self):
-        """Make and configure a copy of the `self.base_estimator_`."""
+        """Make and configure a copy of `self.base_estimator_`."""
 
         # Call `deepcopy` to make a base estimator
         if not isinstance(self.base_estimator_, type):
@@ -161,17 +136,16 @@ class BaseModule(nn.Module):
             self.logger.error(msg.format(log_interval))
             raise ValueError(msg.format(log_interval))
 
-    @abc.abstractmethod
     def set_optimizer(self, optimizer_name, **kwargs):
-        """
-        Implementation on setting the parameter optimizer.
-        """
+        """Set the parameter optimizer."""
+        self.optimizer_name = optimizer_name
+        self.optimizer_args = kwargs
 
-    @abc.abstractmethod
     def set_scheduler(self, scheduler_name, **kwargs):
-        """
-        Implementation on setting the learning rate scheduler.
-        """
+        """Set the learning rate scheduler."""
+        self.scheduler_name = scheduler_name
+        self.scheduler_args = kwargs
+        self.use_scheduler_ = True
 
     @abc.abstractmethod
     def forward(self, x):
@@ -227,6 +201,24 @@ class BaseClassifier(BaseModule):
     Please use the derived classes instead.
     """
 
+    def _decide_n_outputs(self, train_loader):
+        """
+        Decide the number of outputs according to the `train_loader`.
+        The number of outputs equals the number of distinct classes for
+        classifiers.
+        """
+        if hasattr(train_loader.dataset, "classes"):
+            n_outputs = len(train_loader.dataset.classes)
+        # Infer `n_outputs` from the dataloader
+        else:
+            labels = []
+            for _, (_, target) in enumerate(train_loader):
+                labels.append(target)
+            labels = torch.unique(torch.cat(labels))
+            n_outputs = labels.size(0)
+
+        return n_outputs
+
     @torch.no_grad()
     def evaluate(self, test_loader, return_loss=False):
         """Docstrings decorated by downstream models."""
@@ -259,6 +251,21 @@ class BaseRegressor(BaseModule):
     WARNING: This class cannot be used directly.
     Please use the derived classes instead.
     """
+
+    def _decide_n_outputs(self, train_loader):
+        """
+        Decide the number of outputs according to the `train_loader`.
+        The number of outputs equals the number of target variables for
+        regressors (e.g., `1` in univariate regression).
+        """
+        for _, (_, target) in enumerate(train_loader):
+            if len(target.size()) == 1:
+                n_outputs = 1
+            else:
+                n_outputs = target.size(1)
+            break
+
+        return n_outputs
 
     @torch.no_grad()
     def evaluate(self, test_loader):

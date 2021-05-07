@@ -24,11 +24,7 @@ from .utils import operator as op
 from .utils.logging import get_tb_logger
 
 
-__all__ = [
-    "_BaseFastGeometric",
-    "FastGeometricClassifier",
-    "FastGeometricRegressor",
-]
+__all__ = ["FastGeometricClassifier", "FastGeometricRegressor"]
 
 
 __fit_doc = """
@@ -175,10 +171,6 @@ class _BaseFastGeometric(BaseModule):
     """Implementation on the FastGeometricClassifier.""", "seq_model"
 )
 class FastGeometricClassifier(_BaseFastGeometric, BaseClassifier):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.is_classification = True
-
     @torchensemble_model_doc(
         """Implementation on the data forwarding in FastGeometricClassifier.""",  # noqa: E501
         "classifier_forward",
@@ -227,9 +219,7 @@ class FastGeometricClassifier(_BaseFastGeometric, BaseClassifier):
         save_dir=None,
     ):
         self._validate_parameters(epochs, log_interval)
-        self.n_outputs = self._decide_n_outputs(
-            train_loader, self.is_classification
-        )
+        self.n_outputs = self._decide_n_outputs(train_loader)
 
         # ====================================================================
         #                Train the dummy estimator (estimator_)
@@ -426,10 +416,6 @@ class FastGeometricClassifier(_BaseFastGeometric, BaseClassifier):
     """Implementation on the FastGeometricRegressor.""", "seq_model"
 )
 class FastGeometricRegressor(_BaseFastGeometric, BaseRegressor):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.is_classification = False
-
     @torchensemble_model_doc(
         """Implementation on the data forwarding in FastGeometricRegressor.""",  # noqa: E501
         "regressor_forward",
@@ -477,9 +463,7 @@ class FastGeometricRegressor(_BaseFastGeometric, BaseRegressor):
         save_dir=None,
     ):
         self._validate_parameters(epochs, log_interval)
-        self.n_outputs = self._decide_n_outputs(
-            train_loader, self.is_classification
-        )
+        self.n_outputs = self._decide_n_outputs(train_loader)
 
         # ====================================================================
         #                Train the dummy estimator (estimator_)

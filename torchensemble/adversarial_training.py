@@ -218,10 +218,6 @@ class _BaseAdversarialTraining(BaseModule):
     "model",
 )
 class AdversarialTrainingClassifier(_BaseAdversarialTraining, BaseClassifier):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.is_classification = True
-
     @torchensemble_model_doc(
         """Implementation on the data forwarding in AdversarialTrainingClassifier.""",  # noqa: E501
         "classifier_forward",
@@ -240,17 +236,14 @@ class AdversarialTrainingClassifier(_BaseAdversarialTraining, BaseClassifier):
         "set_optimizer",
     )
     def set_optimizer(self, optimizer_name, **kwargs):
-        self.optimizer_name = optimizer_name
-        self.optimizer_args = kwargs
+        super().set_optimizer(optimizer_name, **kwargs)
 
     @torchensemble_model_doc(
         """Set the attributes on scheduler for AdversarialTrainingClassifier.""",  # noqa: E501
         "set_scheduler",
     )
     def set_scheduler(self, scheduler_name, **kwargs):
-        self.scheduler_name = scheduler_name
-        self.scheduler_args = kwargs
-        self.use_scheduler_ = True
+        super().set_scheduler(scheduler_name, **kwargs)
 
     @_adversarial_training_model_doc(
         """Implementation on the training stage of AdversarialTrainingClassifier.""",  # noqa: E501
@@ -268,7 +261,7 @@ class AdversarialTrainingClassifier(_BaseAdversarialTraining, BaseClassifier):
     ):
 
         self._validate_parameters(epochs, epsilon, log_interval)
-        self.n_outputs = self._decide_n_outputs(train_loader, True)
+        self.n_outputs = self._decide_n_outputs(train_loader)
 
         # Instantiate a pool of base estimators, optimizers, and schedulers.
         estimators = []
@@ -424,17 +417,14 @@ class AdversarialTrainingRegressor(_BaseAdversarialTraining, BaseRegressor):
         "set_optimizer",
     )
     def set_optimizer(self, optimizer_name, **kwargs):
-        self.optimizer_name = optimizer_name
-        self.optimizer_args = kwargs
+        super().set_optimizer(optimizer_name, **kwargs)
 
     @torchensemble_model_doc(
         """Set the attributes on scheduler for AdversarialTrainingRegressor.""",  # noqa: E501
         "set_scheduler",
     )
     def set_scheduler(self, scheduler_name, **kwargs):
-        self.scheduler_name = scheduler_name
-        self.scheduler_args = kwargs
-        self.use_scheduler_ = True
+        super().set_scheduler(scheduler_name, **kwargs)
 
     @_adversarial_training_model_doc(
         """Implementation on the training stage of AdversarialTrainingRegressor.""",  # noqa: E501
@@ -452,7 +442,7 @@ class AdversarialTrainingRegressor(_BaseAdversarialTraining, BaseRegressor):
     ):
 
         self._validate_parameters(epochs, epsilon, log_interval)
-        self.n_outputs = self._decide_n_outputs(train_loader, True)
+        self.n_outputs = self._decide_n_outputs(train_loader)
 
         # Instantiate a pool of base estimators, optimizers, and schedulers.
         estimators = []
