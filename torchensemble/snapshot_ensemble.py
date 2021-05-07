@@ -26,11 +26,7 @@ from .utils import operator as op
 from .utils.logging import get_tb_logger
 
 
-__all__ = [
-    "_BaseSnapshotEnsemble",
-    "SnapshotEnsembleClassifier",
-    "SnapshotEnsembleRegressor",
-]
+__all__ = ["SnapshotEnsembleClassifier", "SnapshotEnsembleRegressor"]
 
 
 __fit_doc = """
@@ -213,10 +209,6 @@ class _BaseSnapshotEnsemble(BaseModule):
     """Implementation on the SnapshotEnsembleClassifier.""", "seq_model"
 )
 class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble, BaseClassifier):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.is_classification = True
-
     @torchensemble_model_doc(
         """Implementation on the data forwarding in SnapshotEnsembleClassifier.""",  # noqa: E501
         "classifier_forward",
@@ -231,8 +223,7 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble, BaseClassifier):
         "set_optimizer",
     )
     def set_optimizer(self, optimizer_name, **kwargs):
-        self.optimizer_name = optimizer_name
-        self.optimizer_args = kwargs
+        super().set_optimizer(optimizer_name, **kwargs)
 
     @_snapshot_ensemble_model_doc(
         """Implementation on the training stage of SnapshotEnsembleClassifier.""",  # noqa: E501
@@ -249,9 +240,7 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble, BaseClassifier):
         save_dir=None,
     ):
         self._validate_parameters(lr_clip, epochs, log_interval)
-        self.n_outputs = self._decide_n_outputs(
-            train_loader, self.is_classification
-        )
+        self.n_outputs = self._decide_n_outputs(train_loader)
 
         estimator = self._make_estimator()
 
@@ -381,10 +370,6 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble, BaseClassifier):
     """Implementation on the SnapshotEnsembleRegressor.""", "seq_model"
 )
 class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble, BaseRegressor):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.is_classification = False
-
     @torchensemble_model_doc(
         """Implementation on the data forwarding in SnapshotEnsembleRegressor.""",  # noqa: E501
         "regressor_forward",
@@ -398,8 +383,7 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble, BaseRegressor):
         "set_optimizer",
     )
     def set_optimizer(self, optimizer_name, **kwargs):
-        self.optimizer_name = optimizer_name
-        self.optimizer_args = kwargs
+        super().set_optimizer(optimizer_name, **kwargs)
 
     @_snapshot_ensemble_model_doc(
         """Implementation on the training stage of SnapshotEnsembleRegressor.""",  # noqa: E501
@@ -416,9 +400,7 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble, BaseRegressor):
         save_dir=None,
     ):
         self._validate_parameters(lr_clip, epochs, log_interval)
-        self.n_outputs = self._decide_n_outputs(
-            train_loader, self.is_classification
-        )
+        self.n_outputs = self._decide_n_outputs(train_loader)
 
         estimator = self._make_estimator()
 

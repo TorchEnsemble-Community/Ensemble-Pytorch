@@ -115,17 +115,14 @@ class BaggingClassifier(BaseClassifier):
         "set_optimizer",
     )
     def set_optimizer(self, optimizer_name, **kwargs):
-        self.optimizer_name = optimizer_name
-        self.optimizer_args = kwargs
+        super().set_optimizer(optimizer_name, **kwargs)
 
     @torchensemble_model_doc(
         """Set the attributes on scheduler for BaggingClassifier.""",
         "set_scheduler",
     )
     def set_scheduler(self, scheduler_name, **kwargs):
-        self.scheduler_name = scheduler_name
-        self.scheduler_args = kwargs
-        self.use_scheduler_ = True
+        super().set_scheduler(scheduler_name, **kwargs)
 
     @torchensemble_model_doc(
         """Implementation on the training stage of BaggingClassifier.""", "fit"
@@ -141,7 +138,7 @@ class BaggingClassifier(BaseClassifier):
     ):
 
         self._validate_parameters(epochs, log_interval)
-        self.n_outputs = self._decide_n_outputs(train_loader, True)
+        self.n_outputs = self._decide_n_outputs(train_loader)
 
         # Instantiate a pool of base estimators, optimizers, and schedulers.
         estimators = []
@@ -289,17 +286,14 @@ class BaggingRegressor(BaseRegressor):
         "set_optimizer",
     )
     def set_optimizer(self, optimizer_name, **kwargs):
-        self.optimizer_name = optimizer_name
-        self.optimizer_args = kwargs
+        super().set_optimizer(optimizer_name, **kwargs)
 
     @torchensemble_model_doc(
         """Set the attributes on scheduler for BaggingRegressor.""",
         "set_scheduler",
     )
     def set_scheduler(self, scheduler_name, **kwargs):
-        self.scheduler_name = scheduler_name
-        self.scheduler_args = kwargs
-        self.use_scheduler_ = True
+        super().set_scheduler(scheduler_name, **kwargs)
 
     @torchensemble_model_doc(
         """Implementation on the training stage of BaggingRegressor.""", "fit"
@@ -315,7 +309,7 @@ class BaggingRegressor(BaseRegressor):
     ):
 
         self._validate_parameters(epochs, log_interval)
-        self.n_outputs = self._decide_n_outputs(train_loader, False)
+        self.n_outputs = self._decide_n_outputs(train_loader)
 
         # Instantiate a pool of base estimators, optimizers, and schedulers.
         estimators = []
