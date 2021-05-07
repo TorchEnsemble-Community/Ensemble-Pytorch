@@ -23,11 +23,7 @@ from .utils import set_module
 from .utils import operator as op
 
 
-__all__ = [
-    "_BaseAdversarialTraining",
-    "AdversarialTrainingClassifier",
-    "AdversarialTrainingRegressor",
-]
+__all__ = ["AdversarialTrainingClassifier", "AdversarialTrainingRegressor"]
 
 
 __fit_doc = """
@@ -397,9 +393,6 @@ class AdversarialTrainingClassifier(_BaseAdversarialTraining, BaseClassifier):
     "model",
 )
 class AdversarialTrainingRegressor(_BaseAdversarialTraining, BaseRegressor):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.is_classification = False
 
     @torchensemble_model_doc(
         """Implementation on the data forwarding in AdversarialTrainingRegressor.""",  # noqa: E501
