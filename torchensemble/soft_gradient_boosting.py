@@ -1,6 +1,6 @@
 """
-  In soft gradient boosting, all base estimators could be simulataneously
-  fitted, while achieveing the similar boosting improvements as in gradient
+  In soft gradient boosting, all base estimators could be simultaneously
+  fitted, while achieving the similar boosting improvements as in gradient
   boosting.
 """
 
@@ -21,7 +21,97 @@ from .utils import operator as op
 from .utils.logging import get_tb_logger
 
 
-# __all__ = ["SoftGradientBoostingClassifier", "SoftGradientBoostingRegressor"]
+__all__ = ["SoftGradientBoostingClassifier", "SoftGradientBoostingRegressor"]
+
+
+__model_doc = """
+    Parameters
+    ----------
+    estimator : torch.nn.Module
+        The class or object of your base estimator.
+
+        - If :obj:`class`, it should inherit from :mod:`torch.nn.Module`.
+        - If :obj:`object`, it should be instantiated from a class inherited
+          from :mod:`torch.nn.Module`.
+    n_estimators : int
+        The number of base estimators in the ensemble.
+    estimator_args : dict, default=None
+        The dictionary of hyper-parameters used to instantiate base
+        estimators. This parameter will have no effect if ``estimator`` is a
+        base estimator object after instantiation.
+    shrinkage_rate : float, default=1
+        The shrinkage rate used in gradient boosting.
+    cuda : bool, default=True
+
+        - If ``True``, use GPU to train and evaluate the ensemble.
+        - If ``False``, use CPU to train and evaluate the ensemble.
+    n_jobs : int, default=None
+        The number of workers for training the ensemble. This input
+        argument is used for parallel ensemble methods such as
+        :mod:`voting` and :mod:`bagging`. Setting it to an integer larger
+        than ``1`` enables ``n_jobs`` base estimators to be trained
+        simultaneously.
+
+    Attributes
+    ----------
+    estimators_ : torch.nn.ModuleList
+        An internal container that stores all fitted base estimators.
+"""
+
+
+__fit_doc = """
+    Parameters
+    ----------
+    train_loader : torch.utils.data.DataLoader
+        A data loader that contains the training data.
+    epochs : int, default=100
+        The number of training epochs per base estimator.
+    use_reduction_sum : bool, default=True
+        Whether to set ``reduction="sum"`` for the internal mean squared
+        error used to fit each base estimator.
+    log_interval : int, default=100
+        The number of batches to wait before logging the training status.
+    test_loader : torch.utils.data.DataLoader, default=None
+        A data loader that contains the evaluating data.
+
+        - If ``None``, no validation is conducted after each base
+          estimator being trained.
+        - If not ``None``, the ensemble will be evaluated on this
+          dataloader after each base estimator being trained.
+    save_model : bool, default=True
+        Specify whether to save the model parameters.
+
+        - If test_loader is ``None``, the ensemble containing
+          ``n_estimators`` base estimators will be saved.
+        - If test_loader is not ``None``, the ensemble with the best
+          validation performance will be saved.
+    save_dir : string, default=None
+        Specify where to save the model parameters.
+
+        - If ``None``, the model will be saved in the current directory.
+        - If not ``None``, the model will be saved in the specified
+          directory: ``save_dir``.
+"""
+
+
+def _soft_gradient_boosting_model_doc(header, item="model"):
+    """
+    Decorator on obtaining documentation for different gradient boosting
+    models.
+    """
+
+    def get_doc(item):
+        """Return the selected item"""
+        __doc = {"model": __model_doc, "fit": __fit_doc}
+        return __doc[item]
+
+    def adddoc(cls):
+        doc = [header + "\n\n"]
+        doc.extend(get_doc(item))
+        cls.__doc__ = "".join(doc)
+        return cls
+
+    return adddoc
 
 
 def _parallel_compute_pseudo_residual(
@@ -117,7 +207,6 @@ class _BaseSoftGradientBoosting(BaseModule):
         use_reduction_sum=True,
         log_interval=100,
         test_loader=None,
-        early_stopping_rounds=2,
         save_model=True,
         save_dir=None,
     ):
@@ -198,6 +287,9 @@ class _BaseSoftGradientBoosting(BaseModule):
             io.save(self, save_dir, self.logger)
 
 
+@_soft_gradient_boosting_model_doc(
+    """Implementation on the SoftGradientBoostingClassifier.""", "model"
+)
 class SoftGradientBoostingClassifier(
     _BaseSoftGradientBoosting, BaseClassifier
 ):
@@ -220,7 +312,82 @@ class SoftGradientBoostingClassifier(
         )
         self.is_classification = True
 
+    def _evaluate_during_fit(self, test_loader, epoch):
+        self.eval()
+        correct = 0
+        total = 0
+        with torch.no_grad():
+            for _, (data, target) in enumerate(test_loader):
+                data, target = data.to(self.device), target.to(self.device)
+                output = self.forward(data)
+                _, predicted = torch.max(output.data, 1)
+                correct += (predicted == target).sum().item()
+                total += target.size(0)
+        acc = 100 * correct / total
 
+        msg = (
+            "Epoch: {:03d} | Validation Acc: {:.3f}"
+            " % | Historical Best: {:.3f} %"
+        )
+        self.logger.info(msg.format(epoch, acc, self.best_acc))
+        if self.tb_logger:
+            self.tb_logger.add_scalar(
+                "soft_gradient_boosting/Validation_Acc", acc, epoch
+            )
+
+    @torchensemble_model_doc(
+        """Set the attributes on optimizer for SoftGradientBoostingClassifier.""",  # noqa: E501
+        "set_optimizer",
+    )
+    def set_optimizer(self, optimizer_name, **kwargs):
+        super().set_optimizer(optimizer_name, **kwargs)
+
+    @torchensemble_model_doc(
+        """Set the attributes on scheduler for SoftGradientBoostingClassifier.""",  # noqa: E501
+        "set_scheduler",
+    )
+    def set_scheduler(self, scheduler_name, **kwargs):
+        super().set_scheduler(scheduler_name, **kwargs)
+
+    @_soft_gradient_boosting_model_doc(
+        """Implementation on the training stage of SoftGradientBoostingClassifier.""",  # noqa: E501
+        "fit",
+    )
+    def fit(
+        self,
+        train_loader,
+        epochs=100,
+        use_reduction_sum=True,
+        log_interval=100,
+        test_loader=None,
+        save_model=True,
+        save_dir=None,
+    ):
+        super().fit(
+            train_loader=train_loader,
+            epochs=epochs,
+            use_reduction_sum=use_reduction_sum,
+            log_interval=log_interval,
+            test_loader=test_loader,
+            save_model=save_model,
+            save_dir=save_dir,
+        )
+
+    @torchensemble_model_doc(
+        """Implementation on the data forwarding in SoftGradientBoostingClassifier.""",  # noqa: E501
+        "classifier_forward",
+    )
+    def forward(self, x):
+        output = [estimator(x) for estimator in self.estimators_]
+        output = op.sum_with_multiplicative(output, self.shrinkage_rate)
+        proba = F.softmax(output, dim=1)
+
+        return proba
+
+
+@_soft_gradient_boosting_model_doc(
+    """Implementation on the SoftGradientBoostingRegressor.""", "model"
+)
 class SoftGradientBoostingRegressor(_BaseSoftGradientBoosting, BaseRegressor):
     def __init__(
         self,
@@ -240,3 +407,71 @@ class SoftGradientBoostingRegressor(_BaseSoftGradientBoosting, BaseRegressor):
             n_jobs=n_jobs,
         )
         self.is_classification = False
+
+    def _evaluate_during_fit(self, test_loader, epoch):
+        self.eval()
+        mse = 0.0
+        criterion = nn.MSELoss()
+        with torch.no_grad():
+            for _, (data, target) in enumerate(test_loader):
+                data, target = data.to(self.device), target.to(self.device)
+                output = self.forward(data)
+                mse += criterion(output, target)
+        mse /= len(test_loader)
+
+        msg = (
+            "Epoch: {:03d} | Validation MSE: {:.5f} | Historical Best: {:.5f}"
+        )
+        self.logger.info(msg.format(epoch, mse, self.best_mse))
+        if self.tb_logger:
+            self.tb_logger.add_scalar(
+                "soft_gradient_boosting/Validation_MSE", mse, epoch
+            )
+
+    @torchensemble_model_doc(
+        """Set the attributes on optimizer for SoftGradientBoostingRegressor.""",  # noqa: E501
+        "set_optimizer",
+    )
+    def set_optimizer(self, optimizer_name, **kwargs):
+        super().set_optimizer(optimizer_name, **kwargs)
+
+    @torchensemble_model_doc(
+        """Set the attributes on scheduler for SoftGradientBoostingRegressor.""",  # noqa: E501
+        "set_scheduler",
+    )
+    def set_scheduler(self, scheduler_name, **kwargs):
+        super().set_scheduler(scheduler_name, **kwargs)
+
+    @_soft_gradient_boosting_model_doc(
+        """Implementation on the training stage of SoftGradientBoostingRegressor.""",  # noqa: E501
+        "fit",
+    )
+    def fit(
+        self,
+        train_loader,
+        epochs=100,
+        use_reduction_sum=True,
+        log_interval=100,
+        test_loader=None,
+        save_model=True,
+        save_dir=None,
+    ):
+        super().fit(
+            train_loader=train_loader,
+            epochs=epochs,
+            use_reduction_sum=use_reduction_sum,
+            log_interval=log_interval,
+            test_loader=test_loader,
+            save_model=save_model,
+            save_dir=save_dir,
+        )
+
+    @torchensemble_model_doc(
+        """Implementation on the data forwarding in SoftGradientBoostingRegressor.""",  # noqa: E501
+        "regressor_forward",
+    )
+    def forward(self, x):
+        outputs = [estimator(x) for estimator in self.estimators_]
+        pred = op.sum_with_multiplicative(outputs, self.shrinkage_rate)
+
+        return pred
