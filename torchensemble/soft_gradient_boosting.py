@@ -267,7 +267,7 @@ class _BaseSoftGradientBoosting(BaseModule):
                 # Print training status
                 if batch_idx % log_interval == 0:
                     with torch.no_grad():
-                        msg = "Epoch: {:03d} | Batch: {:03d} | Loss: {:.5f}"
+                        msg = "Epoch: {:03d} | Batch: {:03d} | RegLoss: {:.5f}"
                         self.logger.info(msg.format(epoch, batch_idx, loss))
                         if self.tb_logger:
                             self.tb_logger.add_scalar(
