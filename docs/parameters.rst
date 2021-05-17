@@ -1,7 +1,14 @@
 Parameters
 ==========
 
-This page provides the API reference of :mod:`torchensemble`.
+This page provides the API reference of :mod:`torchensemble`. Below is a list of functions supported by all ensembles.
+
+* :meth:`fit`: Training stage of the ensemble
+* :meth:`evaluate`: Evaluating stage of the ensemble
+* :meth:`predict`: Return the predictions of the ensemble
+* :meth:`forward`: Data forward process of the ensemble
+* :meth:`set_optimizer`: Set the parameter optimizer for training the ensemble
+* :meth:`set_scheduler`: Set the learning rate scheduler for training the ensemble
 
 Fusion
 ------
