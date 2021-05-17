@@ -118,10 +118,10 @@ def _parallel_compute_pseudo_residual(
     output, target, estimator_idx, shrinkage_rate, n_outputs, is_classification
 ):
     """
-    Compute pseudo residuals defined in sGBM for each base estimator in a
-    parallel fashion.
+    Compute pseudo residuals in soft gradient boosting for each base estimator
+    in a parallel fashion.
     """
-    accumulated_output = torch.zeros_like(output, device=output.device)
+    accumulated_output = torch.zeros_like(output[0], device=output[0].device)
     for i in range(estimator_idx):
         accumulated_output += shrinkage_rate * output[i]
 
@@ -260,9 +260,9 @@ class _BaseSoftGradientBoosting(BaseModule):
                 for idx, estimator in enumerate(self.estimators_):
                     loss += criterion(output[idx], rets[idx])
 
-                self.optimizer.zero_grad()
+                optimizer.zero_grad()
                 loss.backward()
-                self.optimizer.step()
+                optimizer.step()
 
                 # Print training status
                 if batch_idx % log_interval == 0:
@@ -277,7 +277,9 @@ class _BaseSoftGradientBoosting(BaseModule):
 
             # Validation
             if test_loader:
-                self._evaluate_during_fit(test_loader, epoch)
+                flag = self._evaluate_during_fit(test_loader, epoch)
+                if flag:
+                    io.save(self, save_dir, self.logger)
 
             # Update the scheduler
             if self.use_scheduler_:
@@ -311,11 +313,13 @@ class SoftGradientBoostingClassifier(
             n_jobs=n_jobs,
         )
         self.is_classification = True
+        self.best_acc = 0.0
 
     def _evaluate_during_fit(self, test_loader, epoch):
         self.eval()
         correct = 0
         total = 0
+        flag = False
         with torch.no_grad():
             for _, (data, target) in enumerate(test_loader):
                 data, target = data.to(self.device), target.to(self.device)
@@ -324,6 +328,10 @@ class SoftGradientBoostingClassifier(
                 correct += (predicted == target).sum().item()
                 total += target.size(0)
         acc = 100 * correct / total
+
+        if acc > self.best_acc:
+            self.best_acc = acc
+            flag = True
 
         msg = (
             "Epoch: {:03d} | Validation Acc: {:.3f}"
@@ -334,6 +342,8 @@ class SoftGradientBoostingClassifier(
             self.tb_logger.add_scalar(
                 "soft_gradient_boosting/Validation_Acc", acc, epoch
             )
+
+        return flag
 
     @torchensemble_model_doc(
         """Set the attributes on optimizer for SoftGradientBoostingClassifier.""",  # noqa: E501
@@ -384,6 +394,14 @@ class SoftGradientBoostingClassifier(
 
         return proba
 
+    @torchensemble_model_doc(item="classifier_evaluate")
+    def evaluate(self, test_loader, return_loss=False):
+        return super().evaluate(test_loader, return_loss)
+
+    @torchensemble_model_doc(item="predict")
+    def predict(self, X, return_numpy=True):
+        return super().predict(X, return_numpy)
+
 
 @_soft_gradient_boosting_model_doc(
     """Implementation on the SoftGradientBoostingRegressor.""", "model"
@@ -407,10 +425,12 @@ class SoftGradientBoostingRegressor(_BaseSoftGradientBoosting, BaseRegressor):
             n_jobs=n_jobs,
         )
         self.is_classification = False
+        self.best_mse = float("inf")
 
     def _evaluate_during_fit(self, test_loader, epoch):
         self.eval()
         mse = 0.0
+        flag = False
         criterion = nn.MSELoss()
         with torch.no_grad():
             for _, (data, target) in enumerate(test_loader):
@@ -418,6 +438,10 @@ class SoftGradientBoostingRegressor(_BaseSoftGradientBoosting, BaseRegressor):
                 output = self.forward(data)
                 mse += criterion(output, target)
         mse /= len(test_loader)
+
+        if mse < self.best_mse:
+            self.best_mse = mse
+            flag = True
 
         msg = (
             "Epoch: {:03d} | Validation MSE: {:.5f} | Historical Best: {:.5f}"
@@ -427,6 +451,8 @@ class SoftGradientBoostingRegressor(_BaseSoftGradientBoosting, BaseRegressor):
             self.tb_logger.add_scalar(
                 "soft_gradient_boosting/Validation_MSE", mse, epoch
             )
+
+        return flag
 
     @torchensemble_model_doc(
         """Set the attributes on optimizer for SoftGradientBoostingRegressor.""",  # noqa: E501
@@ -475,3 +501,11 @@ class SoftGradientBoostingRegressor(_BaseSoftGradientBoosting, BaseRegressor):
         pred = op.sum_with_multiplicative(outputs, self.shrinkage_rate)
 
         return pred
+
+    @torchensemble_model_doc(item="regressor_evaluate")
+    def evaluate(self, test_loader):
+        return super().evaluate(test_loader)
+
+    @torchensemble_model_doc(item="predict")
+    def predict(self, X, return_numpy=True):
+        return super().predict(X, return_numpy)
