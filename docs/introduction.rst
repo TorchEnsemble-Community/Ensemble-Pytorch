@@ -28,8 +28,8 @@ Voting and bagging are popularly used ensemble methods. Basically, voting and ba
 
 Compared to voting, bagging further uses sampling with replacement on each batch of data. Notice that sub-sampling is not typically used when training neural networks, because the neural networks typically achieve better performance with more training data.
 
-Gradient Boosting
------------------
+Gradient Boosting [1]_
+----------------------
 
 Gradient boosting trains all base estimators in a sequential fashion, as the learning target of a base estimator :math:`h^m` is associated with the outputs from base estimators fitted before, i.e., :math:`\{h^1, \cdots, h^{m-1}\}`.
 
@@ -49,7 +49,7 @@ The figure below presents the data flow of gradient boosting during the training
    :align: center
    :width: 500
 
-Snapshot Ensemble [1]_
+Snapshot Ensemble [2]_
 ----------------------
 
 Unlike all methods above, where :math:`M` independent base estimators will be trained, snapshot ensemble generates the ensemble by enforcing a single base estimator to converge to different local minima :math:`M` times. At each minima, the parameters of this estimator are saved (i.e., a snapshot), serving as a base estimator in the ensemble. The output of snapshot ensemble also takes the average over the predictions from all snapshots.
@@ -61,7 +61,7 @@ To obtain snapshots with good performance, snapshot ensemble uses **cyclic annea
 
 Notice that the iteration above indicates the loop on enumerating all batches within each epoch, instead of the loop on iterating over all training epochs.
 
-Adversarial Training [2]_
+Adversarial Training [3]_
 -------------------------
 
 Adversarial samples can be used to improve the performance of base estimators, as validated by the authors in [2]. The implemented ``AdversarialTrainingClassifier`` and ``AdversarialTrainingRegressor`` contain :math:`M` independent base estimators, and each of them is fitted independently as in Voting and Bagging.
@@ -70,13 +70,26 @@ During the training stage of each base estimator :math:`h^m`, an adversarial sam
 
 Same as Voting and Bagging, the output of ``AdversarialTrainingClassifier`` or ``AdversarialTrainingRegressor`` during the evaluating stage is the average over predictions from all base estimators.
 
-Fast Geometric Ensemble [3]_
+Fast Geometric Ensemble [4]_
 ----------------------------
 
 Motivated by geometric insights on the loss surface of deep neural networks, Fast Geometirc Ensembling (FGE) is an efficient ensemble that uses a customized learning rate scheduler to generate base estimators, similar to snapshot ensemble.
 
+Soft Gradient Boosting [5]_
+---------------------------
+
+The sequential training stage of gradient boosting makes it prohibitively expensive to use when large neural networks are chosen as the base estimator. The recently proposed soft gradient boosting machine mitigates this problem by concatenating all base estimators in the ensemble, and by using local and global training objectives inspired from gradient boosting. As a result, it is able to simultaneously train all base estimators, while achieving similar boosting performance as gradient boosting.
+
+The figure below is the model architecture of soft gradient boosting.
+
+.. image:: ./_images/soft_gradient_boosting.png
+   :align: center
+   :width: 400
+
 **References**
 
-.. [1] Huang Gao, Sharon Yixuan Li, Geoff Pleisset, et al., "Snapshot ensembles: Train 1, get m for free." ICLR, 2017.
-.. [2] Balaji Lakshminarayanan, Alexander Pritzel, Charles Blundell., "Simple and Scalable Predictive Uncertainty Estimation using Deep Ensembles." NIPS 2017.
-.. [3] Timur Garipov, Pavel Izmailov, Dmitrii Podoprikhin et al., "Loss Surfaces, Mode Connectivity, and Fast Ensembling of DNNs." NeurIPS, 2018.
+.. [1] Jerome H. Friedman., "Greedy Function Approximation: A Gradient Boosting Machine." The Annals of Statistics, 2001.
+.. [2] Huang Gao, Sharon Yixuan Li, Geoff Pleisset, et al., "Snapshot Ensembles: Train 1, Get M for Free." ICLR, 2017.
+.. [3] Balaji Lakshminarayanan, Alexander Pritzel, Charles Blundell., "Simple and Scalable Predictive Uncertainty Estimation using Deep Ensembles." NIPS 2017.
+.. [4] Timur Garipov, Pavel Izmailov, Dmitrii Podoprikhin et al., "Loss Surfaces, Mode Connectivity, and Fast Ensembling of DNNs." NeurIPS, 2018.
+.. [5] Ji Feng, Yi-Xuan Xu, Yuan Jiang, Zhi-Hua Zhou., "Soft Gradient Boosting Machine.", arXiv, 2020.
