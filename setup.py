@@ -69,7 +69,7 @@ setup(
         "Documentation": "https://ensemble-pytorch.readthedocs.io",
         "Source Code": "https://github.com/xuyxu/Ensemble-Pytorch",
     },
-    version="0.1.3",
+    version="0.1.4",
     long_description=long_description,
     classifiers=[
         "Intended Audience :: Science/Research",
