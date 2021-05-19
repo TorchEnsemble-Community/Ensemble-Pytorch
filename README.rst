@@ -122,16 +122,16 @@ Package Dependency
 Reference
 ---------
 
-.. [1] : Zhou, Zhi-Hua. Ensemble Methods: Foundations and Algorithms. CRC press, 2012.
+.. [1] Zhou, Zhi-Hua. Ensemble Methods: Foundations and Algorithms. CRC press, 2012.
 
-.. [2] : Breiman, Leo. Bagging Predictors. Machine Learning (1996): 123-140.
+.. [2] Breiman, Leo. Bagging Predictors. Machine Learning (1996): 123-140.
 
-.. [3] : Friedman, Jerome H. Greedy Function Approximation: A Gradient Boosting Machine. Annals of Statistics (2001): 1189-1232.
+.. [3] Friedman, Jerome H. Greedy Function Approximation: A Gradient Boosting Machine. Annals of Statistics (2001): 1189-1232.
 
-.. [4] : Huang, Gao, et al. Snapshot Ensembles: Train 1, Get M For Free. ICLR, 2017.
+.. [4] Huang, Gao, et al. Snapshot Ensembles: Train 1, Get M For Free. ICLR, 2017.
 
-.. [5] : Lakshminarayanan, Balaji, et al. Simple and Scalable Predictive Uncertainty Estimation using Deep Ensembles. NIPS, 2017.
+.. [5] Lakshminarayanan, Balaji, et al. Simple and Scalable Predictive Uncertainty Estimation using Deep Ensembles. NIPS, 2017.
 
-.. [6] : Garipov, Timur, et al. Loss Surfaces, Mode Connectivity, and Fast Ensembling of DNNs. NeurIPS, 2018.
+.. [6] Garipov, Timur, et al. Loss Surfaces, Mode Connectivity, and Fast Ensembling of DNNs. NeurIPS, 2018.
 
-.. [7] : Feng, Ji, et al. Soft Gradient Boosting Machine. arXiv, 2020.
+.. [7] Feng, Ji, et al. Soft Gradient Boosting Machine. arXiv, 2020.
