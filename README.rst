@@ -2,8 +2,8 @@
 
 |github|_ |readthedocs|_ |codecov|_ |python|_ |pypi|_ |license|_
 
-.. |github| image:: https://github.com/xuyxu/Ensemble-Pytorch/workflows/torchensemble-CI/badge.svg
-.. _github: https://github.com/xuyxu/Ensemble-Pytorch/actions
+.. |github| image:: https://github.com/TorchEnsemble-Community/Ensemble-Pytorch/workflows/torchensemble-CI/badge.svg
+.. _github: https://github.com/TorchEnsemble-Community/Ensemble-Pytorch/actions
 
 .. |readthedocs| image:: https://readthedocs.org/projects/ensemble-pytorch/badge/?version=latest
 .. _readthedocs: https://ensemble-pytorch.readthedocs.io/en/latest/index.html
@@ -17,8 +17,8 @@
 .. |pypi| image:: https://img.shields.io/pypi/v/torchensemble
 .. _pypi: https://pypi.org/project/torchensemble/
 
-.. |license| image:: https://img.shields.io/github/license/xuyxu/Ensemble-Pytorch
-.. _license: https://github.com/xuyxu/Ensemble-Pytorch/blob/master/LICENSE
+.. |license| image:: https://img.shields.io/github/license/TorchEnsemble-Community/Ensemble-Pytorch
+.. _license: https://github.com/TorchEnsemble-Community/Ensemble-Pytorch/blob/master/LICENSE
 
 Ensemble PyTorch
 ================
