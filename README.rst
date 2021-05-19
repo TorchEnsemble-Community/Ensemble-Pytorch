@@ -26,7 +26,7 @@
 Ensemble PyTorch
 ================
 
-Ensemble PyTorch is a unified ensemble framework for PyTorch to easily improve the performance and robustness of your deep learning model.
+A unified ensemble framework for pytorch_ to easily improve the performance and robustness of your deep learning model.
 
 * `Document <https://ensemble-pytorch.readthedocs.io/>`__
 * `Source Code <https://github.com/xuyxu/Ensemble-Pytorch>`__
@@ -35,26 +35,17 @@ Ensemble PyTorch is a unified ensemble framework for PyTorch to easily improve t
 Installation
 ------------
 
-Stable Version
-~~~~~~~~~~~~~~
-
-The stable version is available at `PyPI <https://pypi.org/project/torchensemble/>`__. You can install it using:
+Stable version:
 
 .. code:: bash
 
-   $ pip install torchensemble
+    pip install torchensemble
 
-Latest Version
-~~~~~~~~~~~~~~
-
-To use the latest version, you need to install the package from source:
+Latest version (under development):
 
 .. code:: bash
 
-    $ git clone https://github.com/xuyxu/Ensemble-Pytorch.git
-    $ cd Ensemble-Pytorch
-    $ pip install -r requirements.txt
-    $ python setup.py install
+    pip install git+https://github.com/xuyxu/Ensemble-Pytorch
 
 Example
 -------
@@ -132,3 +123,7 @@ Reference
 .. [6] Garipov, Timur, et al. Loss Surfaces, Mode Connectivity, and Fast Ensembling of DNNs. NeurIPS, 2018.
 
 .. [7] Feng, Ji, et al. Soft Gradient Boosting Machine. arXiv, 2020.
+
+.. _pytorch: https://pytorch.org/
+
+.. _pypi: https://pypi.org/project/torchensemble/
