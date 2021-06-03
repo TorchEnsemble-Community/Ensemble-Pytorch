@@ -1,6 +1,6 @@
-Welcome to the contributing guidelines of torchensemble!
+Welcome to the contributing guidelines of Ensemble-Pytorch!
 
-torchensemble is a community-driven project and your contributions are highly welcome. Feel free to [raise an issue](https://github.com/TorchEnsemble-Community/Ensemble-Pytorch/issues/new/choose) if you have any problem.
+Ensemble-Pytorch is a community-driven project and your contributions are highly welcome. Feel free to [raise an issue](https://github.com/TorchEnsemble-Community/Ensemble-Pytorch/issues/new/choose) if you have any problem. Below is the table of contents in this contributing guidelines.
 
 - [Where to contribute](#where-to-contribute)
     - [Areas of contribution](#areas-of-contribution)
@@ -48,7 +48,7 @@ If we have missed anything, please [raise an issue](https://github.com/TorchEnse
 Installation
 ------------
 
-Please visit our [installation instructions](https://ensemble-pytorch.readthedocs.io/en/stable/quick_start.html#installation) to resolve any package issues and dependency errors before they occur in the following steps.
+Please visit our [installation instructions](https://ensemble-pytorch.readthedocs.io/en/stable/quick_start.html#installation) to resolve any package issues and dependency errors. Feel free to [raise an issue](https://github.com/TorchEnsemble-Community/Ensemble-Pytorch/issues/new/choose) if the problem still exists.
 
 Reporting bugs
 --------------
@@ -107,7 +107,7 @@ flake8 --filename=*.py torchensemble/
 API design
 ----------
 
-The general API design we follow in torchensemble is similar to [scikit-learn](https://scikit-learn.org/) and [skorch](https://skorch.readthedocs.io/en/latest/?badge=latest).
+The general API design we use in torchensemble is similar to [scikit-learn](https://scikit-learn.org/) and [skorch](https://skorch.readthedocs.io/en/latest/?badge=latest).
 
 For docstrings, we use the [numpy docstring standard](https://numpydoc.readthedocs.io/en/latest/format.html\#docstring-standard).
 
@@ -138,4 +138,4 @@ You can find the generated files in the `Ensemble-Pytorch/docs/_build/` folder. 
 Acknowledgement
 ---------------
 
-This CONTRIBUTING is adapted from the [PyTorch](https://github.com/pytorch/pytorch/blob/master/CONTRIBUTING.md) and [Sktime](https://github.com/alan-turing-institute/sktime/blob/main/CONTRIBUTING.md).
+This CONTRIBUTING file is adapted from the [PyTorch](https://github.com/pytorch/pytorch/blob/master/CONTRIBUTING.md) and [Sktime](https://github.com/alan-turing-institute/sktime/blob/main/CONTRIBUTING.md).
