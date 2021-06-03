@@ -18,6 +18,7 @@ Changelog
 Ver 0.1.*
 ---------
 
+* |Feature| Support using dataloader with multiple input tensors | `@xuyxu <https://github.com/xuyxu>`__
 * |Feature| |API| Add :class:`SoftGradientBoostingClassifier` and :class:`SoftGradientBoostingRegressor` | `@xuyxu <https://github.com/xuyxu>`__
 * |Fix| Fix missing functionality of ``use_reduction_sum`` for :meth:`fit` of Gradient Boosting | `@xuyxu <https://github.com/xuyxu>`__
 * |Enhancement| Relax :mod:`tensorboard` as a soft dependency | `@xuyxu <https://github.com/xuyxu>`__
