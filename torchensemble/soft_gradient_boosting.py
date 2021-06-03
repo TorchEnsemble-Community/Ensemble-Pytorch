@@ -237,10 +237,10 @@ class _BaseSoftGradientBoosting(BaseModule):
 
         for epoch in range(epochs):
             self.train()
-            for batch_idx, (data, target) in enumerate(train_loader):
+            for batch_idx, elem in enumerate(train_loader):
 
-                data, target = data.to(self.device), target.to(self.device)
-                output = [estimator(data) for estimator in self.estimators_]
+                data, target = io.split_data_target(elem, self.device)
+                output = [estimator(*data) for estimator in self.estimators_]
 
                 # Compute pseudo residuals in parallel
                 rets = Parallel(n_jobs=self.n_jobs)(
@@ -315,18 +315,18 @@ class SoftGradientBoostingClassifier(
         self.is_classification = True
         self.best_acc = 0.0
 
+    @torch.no_grad()
     def _evaluate_during_fit(self, test_loader, epoch):
         self.eval()
         correct = 0
         total = 0
         flag = False
-        with torch.no_grad():
-            for _, (data, target) in enumerate(test_loader):
-                data, target = data.to(self.device), target.to(self.device)
-                output = self.forward(data)
-                _, predicted = torch.max(output.data, 1)
-                correct += (predicted == target).sum().item()
-                total += target.size(0)
+        for _, elem in enumerate(test_loader):
+            data, target = io.split_data_target(elem, self.device)
+            output = self.forward(*data)
+            _, predicted = torch.max(output.data, 1)
+            correct += (predicted == target).sum().item()
+            total += target.size(0)
         acc = 100 * correct / total
 
         if acc > self.best_acc:
@@ -387,8 +387,8 @@ class SoftGradientBoostingClassifier(
         """Implementation on the data forwarding in SoftGradientBoostingClassifier.""",  # noqa: E501
         "classifier_forward",
     )
-    def forward(self, x):
-        output = [estimator(x) for estimator in self.estimators_]
+    def forward(self, *x):
+        output = [estimator(*x) for estimator in self.estimators_]
         output = op.sum_with_multiplicative(output, self.shrinkage_rate)
         proba = F.softmax(output, dim=1)
 
@@ -427,16 +427,16 @@ class SoftGradientBoostingRegressor(_BaseSoftGradientBoosting, BaseRegressor):
         self.is_classification = False
         self.best_mse = float("inf")
 
+    @torch.no_grad()
     def _evaluate_during_fit(self, test_loader, epoch):
         self.eval()
         mse = 0.0
         flag = False
         criterion = nn.MSELoss()
-        with torch.no_grad():
-            for _, (data, target) in enumerate(test_loader):
-                data, target = data.to(self.device), target.to(self.device)
-                output = self.forward(data)
-                mse += criterion(output, target)
+        for _, elem in enumerate(test_loader):
+            data, target = io.split_data_target(elem, self.device)
+            output = self.forward(*data)
+            mse += criterion(output, target)
         mse /= len(test_loader)
 
         if mse < self.best_mse:
@@ -496,8 +496,8 @@ class SoftGradientBoostingRegressor(_BaseSoftGradientBoosting, BaseRegressor):
         """Implementation on the data forwarding in SoftGradientBoostingRegressor.""",  # noqa: E501
         "regressor_forward",
     )
-    def forward(self, x):
-        outputs = [estimator(x) for estimator in self.estimators_]
+    def forward(self, *x):
+        outputs = [estimator(*x) for estimator in self.estimators_]
         pred = op.sum_with_multiplicative(outputs, self.shrinkage_rate)
 
         return pred

@@ -110,13 +110,13 @@ class _BaseFastGeometric(BaseModule):
         self.estimators_ = nn.ModuleList()
         self.use_scheduler_ = False
 
-    def _forward(self, x):
+    def _forward(self, *x):
         """
         Implementation on the internal data forwarding in fast geometric
         ensemble.
         """
         # Average
-        results = [estimator(x) for estimator in self.estimators_]
+        results = [estimator(*x) for estimator in self.estimators_]
         output = op.average(results)
 
         return output
@@ -175,8 +175,8 @@ class FastGeometricClassifier(_BaseFastGeometric, BaseClassifier):
         """Implementation on the data forwarding in FastGeometricClassifier.""",  # noqa: E501
         "classifier_forward",
     )
-    def forward(self, x):
-        proba = self._forward(x)
+    def forward(self, *x):
+        proba = self._forward(*x)
 
         return F.softmax(proba, dim=1)
 
@@ -245,13 +245,13 @@ class FastGeometricClassifier(_BaseFastGeometric, BaseClassifier):
 
             # Training
             estimator_.train()
-            for batch_idx, (data, target) in enumerate(train_loader):
+            for batch_idx, elem in enumerate(train_loader):
 
-                batch_size = data.size(0)
-                data, target = data.to(self.device), target.to(self.device)
+                data, target = io.split_data_target(elem, self.device)
+                batch_size = data[0].size(0)
 
                 optimizer.zero_grad()
-                output = estimator_(data)
+                output = estimator_(*data)
                 loss = criterion(output, target)
                 loss.backward()
                 optimizer.step()
@@ -306,18 +306,18 @@ class FastGeometricClassifier(_BaseFastGeometric, BaseClassifier):
 
             # Training
             estimator_.train()
-            for batch_idx, (data, target) in enumerate(train_loader):
+            for batch_idx, elem in enumerate(train_loader):
 
                 # Update learning rate
                 self._adjust_lr(
                     optimizer, epoch, batch_idx, n_iters, cycle, lr_1, lr_2
                 )
 
-                batch_size = data.size(0)
-                data, target = data.to(self.device), target.to(self.device)
+                data, target = io.split_data_target(elem, self.device)
+                batch_size = data[0].size(0)
 
                 optimizer.zero_grad()
-                output = estimator_(data)
+                output = estimator_(*data)
                 loss = criterion(output, target)
                 loss.backward()
                 optimizer.step()
@@ -370,10 +370,9 @@ class FastGeometricClassifier(_BaseFastGeometric, BaseClassifier):
                 with torch.no_grad():
                     correct = 0
                     total = 0
-                    for _, (data, target) in enumerate(test_loader):
-                        data = data.to(self.device)
-                        target = target.to(self.device)
-                        output = self.forward(data)
+                    for _, elem in enumerate(test_loader):
+                        data, target = io.split_data_target(elem, self.device)
+                        output = self.forward(*data)
                         _, predicted = torch.max(output.data, 1)
                         correct += (predicted == target).sum().item()
                         total += target.size(0)
@@ -489,12 +488,12 @@ class FastGeometricRegressor(_BaseFastGeometric, BaseRegressor):
 
             # Training
             estimator_.train()
-            for batch_idx, (data, target) in enumerate(train_loader):
+            for batch_idx, elem in enumerate(train_loader):
 
-                data, target = data.to(self.device), target.to(self.device)
+                data, target = io.split_data_target(elem, self.device)
 
                 optimizer.zero_grad()
-                output = estimator_(data)
+                output = estimator_(*data)
                 loss = criterion(output, target)
                 loss.backward()
                 optimizer.step()
@@ -535,17 +534,17 @@ class FastGeometricRegressor(_BaseFastGeometric, BaseRegressor):
 
             # Training
             estimator_.train()
-            for batch_idx, (data, target) in enumerate(train_loader):
+            for batch_idx, elem in enumerate(train_loader):
 
                 # Update learning rate
                 self._adjust_lr(
                     optimizer, epoch, batch_idx, n_iters, cycle, lr_1, lr_2
                 )
 
-                data, target = data.to(self.device), target.to(self.device)
+                data, target = io.split_data_target(elem, self.device)
 
                 optimizer.zero_grad()
-                output = estimator_(data)
+                output = estimator_(*data)
                 loss = criterion(output, target)
                 loss.backward()
                 optimizer.step()
@@ -582,10 +581,9 @@ class FastGeometricRegressor(_BaseFastGeometric, BaseRegressor):
                 self.eval()
                 with torch.no_grad():
                     mse = 0.0
-                    for _, (data, target) in enumerate(test_loader):
-                        data = data.to(self.device)
-                        target = target.to(self.device)
-                        output = self.forward(data)
+                    for _, elem in enumerate(test_loader):
+                        data, target = io.split_data_target(elem, self.device)
+                        output = self.forward(*data)
                         mse += criterion(output, target)
                     mse /= len(test_loader)
 

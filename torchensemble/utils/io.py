@@ -69,3 +69,31 @@ def load(model, save_dir="./", logger=None):
     for _ in range(n_estimators):
         model.estimators_.append(model._make_estimator())
     model.load_state_dict(model_params)
+
+
+def split_data_target(element, device, logger=None):
+    """Split elements in dataloader according to pre-defined rules."""
+    if not isinstance(element, list):
+        msg = (
+            "Invalid dataloader, please check if the input dataloder is valid."
+        )
+        logger.error(msg)
+        raise ValueError(msg)
+
+    if len(element) == 2:
+        # Dataloader with one input and one target
+        data, target = element[0], element[1]
+        return [data.to(device)], target.to(device)  # tensor -> list
+    elif len(element) > 2:
+        # Dataloader with multiple inputs and one target
+        data, target = element[:-1], element[-1]
+        data_device = [tensor.to(device) for tensor in data]
+        return data_device, target.to(device)
+    else:
+        # Dataloader with invalid input
+        msg = (
+            "The input dataloader should at least contain two tensors - data"
+            " and target."
+        )
+        logger.error(msg)
+        raise ValueError(msg)

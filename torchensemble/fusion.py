@@ -24,12 +24,12 @@ __all__ = ["FusionClassifier", "FusionRegressor"]
     """Implementation on the FusionClassifier.""", "model"
 )
 class FusionClassifier(BaseClassifier):
-    def _forward(self, x):
+    def _forward(self, *x):
         """
         Implementation on the internal data forwarding in FusionClassifier.
         """
         # Average
-        outputs = [estimator(x) for estimator in self.estimators_]
+        outputs = [estimator(*x) for estimator in self.estimators_]
         output = op.average(outputs)
 
         return output
@@ -38,8 +38,8 @@ class FusionClassifier(BaseClassifier):
         """Implementation on the data forwarding in FusionClassifier.""",
         "classifier_forward",
     )
-    def forward(self, x):
-        output = self._forward(x)
+    def forward(self, *x):
+        output = self._forward(*x)
         proba = F.softmax(output, dim=1)
 
         return proba
@@ -94,12 +94,13 @@ class FusionClassifier(BaseClassifier):
         # Training loop
         for epoch in range(epochs):
             self.train()
-            for batch_idx, (data, target) in enumerate(train_loader):
+            for batch_idx, elem in enumerate(train_loader):
 
-                data, target = data.to(self.device), target.to(self.device)
+                data, target = io.split_data_target(elem, self.device)
+                batch_size = data[0].size(0)
 
                 optimizer.zero_grad()
-                output = self._forward(data)
+                output = self._forward(*data)
                 loss = criterion(output, target)
                 loss.backward()
                 optimizer.step()
@@ -116,7 +117,7 @@ class FusionClassifier(BaseClassifier):
                         )
                         self.logger.info(
                             msg.format(
-                                epoch, batch_idx, loss, correct, data.size(0)
+                                epoch, batch_idx, loss, correct, batch_size
                             )
                         )
                         if self.tb_logger:
@@ -131,10 +132,9 @@ class FusionClassifier(BaseClassifier):
                 with torch.no_grad():
                     correct = 0
                     total = 0
-                    for _, (data, target) in enumerate(test_loader):
-                        data = data.to(self.device)
-                        target = target.to(self.device)
-                        output = self.forward(data)
+                    for _, elem in enumerate(test_loader):
+                        data, target = io.split_data_target(elem, self.device)
+                        output = self.forward(*data)
                         _, predicted = torch.max(output.data, 1)
                         correct += (predicted == target).sum().item()
                         total += target.size(0)
@@ -177,9 +177,9 @@ class FusionRegressor(BaseRegressor):
         """Implementation on the data forwarding in FusionRegressor.""",
         "regressor_forward",
     )
-    def forward(self, x):
+    def forward(self, *x):
         # Average
-        outputs = [estimator(x) for estimator in self.estimators_]
+        outputs = [estimator(*x) for estimator in self.estimators_]
         pred = op.average(outputs)
 
         return pred
@@ -233,12 +233,12 @@ class FusionRegressor(BaseRegressor):
         # Training loop
         for epoch in range(epochs):
             self.train()
-            for batch_idx, (data, target) in enumerate(train_loader):
+            for batch_idx, elem in enumerate(train_loader):
 
-                data, target = data.to(self.device), target.to(self.device)
+                data, target = io.split_data_target(elem, self.device)
 
                 optimizer.zero_grad()
-                output = self.forward(data)
+                output = self.forward(*data)
                 loss = criterion(output, target)
                 loss.backward()
                 optimizer.step()
@@ -259,10 +259,9 @@ class FusionRegressor(BaseRegressor):
                 self.eval()
                 with torch.no_grad():
                     mse = 0.0
-                    for _, (data, target) in enumerate(test_loader):
-                        data = data.to(self.device)
-                        target = target.to(self.device)
-                        output = self.forward(data)
+                    for _, elem in enumerate(test_loader):
+                        data, target = io.split_data_target(elem, self.device)
+                        output = self.forward(*data)
                         mse += criterion(output, target)
                     mse /= len(test_loader)
 
