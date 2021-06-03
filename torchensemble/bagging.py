@@ -219,7 +219,7 @@ class BaggingClassifier(BaseClassifier):
                             data, target = io.split_data_target(
                                 elem, self.device
                             )
-                            output = self.forward(*data)
+                            output = _forward(estimators, *data)
                             _, predicted = torch.max(output.data, 1)
                             correct += (predicted == target).sum().item()
                             total += target.size(0)
@@ -388,7 +388,7 @@ class BaggingRegressor(BaseRegressor):
                             data, target = io.split_data_target(
                                 elem, self.device
                             )
-                            output = self.forward(*data)
+                            output = _forward(estimators, *data)
                             mse += criterion(output, target)
                         mse /= len(test_loader)
 
