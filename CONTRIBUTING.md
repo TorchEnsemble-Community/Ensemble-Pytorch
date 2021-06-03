@@ -129,6 +129,7 @@ To build the documentation locally, you need to install a few extra dependencies
 2. To build the website locally, run:
 
     ```bash
+    cd docs
     make html
     ```
 
@@ -137,4 +138,4 @@ You can find the generated files in the `Ensemble-Pytorch/docs/_build/` folder. 
 Acknowledgement
 ---------------
 
-This CONTRIBUTING is adapted from the [PyTorch](https://github.com/pytorch/pytorch/blob/master/CONTRIBUTING.md) and [Sktime](https://github.com/alan-turing-institute/sktime/blob/main/CONTRIBUTING.md)
+This CONTRIBUTING is adapted from the [PyTorch](https://github.com/pytorch/pytorch/blob/master/CONTRIBUTING.md) and [Sktime](https://github.com/alan-turing-institute/sktime/blob/main/CONTRIBUTING.md).
