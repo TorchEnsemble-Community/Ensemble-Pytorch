@@ -68,7 +68,7 @@ class MLP_reg(nn.Module):
         return output
 
 
-# Trainining data
+# Training data
 X_train = torch.Tensor(
     np.array(([0.1, 0.1], [0.2, 0.2], [0.3, 0.3], [0.4, 0.4]))
 )
