@@ -61,4 +61,5 @@ Content
    API Reference <parameters>
    Changelog <changelog>
    Contributors <contributors>
+   Code of Conduct <code_of_conduct>
    Roadmap <roadmap>
