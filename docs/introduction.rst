@@ -75,21 +75,9 @@ Fast Geometric Ensemble [4]_
 
 Motivated by geometric insights on the loss surface of deep neural networks, Fast Geometirc Ensembling (FGE) is an efficient ensemble that uses a customized learning rate scheduler to generate base estimators, similar to snapshot ensemble.
 
-Soft Gradient Boosting [5]_
----------------------------
-
-The sequential training stage of gradient boosting makes it prohibitively expensive to use when large neural networks are chosen as the base estimator. The recently proposed soft gradient boosting machine mitigates this problem by concatenating all base estimators in the ensemble, and by using local and global training objectives inspired from gradient boosting. As a result, it is able to simultaneously train all base estimators, while achieving similar boosting performance as gradient boosting.
-
-The figure below is the model architecture of soft gradient boosting.
-
-.. image:: ./_images/soft_gradient_boosting.png
-   :align: center
-   :width: 400
-
 **References**
 
 .. [1] Jerome H. Friedman., "Greedy Function Approximation: A Gradient Boosting Machine." The Annals of Statistics, 2001.
 .. [2] Huang Gao, Sharon Yixuan Li, Geoff Pleisset, et al., "Snapshot Ensembles: Train 1, Get M for Free." ICLR, 2017.
 .. [3] Balaji Lakshminarayanan, Alexander Pritzel, Charles Blundell., "Simple and Scalable Predictive Uncertainty Estimation using Deep Ensembles." NIPS 2017.
 .. [4] Timur Garipov, Pavel Izmailov, Dmitrii Podoprikhin et al., "Loss Surfaces, Mode Connectivity, and Fast Ensembling of DNNs." NeurIPS, 2018.
-.. [5] Ji Feng, Yi-Xuan Xu, Yuan Jiang, Zhi-Hua Zhou., "Soft Gradient Boosting Machine.", arXiv, 2020.
