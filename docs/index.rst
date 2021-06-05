@@ -53,13 +53,19 @@ Content
 
 .. toctree::
   :maxdepth: 1
+  :caption: For Users
 
-   Quick Start <quick_start>
-   Introduction <introduction>
-   Guidance <guide>
-   Experiment <experiment>
-   API Reference <parameters>
-   Changelog <changelog>
-   Contributors <contributors>
-   Code of Conduct <code_of_conduct>
-   Roadmap <roadmap>
+  Quick Start <quick_start>
+  Introduction <introduction>
+  Guidance <guide>
+  Experiment <experiment>
+  API Reference <parameters>
+
+.. toctree::
+  :maxdepth: 1
+  :caption: For Developers
+
+  Changelog <changelog>
+  Roadmap <roadmap>
+  Contributors <contributors>
+  Code of Conduct <code_of_conduct>
