@@ -20,10 +20,10 @@
 Ensemble PyTorch
 ================
 
-A unified ensemble framework for pytorch_ to easily improve the performance and robustness of your deep learning model.
+A unified ensemble framework for pytorch_ to easily improve the performance and robustness of your deep learning model. Ensemble-PyTorch is part of the `pytorch ecosystem <https://pytorch.org/ecosystem/>`__ which requires the project to be well maintained.
 
 * `Document <https://ensemble-pytorch.readthedocs.io/>`__
-* `Source Code <https://github.com/xuyxu/Ensemble-Pytorch>`__
+* `Source Code <https://github.com/https://github.com/TorchEnsemble-Community/Ensemble-Pytorch/Ensemble-Pytorch>`__
 * `Experiment <https://ensemble-pytorch.readthedocs.io/en/stable/experiment.html>`__
 
 Installation
@@ -39,7 +39,7 @@ Latest version (under development):
 
 .. code:: bash
 
-    pip install git+https://github.com/xuyxu/Ensemble-Pytorch
+    pip install git+https://github.com/TorchEnsemble-Community/Ensemble-Pytorch.git
 
 Example
 -------
@@ -52,43 +52,33 @@ Example
     train_loader = DataLoader(...)
     test_loader = DataLoader(...)
 
-    '''
-    [Step-1] Define the ensemble
-    '''
-    model = VotingClassifier(
+    # Define the ensemble
+    ensemble = VotingClassifier(
         estimator=base_estimator,               # here is your deep learning model
         n_estimators=10,                        # number of base estimators
     )
 
-    '''
-    [Step-2] Set the parameter optimizer
-    '''
-    model.set_optimizer(
+    # Set the optimizer
+    ensemble.set_optimizer(
         "Adam",                                 # type of parameter optimizer
         lr=learning_rate,                       # learning rate of parameter optimizer
         weight_decay=weight_decay,              # weight decay of parameter optimizer
     )
-
-    '''
-    [Step-3] Set the learning rate scheduler
-    '''
-    model.set_scheduler(
+    
+    # Set the learning rate scheduler
+    ensemble.set_scheduler(
         "CosineAnnealingLR",                    # type of learning rate scheduler
         T_max=epochs,                           # additional arguments on the scheduler
     )
 
-    '''
-    [Step-4] Train the ensemble
-    '''
-    model.fit(
+    # Train the ensemble
+    ensemble.fit(
         train_loader,
         epochs=epochs,                          # number of training epochs
     )
 
-    '''
-    [Step-5] Evaluate the ensemble
-    '''
-    acc = model.predict(test_loader)            # testing accuracy
+    # Evaluate the ensemble
+    acc = ensemble.predict(test_loader)         # testing accuracy
 
 Supported Ensemble
 ------------------
@@ -103,8 +93,6 @@ Supported Ensemble
 |         Bagging [2]_         |  Parallel  |         bagging.py        |
 +------------------------------+------------+---------------------------+
 |    Gradient Boosting [3]_    | Sequential |    gradient_boosting.py   |
-+------------------------------+------------+---------------------------+
-|  Soft Gradient Boosting [7]_ |  Parallel  | soft_gradient_boosting.py |
 +------------------------------+------------+---------------------------+
 |    Snapshot Ensemble [4]_    | Sequential |    snapshot_ensemble.py   |
 +------------------------------+------------+---------------------------+
@@ -134,8 +122,6 @@ Reference
 .. [5] Lakshminarayanan, Balaji, et al. Simple and Scalable Predictive Uncertainty Estimation using Deep Ensembles. NIPS, 2017.
 
 .. [6] Garipov, Timur, et al. Loss Surfaces, Mode Connectivity, and Fast Ensembling of DNNs. NeurIPS, 2018.
-
-.. [7] Feng, Ji, et al. Soft Gradient Boosting Machine. arXiv, 2020.
 
 .. _pytorch: https://pytorch.org/
 
