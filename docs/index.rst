@@ -7,9 +7,9 @@ Ensemble PyTorch Documentation
 
 Ensemble PyTorch is a unified ensemble framework for PyTorch to easily improve the performance and robustness of your deep learning model. It provides:
 
-* |:arrow_up_small:| Easy ways to improve the performance and robustness of your deep learning model.
-* |:eyes:| Easy-to-use APIs on training and evaluating the ensemble.
-* |:zap:| High training efficiency with parallelization.
+* Easy ways to improve the performance and robustness of your deep learning model.
+* Easy-to-use APIs on training and evaluating the ensemble.
+* High training efficiency with parallelization.
 
 Guidepost
 ---------
