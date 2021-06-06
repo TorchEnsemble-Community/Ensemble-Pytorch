@@ -167,8 +167,8 @@ class FusionClassifier(BaseClassifier):
         return super().evaluate(test_loader, return_loss)
 
     @torchensemble_model_doc(item="predict")
-    def predict(self, X, return_numpy=True):
-        return super().predict(X, return_numpy)
+    def predict(self, *x):
+        return super().predict(*x)
 
 
 @torchensemble_model_doc("""Implementation on the FusionRegressor.""", "model")
@@ -292,5 +292,5 @@ class FusionRegressor(BaseRegressor):
         return super().evaluate(test_loader)
 
     @torchensemble_model_doc(item="predict")
-    def predict(self, X, return_numpy=True):
-        return super().predict(X, return_numpy)
+    def predict(self, *x):
+        return super().predict(*x)

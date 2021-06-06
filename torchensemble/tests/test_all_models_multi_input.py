@@ -2,7 +2,6 @@ import torch
 import pytest
 import numpy as np
 import torch.nn as nn
-from numpy.testing import assert_array_equal
 from torch.utils.data import TensorDataset, DataLoader
 
 import torchensemble
@@ -36,6 +35,7 @@ all_reg = [
 
 np.random.seed(0)
 torch.manual_seed(0)
+device = torch.device("cpu")
 set_logger("pytest_all_models")
 
 
@@ -46,11 +46,14 @@ class MLP_clf(nn.Module):
         self.linear1 = nn.Linear(2, 2)
         self.linear2 = nn.Linear(2, 2)
 
-    def forward(self, X):
-        X = X.view(X.size()[0], -1)
-        output = self.linear1(X)
-        output = self.linear2(output)
-        return output
+    def forward(self, X_1, X_2):
+        X_1 = X_1.view(X_1.size()[0], -1)
+        X_2 = X_2.view(X_2.size()[0], -1)
+        output_1 = self.linear1(X_1)
+        output_1 = self.linear2(output_1)
+        output_2 = self.linear1(X_2)
+        output_2 = self.linear2(output_2)
+        return 0.5 * output_1 + 0.5 * output_2
 
 
 class MLP_reg(nn.Module):
@@ -59,11 +62,14 @@ class MLP_reg(nn.Module):
         self.linear1 = nn.Linear(2, 2)
         self.linear2 = nn.Linear(2, 1)
 
-    def forward(self, X):
-        X = X.view(X.size()[0], -1)
-        output = self.linear1(X)
-        output = self.linear2(output)
-        return output
+    def forward(self, X_1, X_2):
+        X_1 = X_1.view(X_1.size()[0], -1)
+        X_2 = X_2.view(X_2.size()[0], -1)
+        output_1 = self.linear1(X_1)
+        output_1 = self.linear2(output_1)
+        output_2 = self.linear1(X_2)
+        output_2 = self.linear2(output_2)
+        return 0.5 * output_1 + 0.5 * output_2
 
 
 # Training data
@@ -102,10 +108,10 @@ def test_clf_class(clf):
     if not isinstance(model, torchensemble.SnapshotEnsembleClassifier):
         model.set_scheduler("MultiStepLR", milestones=[2, 4])
 
-    # Prepare data
-    train = TensorDataset(X_train, y_train_clf)
+    # Prepare data with multiple inputs
+    train = TensorDataset(X_train, X_train, y_train_clf)
     train_loader = DataLoader(train, batch_size=2, shuffle=False)
-    test = TensorDataset(X_test, y_test_clf)
+    test = TensorDataset(X_test, X_test, y_test_clf)
     test_loader = DataLoader(test, batch_size=2, shuffle=False)
 
     # Snapshot Ensemble needs more epochs
@@ -119,8 +125,9 @@ def test_clf_class(clf):
     model.evaluate(test_loader)
 
     # Predict
-    for _, (data, target) in enumerate(test_loader):
-        model.predict(data)
+    for _, elem in enumerate(test_loader):
+        data, target = io.split_data_target(elem, device)
+        model.predict(*data)
         break
 
     # Reload
@@ -129,8 +136,9 @@ def test_clf_class(clf):
 
     new_model.evaluate(test_loader)
 
-    for _, (data, target) in enumerate(test_loader):
-        new_model.predict(data)
+    for _, elem in enumerate(test_loader):
+        data, target = io.split_data_target(elem, device)
+        new_model.predict(*data)
         break
 
 
@@ -151,10 +159,10 @@ def test_clf_object(clf):
     if not isinstance(model, torchensemble.SnapshotEnsembleClassifier):
         model.set_scheduler("MultiStepLR", milestones=[2, 4])
 
-    # Prepare data
-    train = TensorDataset(X_train, y_train_clf)
+    # Prepare data with multiple inputs
+    train = TensorDataset(X_train, X_train, y_train_clf)
     train_loader = DataLoader(train, batch_size=2, shuffle=False)
-    test = TensorDataset(X_test, y_test_clf)
+    test = TensorDataset(X_test, X_test, y_test_clf)
     test_loader = DataLoader(test, batch_size=2, shuffle=False)
 
     # Snapshot Ensemble needs more epochs
@@ -168,8 +176,9 @@ def test_clf_object(clf):
     model.evaluate(test_loader)
 
     # Predict
-    for _, (data, target) in enumerate(test_loader):
-        model.predict(data)
+    for _, elem in enumerate(test_loader):
+        data, target = io.split_data_target(elem, device)
+        model.predict(*data)
         break
 
     # Reload
@@ -178,8 +187,9 @@ def test_clf_object(clf):
 
     new_model.evaluate(test_loader)
 
-    for _, (data, target) in enumerate(test_loader):
-        new_model.predict(data)
+    for _, elem in enumerate(test_loader):
+        data, target = io.split_data_target(elem, device)
+        new_model.predict(*data)
         break
 
 
@@ -200,10 +210,10 @@ def test_reg_class(reg):
     if not isinstance(model, torchensemble.SnapshotEnsembleRegressor):
         model.set_scheduler("MultiStepLR", milestones=[2, 4])
 
-    # Prepare data
-    train = TensorDataset(X_train, y_train_reg)
+    # Prepare data with multiple inputs
+    train = TensorDataset(X_train, X_train, y_train_reg)
     train_loader = DataLoader(train, batch_size=2, shuffle=False)
-    test = TensorDataset(X_test, y_test_reg)
+    test = TensorDataset(X_test, X_test, y_test_reg)
     test_loader = DataLoader(test, batch_size=2, shuffle=False)
 
     # Snapshot Ensemble needs more epochs
@@ -217,8 +227,9 @@ def test_reg_class(reg):
     model.evaluate(test_loader)
 
     # Predict
-    for _, (data, target) in enumerate(test_loader):
-        model.predict(data)
+    for _, elem in enumerate(test_loader):
+        data, target = io.split_data_target(elem, device)
+        model.predict(*data)
         break
 
     # Reload
@@ -227,8 +238,9 @@ def test_reg_class(reg):
 
     new_model.evaluate(test_loader)
 
-    for _, (data, target) in enumerate(test_loader):
-        new_model.predict(data)
+    for _, elem in enumerate(test_loader):
+        data, target = io.split_data_target(elem, device)
+        new_model.predict(*data)
         break
 
 
@@ -249,10 +261,10 @@ def test_reg_object(reg):
     if not isinstance(model, torchensemble.SnapshotEnsembleRegressor):
         model.set_scheduler("MultiStepLR", milestones=[2, 4])
 
-    # Prepare data
-    train = TensorDataset(X_train, y_train_reg)
+    # Prepare data with multiple inputs
+    train = TensorDataset(X_train, X_train, y_train_reg)
     train_loader = DataLoader(train, batch_size=2, shuffle=False)
-    test = TensorDataset(X_test, y_test_reg)
+    test = TensorDataset(X_test, X_test, y_test_reg)
     test_loader = DataLoader(test, batch_size=2, shuffle=False)
 
     # Snapshot Ensemble needs more epochs
@@ -266,8 +278,9 @@ def test_reg_object(reg):
     model.evaluate(test_loader)
 
     # Predict
-    for _, (data, target) in enumerate(test_loader):
-        model.predict(data)
+    for _, elem in enumerate(test_loader):
+        data, target = io.split_data_target(elem, device)
+        model.predict(*data)
         break
 
     # Reload
@@ -276,23 +289,12 @@ def test_reg_object(reg):
 
     new_model.evaluate(test_loader)
 
-    for _, (data, target) in enumerate(test_loader):
-        new_model.predict(data)
+    for _, elem in enumerate(test_loader):
+        data, target = io.split_data_target(elem, device)
+        new_model.predict(*data)
         break
 
 
-def test_predict():
+if __name__ == "__main__":
 
-    fusion = all_clf[0]  # FusionClassifier
-    model = fusion(estimator=MLP_clf, n_estimators=2, cuda=False)
-    model.set_optimizer("Adam", lr=1e-3, weight_decay=5e-4)
-
-    train = TensorDataset(X_train, y_train_clf)
-    train_loader = DataLoader(train, batch_size=2, shuffle=False)
-    model.fit(train_loader, epochs=1)
-
-    assert_array_equal(model.predict(X_test), model.predict(numpy_X_test))
-
-    with pytest.raises(ValueError) as excinfo:
-        model.predict([X_test])  # list
-    assert "The type of input X should be one of" in str(excinfo.value)
+    test_reg_class(torchensemble.BaggingRegressor)

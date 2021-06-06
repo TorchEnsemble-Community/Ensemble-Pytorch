@@ -171,27 +171,26 @@ class BaseModule(nn.Module):
         """
 
     @torch.no_grad()
-    def predict(self, X, return_numpy=True):
+    def predict(self, *x):
         """Docstrings decorated by downstream ensembles."""
         self.eval()
-        pred = None
 
-        if isinstance(X, torch.Tensor):
-            pred = self.forward(X.to(self.device))
-        elif isinstance(X, np.ndarray):
-            X = torch.Tensor(X).to(self.device)
-            pred = self.forward(X)
-        else:
-            msg = (
-                "The type of input X should be one of {{torch.Tensor,"
-                " np.ndarray}}."
-            )
-            raise ValueError(msg)
+        # Copy data
+        x_device = []
+        for data in x:
+            if isinstance(data, torch.Tensor):
+                x_device.append(data.to(self.device))
+            elif isinstance(data, np.ndarray):
+                x_device.append(torch.Tensor(data).to(self.device))
+            else:
+                msg = (
+                    "The type of input X should be one of {{torch.Tensor,"
+                    " np.ndarray}}."
+                )
+                raise ValueError(msg)
 
+        pred = self.forward(*x_device)
         pred = pred.cpu()
-        if return_numpy:
-            return pred.numpy()
-
         return pred
 
 

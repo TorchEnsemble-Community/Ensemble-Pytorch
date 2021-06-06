@@ -361,8 +361,8 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble, BaseClassifier):
         return super().evaluate(test_loader, return_loss)
 
     @torchensemble_model_doc(item="predict")
-    def predict(self, X, return_numpy=True):
-        return super().predict(X, return_numpy)
+    def predict(self, *x):
+        return super().predict(*x)
 
 
 @torchensemble_model_doc(
@@ -373,8 +373,8 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble, BaseRegressor):
         """Implementation on the data forwarding in SnapshotEnsembleRegressor.""",  # noqa: E501
         "regressor_forward",
     )
-    def forward(self, x):
-        pred = self._forward(x)
+    def forward(self, *x):
+        pred = self._forward(*x)
         return pred
 
     @torchensemble_model_doc(
@@ -508,5 +508,5 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble, BaseRegressor):
         return super().evaluate(test_loader)
 
     @torchensemble_model_doc(item="predict")
-    def predict(self, X, return_numpy=True):
-        return super().predict(X, return_numpy)
+    def predict(self, *x):
+        return super().predict(*x)

@@ -262,8 +262,8 @@ class BaggingClassifier(BaseClassifier):
         return super().evaluate(test_loader, return_loss)
 
     @torchensemble_model_doc(item="predict")
-    def predict(self, X, return_numpy=True):
-        return super().predict(X, return_numpy)
+    def predict(self, *x):
+        return super().predict(*x)
 
 
 @torchensemble_model_doc(
@@ -274,9 +274,9 @@ class BaggingRegressor(BaseRegressor):
         """Implementation on the data forwarding in BaggingRegressor.""",
         "regressor_forward",
     )
-    def forward(self, x):
+    def forward(self, *x):
         # Average over predictions from all base estimators.
-        outputs = [estimator(x) for estimator in self.estimators_]
+        outputs = [estimator(*x) for estimator in self.estimators_]
         pred = op.average(outputs)
 
         return pred
@@ -426,5 +426,5 @@ class BaggingRegressor(BaseRegressor):
         return super().evaluate(test_loader)
 
     @torchensemble_model_doc(item="predict")
-    def predict(self, X, return_numpy=True):
-        return super().predict(X, return_numpy)
+    def predict(self, *x):
+        return super().predict(*x)
