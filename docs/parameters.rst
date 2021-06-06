@@ -92,25 +92,6 @@ GradientBoostingRegressor
 .. autoclass:: torchensemble.gradient_boosting.GradientBoostingRegressor
     :members:
 
-Soft Gradient Boosting
-----------------------
-
-In soft gradient boosting, all base estimators could be simultaneously
-fitted, while achieving the similar boosting improvements as in gradient
-boosting.
-
-SoftGradientBoostingClassifier
-******************************
-
-.. autoclass:: torchensemble.soft_gradient_boosting.SoftGradientBoostingClassifier
-    :members:
-
-SoftGradientBoostingRegressor
-*****************************
-
-.. autoclass:: torchensemble.soft_gradient_boosting.SoftGradientBoostingRegressor
-    :members:
-
 Snapshot Ensemble
 -----------------
 
