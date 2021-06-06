@@ -4,7 +4,7 @@ Experiments
 Setup
 ~~~~~
 
-Experiments here are designed to evaluate the performance of each ensemble implemented in Ensemble-PyTorch. We have collected four different configurations on dataset and base estimator, as shown in the table below. In addition, scripts on producing all figures below are available on `GitHub <https://github.com/xuyxu/Ensemble-Pytorch/tree/master/docs/plotting>`__.
+Experiments here are designed to evaluate the performance of each ensemble implemented in Ensemble-PyTorch. We have collected four different configurations on dataset and base estimator, as shown in the table below. In addition, scripts on producing all figures below are available on `GitHub <https://github.com/TorchEnsemble-Community/Ensemble-Pytorch/tree/master/docs/plotting>`__.
 
 .. table::
    :align: center
@@ -28,7 +28,7 @@ Experiments here are designed to evaluate the performance of each ensemble imple
 
 .. tip::
 
-  For each experiment shown below, we have added some comments that may be worthy of your attention. Feel free to open an `issue <https://github.com/xuyxu/Ensemble-Pytorch/issues>`__ if you have any question on the results.
+  For each experiment shown below, we have added some comments that may be worthy of your attention. Feel free to open an `issue <https://github.com/TorchEnsemble-Community/Ensemble-Pytorch/issues/new/choose>`__ if you have any question on the results.
 
 LeNet\@MNIST
 ~~~~~~~~~~~~

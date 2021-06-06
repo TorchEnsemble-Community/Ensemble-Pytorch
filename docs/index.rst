@@ -7,9 +7,9 @@ Ensemble PyTorch Documentation
 
 Ensemble PyTorch is a unified ensemble framework for PyTorch to easily improve the performance and robustness of your deep learning model. It provides:
 
-* |:arrow_up_small:| Easy ways to improve the performance and robustness of your deep learning model.
-* |:eyes:| Easy-to-use APIs on training and evaluating the ensemble.
-* |:zap:| High training efficiency with parallelization.
+* Easy ways to improve the performance and robustness of your deep learning model.
+* Easy-to-use APIs on training and evaluating the ensemble.
+* High training efficiency with parallelization.
 
 Guidepost
 ---------
@@ -23,43 +23,58 @@ Example
 
 .. code:: python
 
-  from torchensemble import VotingClassifier             # Voting is a classic ensemble strategy
+  from torchensemble import VotingClassifier  # voting is a classic ensemble strategy
 
   # Load data
   train_loader = DataLoader(...)
   test_loader = DataLoader(...)
 
   # Define the ensemble
-  model = VotingClassifier(estimator=base_estimator,     # your deep learning model
-                           n_estimators=10)              # the number of base estimators
+  ensemble = VotingClassifier(
+      estimator=base_estimator,               # here is your deep learning model
+      n_estimators=10,                        # number of base estimators
+  )
 
   # Set the optimizer
-  model.set_optimizer("Adam",                            # parameter optimizer
-                      lr=learning_rate,                  # learning rate of the optimizer
-                      weight_decay=weight_decay)         # weight decay of the optimizer
+  ensemble.set_optimizer(
+      "Adam",                                 # type of parameter optimizer
+      lr=learning_rate,                       # learning rate of parameter optimizer
+      weight_decay=weight_decay,              # weight decay of parameter optimizer
+  )
+  
+  # Set the learning rate scheduler
+  ensemble.set_scheduler(
+      "CosineAnnealingLR",                    # type of learning rate scheduler
+      T_max=epochs,                           # additional arguments on the scheduler
+  )
 
-  # Set the scheduler
-  model.set_scheduler("CosineAnnealingLR", T_max=epochs) # (optional) learning rate scheduler
+  # Train the ensemble
+  ensemble.fit(
+      train_loader,
+      epochs=epochs,                          # number of training epochs
+  )
 
-  # Train
-  model.fit(train_loader,
-            epochs=epochs)                               # the number of training epochs
-
-  # Evaluate
-  acc = model.predict(test_loader)                       # testing accuracy
+  # Evaluate the ensemble
+  acc = ensemble.predict(test_loader)         # testing accuracy
 
 Content
 -------
 
 .. toctree::
   :maxdepth: 1
+  :caption: For Users
 
-   Quick Start <quick_start>
-   Introduction <introduction>
-   Guidance <guide>
-   Experiment <experiment>
-   API Reference <parameters>
-   Changelog <changelog>
-   Contributors <contributors>
-   Code of Conduct <code_of_conduct>
-   Roadmap <roadmap>
+  Quick Start <quick_start>
+  Introduction <introduction>
+  Guidance <guide>
+  Experiment <experiment>
+  API Reference <parameters>
+
+.. toctree::
+  :maxdepth: 1
+  :caption: For Developers
+
+  Changelog <changelog>
+  Roadmap <roadmap>
+  Contributors <contributors>
+  Code of Conduct <code_of_conduct>
