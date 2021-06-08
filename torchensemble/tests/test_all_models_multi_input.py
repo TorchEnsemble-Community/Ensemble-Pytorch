@@ -297,11 +297,11 @@ def test_reg_object(reg):
 
 def test_split_data_target_invalid_data_type():
     with pytest.raises(ValueError) as excinfo:
-        io.split_data_target(0., device, logger)
+        io.split_data_target(0.0, device, logger)
     assert "Invalid dataloader" in str(excinfo.value)
 
 
 def test_split_data_target_invalid_list_length():
     with pytest.raises(ValueError) as excinfo:
-        io.split_data_target([0.], device, logger)
+        io.split_data_target([0.0], device, logger)
     assert "should at least contain two tensors" in str(excinfo.value)
