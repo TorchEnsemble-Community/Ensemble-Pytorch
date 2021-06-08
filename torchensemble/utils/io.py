@@ -77,7 +77,8 @@ def split_data_target(element, device, logger=None):
         msg = (
             "Invalid dataloader, please check if the input dataloder is valid."
         )
-        logger.error(msg)
+        if logger:
+            logger.error(msg)
         raise ValueError(msg)
 
     if len(element) == 2:
@@ -95,5 +96,6 @@ def split_data_target(element, device, logger=None):
             "The input dataloader should at least contain two tensors - data"
             " and target."
         )
-        logger.error(msg)
+        if logger:
+            logger.error(msg)
         raise ValueError(msg)

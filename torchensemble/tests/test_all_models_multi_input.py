@@ -36,7 +36,7 @@ all_reg = [
 np.random.seed(0)
 torch.manual_seed(0)
 device = torch.device("cpu")
-set_logger("pytest_all_models")
+logger = set_logger("pytest_all_models_multiple_input")
 
 
 # Base estimator
@@ -293,3 +293,15 @@ def test_reg_object(reg):
         data, target = io.split_data_target(elem, device)
         new_model.predict(*data)
         break
+
+
+def test_split_data_target_invalid_data_type():
+    with pytest.raises(ValueError) as excinfo:
+        io.split_data_target(0., device, logger)
+    assert "Invalid dataloader" in str(excinfo.value)
+
+
+def test_split_data_target_invalid_list_length():
+    with pytest.raises(ValueError) as excinfo:
+        io.split_data_target([0.], device, logger)
+    assert "should at least contain two tensors" in str(excinfo.value)
