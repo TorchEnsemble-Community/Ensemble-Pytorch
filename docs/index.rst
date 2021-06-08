@@ -72,12 +72,6 @@ Content
 
 .. toctree::
   :maxdepth: 1
-  :caption: Advanced Topics
-
-  Use DataLoader with Multiple Input <./advanced/multi_input_dataloader>
-
-.. toctree::
-  :maxdepth: 1
   :caption: For Developers
 
   Changelog <changelog>
