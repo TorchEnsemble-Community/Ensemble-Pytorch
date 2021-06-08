@@ -149,7 +149,7 @@ class BaseModule(nn.Module):
         self.use_scheduler_ = True
 
     @abc.abstractmethod
-    def forward(self, x):
+    def forward(self, *x):
         """
         Implementation on the data forwarding in the ensemble. Notice
         that the input ``x`` should be a data batch instead of a standalone

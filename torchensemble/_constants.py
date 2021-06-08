@@ -124,12 +124,12 @@ __predict_doc = """
 
     Parameters
     ----------
-    X : {Tensor, ndarray}
+    X : {tensor, numpy array}
         A data batch in the form of tensor or numpy array.
 
     Returns
     -------
-    pred : Array of shape (n_samples, n_outputs)
+    pred : tensor of shape (n_samples, n_outputs)
         For classifiers, ``n_outputs`` is the number of distinct classes. For
         regressors, ``n_output`` is the number of target variables.
 """
