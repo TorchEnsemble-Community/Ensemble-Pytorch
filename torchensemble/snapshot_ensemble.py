@@ -160,12 +160,12 @@ class _BaseSnapshotEnsemble(BaseModule):
             self.logger.error(msg.format(epochs, self.n_estimators))
             raise ValueError(msg.format(epochs, self.n_estimators))
 
-    def _forward(self, x):
+    def _forward(self, *x):
         """
         Implementation on the internal data forwarding in snapshot ensemble.
         """
         # Average
-        results = [estimator(x) for estimator in self.estimators_]
+        results = [estimator(*x) for estimator in self.estimators_]
         output = op.average(results)
 
         return output
@@ -213,8 +213,8 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble, BaseClassifier):
         """Implementation on the data forwarding in SnapshotEnsembleClassifier.""",  # noqa: E501
         "classifier_forward",
     )
-    def forward(self, x):
-        proba = self._forward(x)
+    def forward(self, *x):
+        proba = self._forward(*x)
 
         return F.softmax(proba, dim=1)
 
@@ -261,16 +261,16 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble, BaseClassifier):
         # Training loop
         estimator.train()
         for epoch in range(epochs):
-            for batch_idx, (data, target) in enumerate(train_loader):
+            for batch_idx, elem in enumerate(train_loader):
 
-                batch_size = data.size(0)
-                data, target = data.to(self.device), target.to(self.device)
+                data, target = io.split_data_target(elem, self.device)
+                batch_size = data[0].size(0)
 
                 # Clip the learning rate
                 optimizer = self._clip_lr(optimizer, lr_clip)
 
                 optimizer.zero_grad()
-                output = estimator(data)
+                output = estimator(*data)
                 loss = criterion(output, target)
                 loss.backward()
                 optimizer.step()
@@ -326,10 +326,9 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble, BaseClassifier):
                 with torch.no_grad():
                     correct = 0
                     total = 0
-                    for _, (data, target) in enumerate(test_loader):
-                        data = data.to(self.device)
-                        target = target.to(self.device)
-                        output = self.forward(data)
+                    for _, elem in enumerate(test_loader):
+                        data, target = io.split_data_target(elem, self.device)
+                        output = self.forward(*data)
                         _, predicted = torch.max(output.data, 1)
                         correct += (predicted == target).sum().item()
                         total += target.size(0)
@@ -362,8 +361,8 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble, BaseClassifier):
         return super().evaluate(test_loader, return_loss)
 
     @torchensemble_model_doc(item="predict")
-    def predict(self, X, return_numpy=True):
-        return super().predict(X, return_numpy)
+    def predict(self, *x):
+        return super().predict(*x)
 
 
 @torchensemble_model_doc(
@@ -374,8 +373,8 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble, BaseRegressor):
         """Implementation on the data forwarding in SnapshotEnsembleRegressor.""",  # noqa: E501
         "regressor_forward",
     )
-    def forward(self, x):
-        pred = self._forward(x)
+    def forward(self, *x):
+        pred = self._forward(*x)
         return pred
 
     @torchensemble_model_doc(
@@ -421,15 +420,15 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble, BaseRegressor):
         # Training loop
         estimator.train()
         for epoch in range(epochs):
-            for batch_idx, (data, target) in enumerate(train_loader):
+            for batch_idx, elem in enumerate(train_loader):
 
-                data, target = data.to(self.device), target.to(self.device)
+                data, target = io.split_data_target(elem, self.device)
 
                 # Clip the learning rate
                 optimizer = self._clip_lr(optimizer, lr_clip)
 
                 optimizer.zero_grad()
-                output = estimator(data)
+                output = estimator(*data)
                 loss = criterion(output, target)
                 loss.backward()
                 optimizer.step()
@@ -476,10 +475,9 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble, BaseRegressor):
                 self.eval()
                 with torch.no_grad():
                     mse = 0.0
-                    for _, (data, target) in enumerate(test_loader):
-                        data = data.to(self.device)
-                        target = target.to(self.device)
-                        output = self.forward(data)
+                    for _, elem in enumerate(test_loader):
+                        data, target = io.split_data_target(elem, self.device)
+                        output = self.forward(*data)
                         mse += criterion(output, target)
                     mse /= len(test_loader)
 
@@ -510,5 +508,5 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble, BaseRegressor):
         return super().evaluate(test_loader)
 
     @torchensemble_model_doc(item="predict")
-    def predict(self, X, return_numpy=True):
-        return super().predict(X, return_numpy)
+    def predict(self, *x):
+        return super().predict(*x)

@@ -7,6 +7,7 @@ import numpy as np
 import torch.nn as nn
 
 from . import _constants as const
+from .utils.io import split_data_target
 from .utils.logging import get_tb_logger
 
 
@@ -148,7 +149,7 @@ class BaseModule(nn.Module):
         self.use_scheduler_ = True
 
     @abc.abstractmethod
-    def forward(self, x):
+    def forward(self, *x):
         """
         Implementation on the data forwarding in the ensemble. Notice
         that the input ``x`` should be a data batch instead of a standalone
@@ -170,27 +171,26 @@ class BaseModule(nn.Module):
         """
 
     @torch.no_grad()
-    def predict(self, X, return_numpy=True):
-        """Docstrings decorated by downstream models."""
+    def predict(self, *x):
+        """Docstrings decorated by downstream ensembles."""
         self.eval()
-        pred = None
 
-        if isinstance(X, torch.Tensor):
-            pred = self.forward(X.to(self.device))
-        elif isinstance(X, np.ndarray):
-            X = torch.Tensor(X).to(self.device)
-            pred = self.forward(X)
-        else:
-            msg = (
-                "The type of input X should be one of {{torch.Tensor,"
-                " np.ndarray}}."
-            )
-            raise ValueError(msg)
+        # Copy data
+        x_device = []
+        for data in x:
+            if isinstance(data, torch.Tensor):
+                x_device.append(data.to(self.device))
+            elif isinstance(data, np.ndarray):
+                x_device.append(torch.Tensor(data).to(self.device))
+            else:
+                msg = (
+                    "The type of input X should be one of {{torch.Tensor,"
+                    " np.ndarray}}."
+                )
+                raise ValueError(msg)
 
+        pred = self.forward(*x_device)
         pred = pred.cpu()
-        if return_numpy:
-            return pred.numpy()
-
         return pred
 
 
@@ -212,7 +212,8 @@ class BaseClassifier(BaseModule):
         # Infer `n_outputs` from the dataloader
         else:
             labels = []
-            for _, (_, target) in enumerate(train_loader):
+            for _, elem in enumerate(train_loader):
+                _, target = split_data_target(elem, self.device)
                 labels.append(target)
             labels = torch.unique(torch.cat(labels))
             n_outputs = labels.size(0)
@@ -228,9 +229,9 @@ class BaseClassifier(BaseModule):
         criterion = nn.CrossEntropyLoss()
         loss = 0.0
 
-        for _, (data, target) in enumerate(test_loader):
-            data, target = data.to(self.device), target.to(self.device)
-            output = self.forward(data)
+        for _, elem in enumerate(test_loader):
+            data, target = split_data_target(elem, self.device)
+            output = self.forward(*data)
             _, predicted = torch.max(output.data, 1)
             correct += (predicted == target).sum().item()
             total += target.size(0)
@@ -258,25 +259,26 @@ class BaseRegressor(BaseModule):
         The number of outputs equals the number of target variables for
         regressors (e.g., `1` in univariate regression).
         """
-        for _, (_, target) in enumerate(train_loader):
+        for _, elem in enumerate(train_loader):
+            _, target = split_data_target(elem, self.device)
             if len(target.size()) == 1:
-                n_outputs = 1
+                n_outputs = 1  # univariate regression
             else:
-                n_outputs = target.size(1)
+                n_outputs = target.size(1)  # multivariate regression
             break
 
         return n_outputs
 
     @torch.no_grad()
     def evaluate(self, test_loader):
-        """Docstrings decorated by downstream models."""
+        """Docstrings decorated by downstream ensembles."""
         self.eval()
         mse = 0.0
         criterion = nn.MSELoss()
 
-        for _, (data, target) in enumerate(test_loader):
-            data, target = data.to(self.device), target.to(self.device)
-            output = self.forward(data)
+        for _, elem in enumerate(test_loader):
+            data, target = split_data_target(elem, self.device)
+            output = self.forward(*data)
             mse += criterion(output, target)
 
         return float(mse) / len(test_loader)

@@ -186,10 +186,11 @@ class _BaseGradientBoosting(BaseModule):
     def _handle_early_stopping(self, test_loader, est_idx):
         """Decide whether to trigger the internal counter on early stopping."""
 
-    def _staged_forward(self, x, est_idx):
+    def _staged_forward(self, est_idx, *x):
         """
         Return the accumulated outputs from the first `est_idx+1` base
-        estimators."""
+        estimators.
+        """
         if est_idx >= self.n_estimators:
             msg = (
                 "est_idx = {} should be an integer smaller than the"
@@ -199,7 +200,7 @@ class _BaseGradientBoosting(BaseModule):
             raise ValueError(msg.format(est_idx, self.n_estimators))
 
         outputs = [
-            estimator(x) for estimator in self.estimators_[: est_idx + 1]
+            estimator(*x) for estimator in self.estimators_[: est_idx + 1]
         ]
         out = op.sum_with_multiplicative(outputs, self.shrinkage_rate)
 
@@ -248,14 +249,14 @@ class _BaseGradientBoosting(BaseModule):
             estimator.train()
             total_iters = 0
             for epoch in range(epochs):
-                for batch_idx, (data, target) in enumerate(train_loader):
+                for batch_idx, elem in enumerate(train_loader):
 
-                    data, target = data.to(self.device), target.to(self.device)
+                    data, target = io.split_data_target(elem, self.device)
 
                     # Compute the learning target of the current estimator
-                    residual = self._pseudo_residual(data, target, est_idx)
+                    residual = self._pseudo_residual(est_idx, target, *data)
 
-                    output = estimator(data)
+                    output = estimator(*data)
                     loss = criterion(output, residual)
 
                     learner_optimizer.zero_grad()
@@ -319,15 +320,15 @@ class _BaseGradientBoosting(BaseModule):
     """Implementation on the GradientBoostingClassifier.""", "model"
 )
 class GradientBoostingClassifier(_BaseGradientBoosting, BaseClassifier):
-    def _pseudo_residual(self, X, y, est_idx):
+    def _pseudo_residual(self, est_idx, y, *x):
         """Compute pseudo residuals in classification."""
-        output = torch.zeros(X.size(0), self.n_outputs).to(self.device)
+        output = torch.zeros(y.size(0), self.n_outputs).to(self.device)
 
         # Before fitting the first estimator, we simply assume that GBM
         # outputs 0 for any input (i.e., a null output).
         if est_idx > 0:
             results = [
-                estimator(X) for estimator in self.estimators_[:est_idx]
+                estimator(*x) for estimator in self.estimators_[:est_idx]
             ]
             output += op.sum_with_multiplicative(results, self.shrinkage_rate)
         pseudo_residual = op.pseudo_residual_classification(
@@ -343,9 +344,9 @@ class GradientBoostingClassifier(_BaseGradientBoosting, BaseClassifier):
         total = 0
         flag = False
         with torch.no_grad():
-            for _, (data, target) in enumerate(test_loader):
-                data, target = data.to(self.device), target.to(self.device)
-                output = F.softmax(self._staged_forward(data, est_idx), dim=1)
+            for _, elem in enumerate(test_loader):
+                data, target = io.split_data_target(elem, self.device)
+                output = F.softmax(self._staged_forward(est_idx, *data), dim=1)
                 _, predicted = torch.max(output.data, 1)
                 correct += (predicted == target).sum().item()
                 total += target.size(0)
@@ -412,8 +413,8 @@ class GradientBoostingClassifier(_BaseGradientBoosting, BaseClassifier):
         """Implementation on the data forwarding in GradientBoostingClassifier.""",  # noqa: E501
         "classifier_forward",
     )
-    def forward(self, x):
-        output = [estimator(x) for estimator in self.estimators_]
+    def forward(self, *x):
+        output = [estimator(*x) for estimator in self.estimators_]
         output = op.sum_with_multiplicative(output, self.shrinkage_rate)
         proba = F.softmax(output, dim=1)
 
@@ -424,21 +425,21 @@ class GradientBoostingClassifier(_BaseGradientBoosting, BaseClassifier):
         return super().evaluate(test_loader, return_loss)
 
     @torchensemble_model_doc(item="predict")
-    def predict(self, X, return_numpy=True):
-        return super().predict(X, return_numpy)
+    def predict(self, *x):
+        return super().predict(*x)
 
 
 @_gradient_boosting_model_doc(
     """Implementation on the GradientBoostingRegressor.""", "model"
 )
 class GradientBoostingRegressor(_BaseGradientBoosting, BaseRegressor):
-    def _pseudo_residual(self, X, y, est_idx):
+    def _pseudo_residual(self, est_idx, y, *x):
         """Compute pseudo residuals in regression."""
         output = torch.zeros_like(y).to(self.device)
 
         if est_idx > 0:
             results = [
-                estimator(X) for estimator in self.estimators_[:est_idx]
+                estimator(*x) for estimator in self.estimators_[:est_idx]
             ]
             output = op.sum_with_multiplicative(results, self.shrinkage_rate)
         pseudo_residual = op.pseudo_residual_regression(y, output)
@@ -452,9 +453,9 @@ class GradientBoostingRegressor(_BaseGradientBoosting, BaseRegressor):
         flag = False
         criterion = nn.MSELoss()
         with torch.no_grad():
-            for _, (data, target) in enumerate(test_loader):
-                data, target = data.to(self.device), target.to(self.device)
-                output = self._staged_forward(data, est_idx)
+            for _, elem in enumerate(test_loader):
+                data, target = io.split_data_target(elem, self.device)
+                output = self._staged_forward(est_idx, *data)
                 mse += criterion(output, target)
         mse /= len(test_loader)
 
@@ -520,8 +521,8 @@ class GradientBoostingRegressor(_BaseGradientBoosting, BaseRegressor):
         """Implementation on the data forwarding in GradientBoostingRegressor.""",  # noqa: E501
         "regressor_forward",
     )
-    def forward(self, x):
-        outputs = [estimator(x) for estimator in self.estimators_]
+    def forward(self, *x):
+        outputs = [estimator(*x) for estimator in self.estimators_]
         pred = op.sum_with_multiplicative(outputs, self.shrinkage_rate)
 
         return pred
@@ -531,5 +532,5 @@ class GradientBoostingRegressor(_BaseGradientBoosting, BaseRegressor):
         return super().evaluate(test_loader)
 
     @torchensemble_model_doc(item="predict")
-    def predict(self, X, return_numpy=True):
-        return super().predict(X, return_numpy)
+    def predict(self, *x):
+        return super().predict(*x)

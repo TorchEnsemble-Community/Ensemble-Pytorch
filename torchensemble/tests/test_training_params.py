@@ -86,30 +86,6 @@ def test_gradient_boosting():
     assert "shrinkage rate should be in the range" in str(excinfo.value)
 
 
-def test_soft_gradient_boosting():
-    model = torchensemble.SoftGradientBoostingClassifier(
-        estimator=MLP, n_estimators=2, cuda=False
-    )
-
-    # Epochs
-    with pytest.raises(ValueError) as excinfo:
-        model.fit(train_loader, epochs=-1)
-    assert "number of training epochs" in str(excinfo.value)
-
-    # Log interval
-    with pytest.raises(ValueError) as excinfo:
-        model.fit(train_loader, log_interval=-1)
-    assert "number of batches to wait" in str(excinfo.value)
-
-    # Shrinkage rate
-    model = torchensemble.GradientBoostingClassifier(
-        estimator=MLP, n_estimators=2, shrinkage_rate=2, cuda=False
-    )
-    with pytest.raises(ValueError) as excinfo:
-        model.fit(train_loader)
-    assert "shrinkage rate should be in the range" in str(excinfo.value)
-
-
 def test_snapshot_ensemble():
     model = torchensemble.SnapshotEnsembleClassifier(
         estimator=MLP, n_estimators=2, cuda=False

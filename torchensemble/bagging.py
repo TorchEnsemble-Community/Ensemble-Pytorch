@@ -41,26 +41,26 @@ def _parallel_fit_per_epoch(
     WARNING: Parallelization when fitting large base estimators may cause
     out-of-memory error.
     """
-
     if cur_lr:
         # Parallelization corrupts the binding between optimizer and scheduler
         set_module.update_lr(optimizer, cur_lr)
 
-    for batch_idx, (data, target) in enumerate(train_loader):
+    for batch_idx, elem in enumerate(train_loader):
 
-        batch_size = data.size(0)
-        data, target = data.to(device), target.to(device)
+        data, target = io.split_data_target(elem, device)
+        batch_size = data[0].size(0)
 
         # Sampling with replacement
         sampling_mask = torch.randint(
             high=batch_size, size=(int(batch_size),), dtype=torch.int64
         )
         sampling_mask = torch.unique(sampling_mask)  # remove duplicates
-        sampling_data = data[sampling_mask]
+        subsample_size = sampling_mask.size(0)
+        sampling_data = [tensor[sampling_mask] for tensor in data]
         sampling_target = target[sampling_mask]
 
         optimizer.zero_grad()
-        sampling_output = estimator(sampling_data)
+        sampling_output = estimator(*sampling_data)
         loss = criterion(sampling_output, sampling_target)
         loss.backward()
         optimizer.step()
@@ -70,7 +70,6 @@ def _parallel_fit_per_epoch(
 
             # Classification
             if is_classification:
-                subsample_size = sampling_data.size(0)
                 _, predicted = torch.max(sampling_output.data, 1)
                 correct = (predicted == sampling_target).sum().item()
 
@@ -101,10 +100,10 @@ class BaggingClassifier(BaseClassifier):
         """Implementation on the data forwarding in BaggingClassifier.""",
         "classifier_forward",
     )
-    def forward(self, x):
+    def forward(self, *x):
         # Average over class distributions from all base estimators.
         outputs = [
-            F.softmax(estimator(x), dim=1) for estimator in self.estimators_
+            F.softmax(estimator(*x), dim=1) for estimator in self.estimators_
         ]
         proba = op.average(outputs)
 
@@ -163,9 +162,9 @@ class BaggingClassifier(BaseClassifier):
         best_acc = 0.0
 
         # Internal helper function on pesudo forward
-        def _forward(estimators, data):
+        def _forward(estimators, *x):
             outputs = [
-                F.softmax(estimator(data), dim=1) for estimator in estimators
+                F.softmax(estimator(*x), dim=1) for estimator in estimators
             ]
             proba = op.average(outputs)
 
@@ -216,10 +215,11 @@ class BaggingClassifier(BaseClassifier):
                     with torch.no_grad():
                         correct = 0
                         total = 0
-                        for _, (data, target) in enumerate(test_loader):
-                            data = data.to(self.device)
-                            target = target.to(self.device)
-                            output = _forward(estimators, data)
+                        for _, elem in enumerate(test_loader):
+                            data, target = io.split_data_target(
+                                elem, self.device
+                            )
+                            output = _forward(estimators, *data)
                             _, predicted = torch.max(output.data, 1)
                             correct += (predicted == target).sum().item()
                             total += target.size(0)
@@ -262,8 +262,8 @@ class BaggingClassifier(BaseClassifier):
         return super().evaluate(test_loader, return_loss)
 
     @torchensemble_model_doc(item="predict")
-    def predict(self, X, return_numpy=True):
-        return super().predict(X, return_numpy)
+    def predict(self, *x):
+        return super().predict(*x)
 
 
 @torchensemble_model_doc(
@@ -274,9 +274,9 @@ class BaggingRegressor(BaseRegressor):
         """Implementation on the data forwarding in BaggingRegressor.""",
         "regressor_forward",
     )
-    def forward(self, x):
+    def forward(self, *x):
         # Average over predictions from all base estimators.
-        outputs = [estimator(x) for estimator in self.estimators_]
+        outputs = [estimator(*x) for estimator in self.estimators_]
         pred = op.average(outputs)
 
         return pred
@@ -334,8 +334,8 @@ class BaggingRegressor(BaseRegressor):
         best_mse = float("inf")
 
         # Internal helper function on pesudo forward
-        def _forward(estimators, data):
-            outputs = [estimator(data) for estimator in estimators]
+        def _forward(estimators, *x):
+            outputs = [estimator(*x) for estimator in estimators]
             pred = op.average(outputs)
 
             return pred
@@ -384,10 +384,11 @@ class BaggingRegressor(BaseRegressor):
                     self.eval()
                     with torch.no_grad():
                         mse = 0.0
-                        for _, (data, target) in enumerate(test_loader):
-                            data = data.to(self.device)
-                            target = target.to(self.device)
-                            output = _forward(estimators, data)
+                        for _, elem in enumerate(test_loader):
+                            data, target = io.split_data_target(
+                                elem, self.device
+                            )
+                            output = _forward(estimators, *data)
                             mse += criterion(output, target)
                         mse /= len(test_loader)
 
@@ -425,5 +426,5 @@ class BaggingRegressor(BaseRegressor):
         return super().evaluate(test_loader)
 
     @torchensemble_model_doc(item="predict")
-    def predict(self, X, return_numpy=True):
-        return super().predict(X, return_numpy)
+    def predict(self, *x):
+        return super().predict(*x)

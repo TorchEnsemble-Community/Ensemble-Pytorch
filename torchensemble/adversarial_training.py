@@ -107,23 +107,24 @@ def _parallel_fit_per_epoch(
         # Parallelization corrupts the binding between optimizer and scheduler
         set_module.update_lr(optimizer, cur_lr)
 
-    for batch_idx, (data, target) in enumerate(train_loader):
+    for batch_idx, elem in enumerate(train_loader):
 
-        batch_size = data.size()[0]
-        data, target = data.to(device), target.to(device)
-        data.requires_grad = True
+        data, target = io.split_data_target(elem, device)
+        batch_size = data[0].size(0)
+        for tensor in data:
+            tensor.requires_grad = True
 
         # Get adversarial samples
-        _output = estimator(data)
+        _output = estimator(*data)
         _loss = criterion(_output, target)
         _loss.backward()
-        data_grad = data.grad.data
+        data_grad = [tensor.grad.data for tensor in data]
         adv_data = _get_fgsm_samples(data, epsilon, data_grad)
 
         # Compute the training loss
         optimizer.zero_grad()
-        org_output = estimator(data)
-        adv_output = estimator(adv_data)
+        org_output = estimator(*data)
+        adv_output = estimator(*adv_data)
         loss = criterion(org_output, target) + criterion(adv_output, target)
         loss.backward()
         optimizer.step()
@@ -156,27 +157,31 @@ def _parallel_fit_per_epoch(
     return estimator, optimizer
 
 
-def _get_fgsm_samples(sample, epsilon, sample_grad):
+def _get_fgsm_samples(sample_list, epsilon, sample_grad_list):
     """
     Private functions used to generate adversarial samples with fast gradient
     sign method (FGSM).
     """
 
-    # Check the input range of `sample`
-    min_value, max_value = torch.min(sample), torch.max(sample)
-    if not 0 <= min_value < max_value <= 1:
-        msg = (
-            "The input range of samples passed to adversarial training"
-            " should be in the range [0, 1], but got [{:.3f}, {:.3f}]"
-            " instead."
-        )
-        raise ValueError(msg.format(min_value, max_value))
+    perturbed_sample_list = []
+    for sample, sample_grad in zip(sample_list, sample_grad_list):
+        # Check the input range of `sample`
+        min_value, max_value = torch.min(sample), torch.max(sample)
+        if not 0 <= min_value < max_value <= 1:
+            msg = (
+                "The input range of samples passed to adversarial training"
+                " should be in the range [0, 1], but got [{:.3f}, {:.3f}]"
+                " instead."
+            )
+            raise ValueError(msg.format(min_value, max_value))
 
-    sign_sample_grad = sample_grad.sign()
-    perturbed_sample = sample + epsilon * sign_sample_grad
-    perturbed_sample = torch.clamp(perturbed_sample, 0, 1)
+        sign_sample_grad = sample_grad.sign()
+        perturbed_sample = sample + epsilon * sign_sample_grad
+        perturbed_sample = torch.clamp(perturbed_sample, 0, 1)
 
-    return perturbed_sample
+        perturbed_sample_list.append(perturbed_sample)
+
+    return perturbed_sample_list
 
 
 class _BaseAdversarialTraining(BaseModule):
@@ -218,10 +223,10 @@ class AdversarialTrainingClassifier(_BaseAdversarialTraining, BaseClassifier):
         """Implementation on the data forwarding in AdversarialTrainingClassifier.""",  # noqa: E501
         "classifier_forward",
     )
-    def forward(self, x):
+    def forward(self, *x):
         # Take the average over class distributions from all base estimators.
         outputs = [
-            F.softmax(estimator(x), dim=1) for estimator in self.estimators_
+            F.softmax(estimator(*x), dim=1) for estimator in self.estimators_
         ]
         proba = op.average(outputs)
 
@@ -282,9 +287,9 @@ class AdversarialTrainingClassifier(_BaseAdversarialTraining, BaseClassifier):
         best_acc = 0.0
 
         # Internal helper function on pesudo forward
-        def _forward(estimators, data):
+        def _forward(estimators, *x):
             outputs = [
-                F.softmax(estimator(data), dim=1) for estimator in estimators
+                F.softmax(estimator(*x), dim=1) for estimator in estimators
             ]
             proba = op.average(outputs)
 
@@ -336,10 +341,11 @@ class AdversarialTrainingClassifier(_BaseAdversarialTraining, BaseClassifier):
                     with torch.no_grad():
                         correct = 0
                         total = 0
-                        for _, (data, target) in enumerate(test_loader):
-                            data = data.to(self.device)
-                            target = target.to(self.device)
-                            output = _forward(estimators, data)
+                        for _, elem in enumerate(test_loader):
+                            data, target = io.split_data_target(
+                                elem, self.device
+                            )
+                            output = _forward(estimators, *data)
                             _, predicted = torch.max(output.data, 1)
                             correct += (predicted == target).sum().item()
                             total += target.size(0)
@@ -384,8 +390,8 @@ class AdversarialTrainingClassifier(_BaseAdversarialTraining, BaseClassifier):
         return super().evaluate(test_loader, return_loss)
 
     @torchensemble_model_doc(item="predict")
-    def predict(self, X, return_numpy=True):
-        return super().predict(X, return_numpy)
+    def predict(self, *x):
+        return super().predict(*x)
 
 
 @torchensemble_model_doc(
@@ -397,9 +403,9 @@ class AdversarialTrainingRegressor(_BaseAdversarialTraining, BaseRegressor):
         """Implementation on the data forwarding in AdversarialTrainingRegressor.""",  # noqa: E501
         "regressor_forward",
     )
-    def forward(self, x):
+    def forward(self, *x):
         # Take the average over predictions from all base estimators.
-        outputs = [estimator(x) for estimator in self.estimators_]
+        outputs = [estimator(*x) for estimator in self.estimators_]
         pred = op.average(outputs)
 
         return pred
@@ -459,8 +465,8 @@ class AdversarialTrainingRegressor(_BaseAdversarialTraining, BaseRegressor):
         best_mse = float("inf")
 
         # Internal helper function on pesudo forward
-        def _forward(estimators, data):
-            outputs = [estimator(data) for estimator in estimators]
+        def _forward(estimators, *x):
+            outputs = [estimator(*x) for estimator in estimators]
             pred = op.average(outputs)
 
             return pred
@@ -510,10 +516,11 @@ class AdversarialTrainingRegressor(_BaseAdversarialTraining, BaseRegressor):
                     self.eval()
                     with torch.no_grad():
                         mse = 0.0
-                        for _, (data, target) in enumerate(test_loader):
-                            data = data.to(self.device)
-                            target = target.to(self.device)
-                            output = _forward(estimators, data)
+                        for _, elem in enumerate(test_loader):
+                            data, target = io.split_data_target(
+                                elem, self.device
+                            )
+                            output = _forward(estimators, *data)
                             mse += criterion(output, target)
                         mse /= len(test_loader)
 
@@ -553,5 +560,5 @@ class AdversarialTrainingRegressor(_BaseAdversarialTraining, BaseRegressor):
         return super().evaluate(test_loader)
 
     @torchensemble_model_doc(item="predict")
-    def predict(self, X, return_numpy=True):
-        return super().predict(X, return_numpy)
+    def predict(self, *x):
+        return super().predict(*x)

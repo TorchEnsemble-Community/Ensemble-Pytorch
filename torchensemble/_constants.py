@@ -124,19 +124,14 @@ __predict_doc = """
 
     Parameters
     ----------
-    X : {Tensor, ndarray}
-        A data batch in the form of tensor or Numpy array.
-    return_numpy : bool, default=True
-        Whether to convert the predictions into a Numpy array.
+    X : {tensor, numpy array}
+        A data batch in the form of tensor or numpy array.
 
     Returns
     -------
-    pred : Array of shape (n_samples, n_outputs)
+    pred : tensor of shape (n_samples, n_outputs)
         For classifiers, ``n_outputs`` is the number of distinct classes. For
         regressors, ``n_output`` is the number of target variables.
-
-        - If ``return_numpy`` is ``False``, the result is a tensor.
-        - If ``return_numpy`` is ``True``, the result is a Numpy array.
 """
 
 
