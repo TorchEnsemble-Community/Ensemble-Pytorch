@@ -293,8 +293,3 @@ def test_reg_object(reg):
         data, target = io.split_data_target(elem, device)
         new_model.predict(*data)
         break
-
-
-if __name__ == "__main__":
-
-    test_reg_class(torchensemble.BaggingRegressor)
