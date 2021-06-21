@@ -18,7 +18,7 @@ def set_optimizer(model, optimizer_name, **kwargs):
         "RMSprop",
         "Rprop",
         "SGD",
-        "LBFGS"
+        "LBFGS",
     ]
     if optimizer_name not in torch_optim_optimizers:
         msg = "Unrecognized optimizer: {}, should be one of {}."

@@ -102,7 +102,7 @@ class FusionClassifier(BaseClassifier):
                         optimizer.zero_grad()
                     output = self._forward(*data)
                     loss = criterion(output, target)
-                    if loss.requires_grad():
+                    if loss.requires_grad:
                         loss.backward()
                     return loss
 
@@ -251,16 +251,16 @@ class FusionRegressor(BaseRegressor):
                 def closure():
                     if torch.is_grad_enabled():
                         optimizer.zero_grad()
-                    output = self._forward(*data)
+                    output = self.forward(*data)
                     loss = criterion(output, target)
-                    if loss.requires_grad():
+                    if loss.requires_grad:
                         loss.backward()
                     return loss
 
                 optimizer.step(closure)
 
                 # Calculate loss for logging
-                output = self._forward(*data)
+                output = self.forward(*data)
                 loss = closure()
 
                 # Print training status
