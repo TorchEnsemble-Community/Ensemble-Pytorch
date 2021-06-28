@@ -126,3 +126,11 @@ Reference
 .. _pytorch: https://pytorch.org/
 
 .. _pypi: https://pypi.org/project/torchensemble/
+
+Thanks to all our contributors
+------------------------------
+
+|contributors|
+
+.. |contributors| image:: https://contributors-img.web.app/image?repo=TorchEnsemble-Community/Ensemble-Pytorch
+.. _contributors: https://github.com/TorchEnsemble-Community/Ensemble-Pytorch/graphs/contributors
