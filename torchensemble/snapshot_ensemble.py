@@ -252,7 +252,6 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble, BaseClassifier):
         scheduler = self._set_scheduler(optimizer, epochs * len(train_loader))
 
         # Utils
-        criterion = nn.CrossEntropyLoss()
         best_acc = 0.0
         counter = 0  # a counter on generating snapshots
         total_iters = 0
@@ -271,7 +270,7 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble, BaseClassifier):
 
                 optimizer.zero_grad()
                 output = estimator(*data)
-                loss = criterion(output, target)
+                loss = self._criterion(output, target)
                 loss.backward()
                 optimizer.step()
 
@@ -411,8 +410,7 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble, BaseRegressor):
         scheduler = self._set_scheduler(optimizer, epochs * len(train_loader))
 
         # Utils
-        criterion = nn.MSELoss()
-        best_mse = float("inf")
+        best_loss = float("inf")
         counter = 0  # a counter on generating snapshots
         total_iters = 0
         n_iters_per_estimator = epochs * len(train_loader) // self.n_estimators
@@ -429,7 +427,7 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble, BaseRegressor):
 
                 optimizer.zero_grad()
                 output = estimator(*data)
-                loss = criterion(output, target)
+                loss = self._criterion(output, target)
                 loss.backward()
                 optimizer.step()
 
@@ -474,29 +472,29 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble, BaseRegressor):
             if test_loader and counter % n_iters_per_estimator == 0:
                 self.eval()
                 with torch.no_grad():
-                    mse = 0.0
+                    val_loss = 0.0
                     for _, elem in enumerate(test_loader):
                         data, target = io.split_data_target(elem, self.device)
                         output = self.forward(*data)
-                        mse += criterion(output, target)
-                    mse /= len(test_loader)
+                        val_loss += self._criterion(output, target)
+                    val_loss /= len(test_loader)
 
-                    if mse < best_mse:
-                        best_mse = mse
+                    if val_loss < best_loss:
+                        best_loss = val_loss
                         if save_model:
                             io.save(self, save_dir, self.logger)
 
                     msg = (
-                        "n_estimators: {} | Validation MSE: {:.5f} |"
+                        "n_estimators: {} | Validation Loss: {:.5f} |"
                         " Historical Best: {:.5f}"
                     )
                     self.logger.info(
-                        msg.format(len(self.estimators_), mse, best_mse)
+                        msg.format(len(self.estimators_), val_loss, best_loss)
                     )
                     if self.tb_logger:
                         self.tb_logger.add_scalar(
-                            "snapshot_ensemble/Validation_MSE",
-                            mse,
+                            "snapshot_ensemble/Validation_Loss",
+                            val_loss,
                             len(self.estimators_),
                         )
 

@@ -95,6 +95,10 @@ def test_clf_class(clf):
 
     model = clf(estimator=MLP_clf, n_estimators=n_estimators, cuda=False)
 
+    # Criterion
+    criterion = nn.CrossEntropyLoss()
+    model.set_criterion(criterion)
+
     # Optimizer
     model.set_optimizer("Adam", lr=1e-3, weight_decay=5e-4)
 
@@ -143,6 +147,10 @@ def test_clf_object(clf):
     n_estimators = 2
 
     model = clf(estimator=MLP_clf(), n_estimators=n_estimators, cuda=False)
+
+    # Criterion
+    criterion = nn.CrossEntropyLoss()
+    model.set_criterion(criterion)
 
     # Optimizer
     model.set_optimizer("Adam", lr=1e-3, weight_decay=5e-4)
@@ -193,6 +201,10 @@ def test_reg_class(reg):
 
     model = reg(estimator=MLP_reg, n_estimators=n_estimators, cuda=False)
 
+    # Criterion
+    criterion = nn.MSELoss()
+    model.set_criterion(criterion)
+
     # Optimizer
     model.set_optimizer("Adam", lr=1e-3, weight_decay=5e-4)
 
@@ -242,6 +254,10 @@ def test_reg_object(reg):
 
     model = reg(estimator=MLP_reg(), n_estimators=n_estimators, cuda=False)
 
+    # Criterion
+    criterion = nn.MSELoss()
+    model.set_criterion(criterion)
+
     # Optimizer
     model.set_optimizer("Adam", lr=1e-3, weight_decay=5e-4)
 
@@ -285,6 +301,7 @@ def test_predict():
 
     fusion = all_clf[0]  # FusionClassifier
     model = fusion(estimator=MLP_clf, n_estimators=2, cuda=False)
+    model.set_criterion(nn.CrossEntropyLoss())
     model.set_optimizer("Adam", lr=1e-3, weight_decay=5e-4)
 
     train = TensorDataset(X_train, y_train_clf)

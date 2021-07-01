@@ -137,6 +137,10 @@ class BaseModule(nn.Module):
             self.logger.error(msg.format(log_interval))
             raise ValueError(msg.format(log_interval))
 
+    def set_criterion(self, criterion):
+        """Set the training criterion."""
+        self._criterion = criterion
+    
     def set_optimizer(self, optimizer_name, **kwargs):
         """Set the parameter optimizer."""
         self.optimizer_name = optimizer_name
@@ -226,7 +230,6 @@ class BaseClassifier(BaseModule):
         self.eval()
         correct = 0
         total = 0
-        criterion = nn.CrossEntropyLoss()
         loss = 0.0
 
         for _, elem in enumerate(test_loader):
@@ -235,7 +238,7 @@ class BaseClassifier(BaseModule):
             _, predicted = torch.max(output.data, 1)
             correct += (predicted == target).sum().item()
             total += target.size(0)
-            loss += criterion(output, target)
+            loss += self._criterion(output, target)
 
         acc = 100 * correct / total
         loss /= len(test_loader)
@@ -273,12 +276,11 @@ class BaseRegressor(BaseModule):
     def evaluate(self, test_loader):
         """Docstrings decorated by downstream ensembles."""
         self.eval()
-        mse = 0.0
-        criterion = nn.MSELoss()
+        loss = 0.0
 
         for _, elem in enumerate(test_loader):
             data, target = split_data_target(elem, self.device)
             output = self.forward(*data)
-            mse += criterion(output, target)
+            loss += self._criterion(output, target)
 
-        return float(mse) / len(test_loader)
+        return float(loss) / len(test_loader)
