@@ -34,6 +34,9 @@ Example
       estimator=base_estimator,               # here is your deep learning model
       n_estimators=10,                        # number of base estimators
   )
+  # Set the criterion
+  criterion = nn.CrossEntropyLoss()           # training objective
+  ensemble.set_criterion(criterion)
 
   # Set the optimizer
   ensemble.set_optimizer(
