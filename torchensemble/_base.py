@@ -140,7 +140,7 @@ class BaseModule(nn.Module):
     def set_criterion(self, criterion):
         """Set the training criterion."""
         self._criterion = criterion
-    
+
     def set_optimizer(self, optimizer_name, **kwargs):
         """Set the parameter optimizer."""
         self.optimizer_name = optimizer_name

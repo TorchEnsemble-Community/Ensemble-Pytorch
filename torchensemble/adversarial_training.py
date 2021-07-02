@@ -533,7 +533,9 @@ class AdversarialTrainingRegressor(_BaseAdversarialTraining, BaseRegressor):
                             "Epoch: {:03d} | Validation Loss:"
                             " {:.5f} | Historical Best: {:.5f}"
                         )
-                        self.logger.info(msg.format(epoch, val_loss, best_loss))
+                        self.logger.info(
+                            msg.format(epoch, val_loss, best_loss)
+                        )
                         if self.tb_logger:
                             self.tb_logger.add_scalar(
                                 "adversirial_training/Validation_Loss",

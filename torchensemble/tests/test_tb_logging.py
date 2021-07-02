@@ -203,7 +203,7 @@ def test_reg_class(reg):
     # Criterion
     criterion = nn.MSELoss()
     model.set_criterion(criterion)
-    
+
     # Optimizer
     model.set_optimizer("Adam", lr=1e-3, weight_decay=5e-4)
 

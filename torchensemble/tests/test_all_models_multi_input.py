@@ -104,7 +104,7 @@ def test_clf_class(clf):
     # Criterion
     criterion = nn.CrossEntropyLoss()
     model.set_criterion(criterion)
-    
+
     # Optimizer
     model.set_optimizer("Adam", lr=1e-3, weight_decay=5e-4)
 
@@ -159,7 +159,7 @@ def test_clf_object(clf):
     # Criterion
     criterion = nn.CrossEntropyLoss()
     model.set_criterion(criterion)
-    
+
     # Optimizer
     model.set_optimizer("Adam", lr=1e-3, weight_decay=5e-4)
 
@@ -214,7 +214,7 @@ def test_reg_class(reg):
     # Criterion
     criterion = nn.MSELoss()
     model.set_criterion(criterion)
-    
+
     # Optimizer
     model.set_optimizer("Adam", lr=1e-3, weight_decay=5e-4)
 
@@ -269,7 +269,7 @@ def test_reg_object(reg):
     # Criterion
     criterion = nn.MSELoss()
     model.set_criterion(criterion)
-    
+
     # Optimizer
     model.set_optimizer("Adam", lr=1e-3, weight_decay=5e-4)
 
