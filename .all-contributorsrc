@@ -1,6 +1,6 @@
 {
   "projectName": "Ensemble-Pytorch",
-  "projectOwner": "xuyxu",
+  "projectOwner": "TorchEnsemble-Community",
   "repoType": "github",
   "repoHost": "https://github.com",
   "files": [
@@ -66,6 +66,15 @@
       "name": "nolaurence",
       "avatar_url": "https://avatars.githubusercontent.com/u/53215736?v=4",
       "profile": "https://github.com/nolaurence",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "by256",
+      "name": "Batuhan Yildirim",
+      "avatar_url": "https://avatars.githubusercontent.com/u/44163664?v=4",
+      "profile": "https://by256.github.io/",
       "contributions": [
         "code"
       ]
