@@ -1,4 +1,5 @@
 import torch
+import pytest
 import numpy as np
 from torch.utils.data import TensorDataset, DataLoader
 
@@ -19,3 +20,12 @@ def test_fixed_dataloder():
         # Check same elements
         for elem_1, elem_2 in zip(fixed_elem, elem):
             assert torch.equal(elem_1, elem_2)
+
+    # Check dataloder length
+    assert len(fixed_dataloader) == 2
+
+
+def test_fixed_dataloader_invalid_type():
+    with pytest.raises(ValueError) as excinfo:
+        FixedDataLoader((X, y))
+    assert "input used to instantiate FixedDataLoader" in str(excinfo.value)
