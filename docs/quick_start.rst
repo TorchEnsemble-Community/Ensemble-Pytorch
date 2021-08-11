@@ -49,7 +49,7 @@ Ensemble-PyTorch uses a global logger to track and print the intermediate loggin
 
 .. code-block:: python
 
-    from torchensemble.utils import set_logger
+    from torchensemble.utils.logging import set_logger
 
     logger = set_logger('classification_mnist_mlp')
 
