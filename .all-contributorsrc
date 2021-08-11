@@ -1,6 +1,6 @@
 {
   "projectName": "Ensemble-Pytorch",
-  "projectOwner": "xuyxu",
+  "projectOwner": "TorchEnsemble-Community",
   "repoType": "github",
   "repoHost": "https://github.com",
   "files": [
@@ -68,6 +68,15 @@
       "profile": "https://github.com/nolaurence",
       "contributions": [
         "code"
+      ]
+    },
+    {
+      "login": "kiranchari",
+      "name": "kiranchari",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1838910?v=4",
+      "profile": "https://github.com/kiranchari",
+      "contributions": [
+        "doc"
       ]
     }
   ],
