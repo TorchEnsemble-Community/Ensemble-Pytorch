@@ -239,7 +239,7 @@ if __name__ == "__main__":
 
     # Training
     tic = time.time()
-    model.fit(train_loader, epochs=epochs, test_loader=test_loader, save_model=False)
+    model.fit(train_loader, epochs=epochs)
     toc = time.time()
     training_time = toc - tic
 
