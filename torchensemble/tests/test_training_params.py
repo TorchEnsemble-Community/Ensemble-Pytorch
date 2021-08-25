@@ -12,6 +12,7 @@ parallel = [
     torchensemble.FusionClassifier,
     torchensemble.VotingClassifier,
     torchensemble.BaggingClassifier,
+    torchensemble.SoftGradientBoostingClassifier,
 ]
 
 set_logger("pytest_training_params")
