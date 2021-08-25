@@ -176,13 +176,13 @@ Reference:
     J. Feng, Y.-X. Xu et al., Soft Gradient Boosting Machine, ArXiv, 2020.
 
 SoftGradientBoostingClassifier
-***********************
+******************************
 
 .. autoclass:: torchensemble.soft_gradient_boosting.SoftGradientBoostingClassifier
     :members:
 
 SoftGradientBoostingRegressor
-***********************
+*****************************
 
 .. autoclass:: torchensemble.soft_gradient_boosting.SoftGradientBoostingRegressor
     :members:

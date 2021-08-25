@@ -399,8 +399,8 @@ class SoftGradientBoostingClassifier(
         return super().evaluate(test_loader, return_loss)
 
     @torchensemble_model_doc(item="predict")
-    def predict(self, X, return_numpy=True):
-        return super().predict(X, return_numpy)
+    def predict(self, *x):
+        return super().predict(*x)
 
 
 @_soft_gradient_boosting_model_doc(
@@ -507,5 +507,5 @@ class SoftGradientBoostingRegressor(_BaseSoftGradientBoosting, BaseRegressor):
         return super().evaluate(test_loader)
 
     @torchensemble_model_doc(item="predict")
-    def predict(self, X, return_numpy=True):
-        return super().predict(X, return_numpy)
+    def predict(self, *x):
+        return super().predict(*x)
