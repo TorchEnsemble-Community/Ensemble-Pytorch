@@ -278,7 +278,7 @@ class _BaseSoftGradientBoosting(BaseModule):
             # Validation
             if test_loader:
                 flag = self._evaluate_during_fit(test_loader, epoch)
-                if flag:
+                if save_model and flag:
                     io.save(self, save_dir, self.logger)
 
             # Update the scheduler
