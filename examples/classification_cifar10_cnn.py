@@ -12,6 +12,7 @@ from torchensemble.voting import VotingClassifier
 from torchensemble.bagging import BaggingClassifier
 from torchensemble.gradient_boosting import GradientBoostingClassifier
 from torchensemble.snapshot_ensemble import SnapshotEnsembleClassifier
+from torchensemble.soft_gradient_boosting import SoftGradientBoostingClassifier
 
 from torchensemble.utils.logging import set_logger
 
@@ -222,6 +223,35 @@ if __name__ == "__main__":
     records.append(
         (
             "SnapshotEnsembleClassifier",
+            training_time,
+            evaluating_time,
+            testing_acc,
+        )
+    )
+
+    # SoftGradientBoostingClassifier
+    model = SoftGradientBoostingClassifier(
+        estimator=LeNet5, n_estimators=n_estimators, cuda=True
+    )
+
+    # Set the optimizer
+    model.set_optimizer("Adam", lr=lr, weight_decay=weight_decay)
+
+    # Training
+    tic = time.time()
+    model.fit(train_loader, epochs=epochs, test_loader=test_loader, save_model=False)
+    toc = time.time()
+    training_time = toc - tic
+
+    # Evaluating
+    tic = time.time()
+    testing_acc = model.evaluate(test_loader)
+    toc = time.time()
+    evaluating_time = toc - tic
+
+    records.append(
+        (
+            "SoftGradientBoostingClassifier",
             training_time,
             evaluating_time,
             testing_acc,
