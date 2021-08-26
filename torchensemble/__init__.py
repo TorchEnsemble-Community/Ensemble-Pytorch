@@ -12,6 +12,8 @@ from .adversarial_training import AdversarialTrainingClassifier
 from .adversarial_training import AdversarialTrainingRegressor
 from .fast_geometric import FastGeometricClassifier
 from .fast_geometric import FastGeometricRegressor
+from .soft_gradient_boosting import SoftGradientBoostingClassifier
+from .soft_gradient_boosting import SoftGradientBoostingRegressor
 
 
 __all__ = [
@@ -29,4 +31,6 @@ __all__ = [
     "AdversarialTrainingRegressor",
     "FastGeometricClassifier",
     "FastGeometricRegressor",
+    "SoftGradientBoostingClassifier",
+    "SoftGradientBoostingRegressor",
 ]
