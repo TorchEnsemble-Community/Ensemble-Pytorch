@@ -312,6 +312,7 @@ class SoftGradientBoostingClassifier(
             cuda=cuda,
             n_jobs=n_jobs,
         )
+        self._criterion = nn.CrossEntropyLoss()
         self.is_classification = True
         self.best_acc = 0.0
 
@@ -358,6 +359,13 @@ class SoftGradientBoostingClassifier(
     )
     def set_scheduler(self, scheduler_name, **kwargs):
         super().set_scheduler(scheduler_name, **kwargs)
+
+    @torchensemble_model_doc(
+        """Set the training criterion for SoftGradientBoostingClassifier.""",
+        "set_criterion",
+    )
+    def set_criterion(self, criterion):
+        super().set_criterion(criterion)
 
     @_soft_gradient_boosting_model_doc(
         """Implementation on the training stage of SoftGradientBoostingClassifier.""",  # noqa: E501
@@ -424,6 +432,7 @@ class SoftGradientBoostingRegressor(_BaseSoftGradientBoosting, BaseRegressor):
             cuda=cuda,
             n_jobs=n_jobs,
         )
+        self._criterion = nn.MSELoss()
         self.is_classification = False
         self.best_mse = float("inf")
 
@@ -467,6 +476,13 @@ class SoftGradientBoostingRegressor(_BaseSoftGradientBoosting, BaseRegressor):
     )
     def set_scheduler(self, scheduler_name, **kwargs):
         super().set_scheduler(scheduler_name, **kwargs)
+
+    @torchensemble_model_doc(
+        """Set the training criterion for SoftGradientBoostingRegressor.""",
+        "set_criterion",
+    )
+    def set_criterion(self, criterion):
+        super().set_criterion(criterion)
 
     @_soft_gradient_boosting_model_doc(
         """Implementation on the training stage of SoftGradientBoostingRegressor.""",  # noqa: E501

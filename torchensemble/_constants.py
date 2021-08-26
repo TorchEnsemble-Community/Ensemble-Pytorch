@@ -85,6 +85,14 @@ __set_scheduler_doc = """
 """
 
 
+__set_criterion_doc = """
+    Parameters
+    ----------
+    criterion : torch.nn.loss
+        The customized training criterion object.
+"""
+
+
 __fit_doc = """
     Parameters
     ----------

@@ -398,6 +398,7 @@ class GradientBoostingClassifier(_BaseGradientBoosting, BaseClassifier):
         save_model=True,
         save_dir=None,
     ):
+        self._criterion = nn.CrossEntropyLoss()
         super().fit(
             train_loader=train_loader,
             epochs=epochs,
@@ -506,6 +507,7 @@ class GradientBoostingRegressor(_BaseGradientBoosting, BaseRegressor):
         save_model=True,
         save_dir=None,
     ):
+        self._criterion = nn.MSELoss()
         super().fit(
             train_loader=train_loader,
             epochs=epochs,

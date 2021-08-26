@@ -28,6 +28,7 @@ def save(model, save_dir, logger):
     state = {
         "n_estimators": len(model.estimators_),
         "model": model.state_dict(),
+        "_criterion": model._criterion,
     }
     save_dir = os.path.join(save_dir, filename)
 
@@ -64,6 +65,7 @@ def load(model, save_dir="./", logger=None):
     state = torch.load(save_dir)
     n_estimators = state["n_estimators"]
     model_params = state["model"]
+    model._criterion = state["_criterion"]
 
     # Pre-allocate and load all base estimators
     for _ in range(n_estimators):
