@@ -1,6 +1,6 @@
 .. image:: ./docs/_images/badge_small.png
 
-|github|_ |readthedocs|_ |codecov|_ |python|_ |license|_
+|github|_ |readthedocs|_ |codecov|_ |license|_
 
 .. |github| image:: https://github.com/TorchEnsemble-Community/Ensemble-Pytorch/workflows/torchensemble-CI/badge.svg
 .. _github: https://github.com/TorchEnsemble-Community/Ensemble-Pytorch/actions
@@ -10,9 +10,6 @@
 
 .. |codecov| image:: https://codecov.io/gh/TorchEnsemble-Community/Ensemble-Pytorch/branch/master/graph/badge.svg?token=2FXCFRIDTV
 .. _codecov: https://codecov.io/gh/TorchEnsemble-Community/Ensemble-Pytorch
-
-.. |python| image:: https://img.shields.io/pypi/pyversions/torchensemble
-.. _python: https://pypi.org/project/torchensemble/
 
 .. |license| image:: https://img.shields.io/github/license/TorchEnsemble-Community/Ensemble-Pytorch
 .. _license: https://github.com/TorchEnsemble-Community/Ensemble-Pytorch/blob/master/LICENSE
