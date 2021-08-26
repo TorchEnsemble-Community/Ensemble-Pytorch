@@ -1,6 +1,6 @@
 .. image:: ./docs/_images/badge_small.png
 
-|github|_ |readthedocs|_ |codecov|_ |python|_ |license|_
+|github|_ |readthedocs|_ |codecov|_ |license|_
 
 .. |github| image:: https://github.com/TorchEnsemble-Community/Ensemble-Pytorch/workflows/torchensemble-CI/badge.svg
 .. _github: https://github.com/TorchEnsemble-Community/Ensemble-Pytorch/actions
@@ -10,9 +10,6 @@
 
 .. |codecov| image:: https://codecov.io/gh/TorchEnsemble-Community/Ensemble-Pytorch/branch/master/graph/badge.svg?token=2FXCFRIDTV
 .. _codecov: https://codecov.io/gh/TorchEnsemble-Community/Ensemble-Pytorch
-
-.. |python| image:: https://img.shields.io/pypi/pyversions/torchensemble
-.. _python: https://pypi.org/project/torchensemble/
 
 .. |license| image:: https://img.shields.io/github/license/TorchEnsemble-Community/Ensemble-Pytorch
 .. _license: https://github.com/TorchEnsemble-Community/Ensemble-Pytorch/blob/master/LICENSE
@@ -100,6 +97,8 @@ Supported Ensemble
 +------------------------------+------------+---------------------------+
 | Fast Geometric Ensemble [6]_ | Sequential |     fast_geometric.py     |
 +------------------------------+------------+---------------------------+
+|  Soft Gradient Boosting [7]_ |  Parallel  | soft_gradient_boosting.py |
++------------------------------+------------+---------------------------+
 
 Dependencies
 ------------
@@ -122,6 +121,8 @@ Reference
 .. [5] Lakshminarayanan, Balaji, et al. Simple and Scalable Predictive Uncertainty Estimation using Deep Ensembles. NIPS, 2017.
 
 .. [6] Garipov, Timur, et al. Loss Surfaces, Mode Connectivity, and Fast Ensembling of DNNs. NeurIPS, 2018.
+
+.. [7] Feng, Ji, et al. Soft Gradient Boosting Machine. ArXiv, 2020.
 
 .. _pytorch: https://pytorch.org/
 

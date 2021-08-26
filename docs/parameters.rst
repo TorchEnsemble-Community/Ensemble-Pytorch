@@ -165,3 +165,24 @@ FastGeometricRegressor
 
 .. autoclass:: torchensemble.fast_geometric.FastGeometricRegressor
     :members:
+
+Soft Gradient Boosting
+----------------------
+
+In soft gradient boosting, all base estimators could be simultaneously fitted,
+while achieving the similar boosting improvements as in gradient boosting.
+
+Reference:
+    J. Feng, Y.-X. Xu et al., Soft Gradient Boosting Machine, ArXiv, 2020.
+
+SoftGradientBoostingClassifier
+******************************
+
+.. autoclass:: torchensemble.soft_gradient_boosting.SoftGradientBoostingClassifier
+    :members:
+
+SoftGradientBoostingRegressor
+*****************************
+
+.. autoclass:: torchensemble.soft_gradient_boosting.SoftGradientBoostingRegressor
+    :members:

@@ -18,6 +18,8 @@ Changelog
 Ver 0.1.*
 ---------
 
+* |Fix| Fix missing functionality of ``save_model`` for :meth:`fit` of Soft Gradient Boosting | `@xuyxu <https://github.com/xuyxu>`__
+* |Feature| |API| Add :class:`SoftGradientBoostingClassifier` and :class:`SoftGradientBoostingRegressor` | `@xuyxu <https://github.com/xuyxu>`__
 * |Feature| |API| Support using dataloader with multiple input | `@xuyxu <https://github.com/xuyxu>`__
 * |Fix| Fix missing functionality of ``use_reduction_sum`` for :meth:`fit` of Gradient Boosting | `@xuyxu <https://github.com/xuyxu>`__
 * |Enhancement| Relax :mod:`tensorboard` as a soft dependency | `@xuyxu <https://github.com/xuyxu>`__

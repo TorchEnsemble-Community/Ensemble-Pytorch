@@ -19,6 +19,7 @@ all_clf = [
     torchensemble.SnapshotEnsembleClassifier,
     torchensemble.AdversarialTrainingClassifier,
     torchensemble.FastGeometricClassifier,
+    torchensemble.SoftGradientBoostingClassifier,
 ]
 
 
@@ -31,6 +32,7 @@ all_reg = [
     torchensemble.SnapshotEnsembleRegressor,
     torchensemble.AdversarialTrainingRegressor,
     torchensemble.FastGeometricRegressor,
+    torchensemble.SoftGradientBoostingRegressor,
 ]
 
 
