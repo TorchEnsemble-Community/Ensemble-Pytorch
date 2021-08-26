@@ -8,6 +8,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 <!-- markdownlint-disable -->
 <table>
   <tr>
+    <td align="center"><a href="https://by256.github.io/"><img src="https://avatars.githubusercontent.com/u/44163664?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Batuhan Yildirim</b></sub></a><br /><a href="https://github.com/TorchEnsemble-Community/Ensemble-Pytorch/commits?author=by256" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/mttgdd"><img src="https://avatars.githubusercontent.com/u/3154919?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Matt Gadd</b></sub></a><br /><a href="https://github.com/TorchEnsemble-Community/Ensemble-Pytorch/commits?author=mttgdd" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/zzzzwj"><img src="https://avatars.githubusercontent.com/u/23235538?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Wenjie Zhang</b></sub></a><br /><a href="https://github.com/TorchEnsemble-Community/Ensemble-Pytorch/commits?author=zzzzwj" title="Code">💻</a> <a href="https://github.com/TorchEnsemble-Community/Ensemble-Pytorch/commits?author=zzzzwj" title="Tests">⚠️</a></td>
     <td align="center"><a href="https://github.com/Xiaohui9607"><img src="https://avatars.githubusercontent.com/u/37996225?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Xiaohui Chen</b></sub></a><br /><a href="https://github.com/TorchEnsemble-Community/Ensemble-Pytorch/issues?q=author%3AXiaohui9607" title="Bug reports">🐛</a></td>
