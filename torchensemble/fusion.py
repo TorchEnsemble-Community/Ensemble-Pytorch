@@ -59,6 +59,13 @@ class FusionClassifier(BaseClassifier):
         super().set_scheduler(scheduler_name, **kwargs)
 
     @torchensemble_model_doc(
+        """Set the training criterion for FusionClassifier.""",
+        "set_criterion",
+    )
+    def set_criterion(self, criterion):
+        super().set_criterion(criterion)
+
+    @torchensemble_model_doc(
         """Implementation on the training stage of FusionClassifier.""", "fit"
     )
     def fit(
@@ -85,6 +92,10 @@ class FusionClassifier(BaseClassifier):
             self.scheduler_ = set_module.set_scheduler(
                 optimizer, self.scheduler_name, **self.scheduler_args
             )
+
+        # Check the training criterion
+        if not hasattr(self, "_criterion"):
+            self._criterion = nn.CrossEntropyLoss()
 
         # Utils
         best_acc = 0.0
@@ -198,6 +209,13 @@ class FusionRegressor(BaseRegressor):
         super().set_scheduler(scheduler_name, **kwargs)
 
     @torchensemble_model_doc(
+        """Set the training criterion for FusionRegressor.""",
+        "set_criterion",
+    )
+    def set_criterion(self, criterion):
+        super().set_criterion(criterion)
+
+    @torchensemble_model_doc(
         """Implementation on the training stage of FusionRegressor.""", "fit"
     )
     def fit(
@@ -223,6 +241,10 @@ class FusionRegressor(BaseRegressor):
             self.scheduler_ = set_module.set_scheduler(
                 optimizer, self.scheduler_name, **self.scheduler_args
             )
+
+        # Check the training criterion
+        if not hasattr(self, "_criterion"):
+            self._criterion = nn.MSELoss()
 
         # Utils
         best_loss = float("inf")

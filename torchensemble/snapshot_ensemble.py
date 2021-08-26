@@ -225,6 +225,13 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble, BaseClassifier):
     def set_optimizer(self, optimizer_name, **kwargs):
         super().set_optimizer(optimizer_name, **kwargs)
 
+    @torchensemble_model_doc(
+        """Set the training criterion for SnapshotEnsembleClassifier.""",
+        "set_criterion",
+    )
+    def set_criterion(self, criterion):
+        super().set_criterion(criterion)
+
     @_snapshot_ensemble_model_doc(
         """Implementation on the training stage of SnapshotEnsembleClassifier.""",  # noqa: E501
         "fit",
@@ -250,6 +257,10 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble, BaseClassifier):
         )
 
         scheduler = self._set_scheduler(optimizer, epochs * len(train_loader))
+
+        # Check the training criterion
+        if not hasattr(self, "_criterion"):
+            self._criterion = nn.CrossEntropyLoss()
 
         # Utils
         best_acc = 0.0
@@ -383,6 +394,13 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble, BaseRegressor):
     def set_optimizer(self, optimizer_name, **kwargs):
         super().set_optimizer(optimizer_name, **kwargs)
 
+    @torchensemble_model_doc(
+        """Set the training criterion for SnapshotEnsembleRegressor.""",
+        "set_criterion",
+    )
+    def set_criterion(self, criterion):
+        super().set_criterion(criterion)
+
     @_snapshot_ensemble_model_doc(
         """Implementation on the training stage of SnapshotEnsembleRegressor.""",  # noqa: E501
         "fit",
@@ -408,6 +426,10 @@ class SnapshotEnsembleRegressor(_BaseSnapshotEnsemble, BaseRegressor):
         )
 
         scheduler = self._set_scheduler(optimizer, epochs * len(train_loader))
+
+        # Check the training criterion
+        if not hasattr(self, "_criterion"):
+            self._criterion = nn.MSELoss()
 
         # Utils
         best_loss = float("inf")

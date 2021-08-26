@@ -202,6 +202,13 @@ class FastGeometricClassifier(_BaseFastGeometric, BaseClassifier):
     def set_scheduler(self, scheduler_name, **kwargs):
         super().set_scheduler(scheduler_name=scheduler_name, **kwargs)
 
+    @torchensemble_model_doc(
+        """Set the training criterion for FastGeometricClassifier.""",
+        "set_criterion",
+    )
+    def set_criterion(self, criterion):
+        super().set_criterion(criterion)
+
     @_fast_geometric_model_doc(
         """Implementation on the training stage of FastGeometricClassifier.""",  # noqa: E501
         "fit",
@@ -236,6 +243,10 @@ class FastGeometricClassifier(_BaseFastGeometric, BaseClassifier):
             scheduler = set_module.set_scheduler(
                 optimizer, self.scheduler_name, **self.scheduler_args
             )
+
+        # Check the training criterion
+        if not hasattr(self, "_criterion"):
+            self._criterion = nn.CrossEntropyLoss()
 
         # Utils
         total_iters = 0
@@ -444,6 +455,13 @@ class FastGeometricRegressor(_BaseFastGeometric, BaseRegressor):
     def set_scheduler(self, scheduler_name, **kwargs):
         super().set_scheduler(scheduler_name=scheduler_name, **kwargs)
 
+    @torchensemble_model_doc(
+        """Set the training criterion for FastGeometricRegressor.""",
+        "set_criterion",
+    )
+    def set_criterion(self, criterion):
+        super().set_criterion(criterion)
+
     @_fast_geometric_model_doc(
         """Implementation on the training stage of FastGeometricRegressor.""",  # noqa: E501
         "fit",
@@ -478,6 +496,10 @@ class FastGeometricRegressor(_BaseFastGeometric, BaseRegressor):
             scheduler = set_module.set_scheduler(
                 optimizer, self.scheduler_name, **self.scheduler_args
             )
+
+        # Check the training criterion
+        if not hasattr(self, "_criterion"):
+            self._criterion = nn.MSELoss()
 
         # Utils
         total_iters = 0

@@ -33,6 +33,7 @@ def torchensemble_model_doc(header="", item="model"):
             "predict": const.__predict_doc,
             "set_optimizer": const.__set_optimizer_doc,
             "set_scheduler": const.__set_scheduler_doc,
+            "set_criterion": const.__set_criterion_doc,
             "classifier_forward": const.__classification_forward_doc,
             "classifier_evaluate": const.__classification_evaluate_doc,
             "regressor_forward": const.__regression_forward_doc,

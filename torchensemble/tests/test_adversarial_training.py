@@ -36,8 +36,7 @@ def test_adversarial_training_range():
     model = torchensemble.AdversarialTrainingClassifier(
         estimator=MLP_clf, n_estimators=2, cuda=False
     )
-    criterion = nn.CrossEntropyLoss()
-    model.set_criterion(criterion)
+
     model.set_optimizer("Adam")
 
     # Prepare data

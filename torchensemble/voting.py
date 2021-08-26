@@ -115,6 +115,13 @@ class VotingClassifier(BaseClassifier):
         super().set_scheduler(scheduler_name, **kwargs)
 
     @torchensemble_model_doc(
+        """Set the training criterion for VotingClassifier.""",
+        "set_criterion",
+    )
+    def set_criterion(self, criterion):
+        super().set_criterion(criterion)
+
+    @torchensemble_model_doc(
         """Implementation on the training stage of VotingClassifier.""", "fit"
     )
     def fit(
@@ -147,6 +154,10 @@ class VotingClassifier(BaseClassifier):
             scheduler_ = set_module.set_scheduler(
                 optimizers[0], self.scheduler_name, **self.scheduler_args
             )
+
+        # Check the training criterion
+        if not hasattr(self, "_criterion"):
+            self._criterion = nn.CrossEntropyLoss()
 
         # Utils
         best_acc = 0.0
@@ -284,6 +295,13 @@ class VotingRegressor(BaseRegressor):
         super().set_scheduler(scheduler_name, **kwargs)
 
     @torchensemble_model_doc(
+        """Set the training criterion for VotingRegressor.""",
+        "set_criterion",
+    )
+    def set_criterion(self, criterion):
+        super().set_criterion(criterion)
+
+    @torchensemble_model_doc(
         """Implementation on the training stage of VotingRegressor.""", "fit"
     )
     def fit(
@@ -316,6 +334,10 @@ class VotingRegressor(BaseRegressor):
             scheduler_ = set_module.set_scheduler(
                 optimizers[0], self.scheduler_name, **self.scheduler_args
             )
+
+        # Check the training criterion
+        if not hasattr(self, "_criterion"):
+            self._criterion = nn.MSELoss()
 
         # Utils
         best_loss = float("inf")

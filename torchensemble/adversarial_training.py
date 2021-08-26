@@ -246,6 +246,13 @@ class AdversarialTrainingClassifier(_BaseAdversarialTraining, BaseClassifier):
     def set_scheduler(self, scheduler_name, **kwargs):
         super().set_scheduler(scheduler_name, **kwargs)
 
+    @torchensemble_model_doc(
+        """Set the training criterion for AdversarialTrainingClassifier.""",
+        "set_criterion",
+    )
+    def set_criterion(self, criterion):
+        super().set_criterion(criterion)
+
     @_adversarial_training_model_doc(
         """Implementation on the training stage of AdversarialTrainingClassifier.""",  # noqa: E501
         "fit",
@@ -281,6 +288,10 @@ class AdversarialTrainingClassifier(_BaseAdversarialTraining, BaseClassifier):
             scheduler_ = set_module.set_scheduler(
                 optimizers[0], self.scheduler_name, **self.scheduler_args
             )
+
+        # Check the training criterion
+        if not hasattr(self, "_criterion"):
+            self._criterion = nn.CrossEntropyLoss()
 
         # Utils
         best_acc = 0.0
@@ -423,6 +434,13 @@ class AdversarialTrainingRegressor(_BaseAdversarialTraining, BaseRegressor):
     def set_scheduler(self, scheduler_name, **kwargs):
         super().set_scheduler(scheduler_name, **kwargs)
 
+    @torchensemble_model_doc(
+        """Set the training criterion for AdversarialTrainingRegressor.""",
+        "set_criterion",
+    )
+    def set_criterion(self, criterion):
+        super().set_criterion(criterion)
+
     @_adversarial_training_model_doc(
         """Implementation on the training stage of AdversarialTrainingRegressor.""",  # noqa: E501
         "fit",
@@ -458,6 +476,10 @@ class AdversarialTrainingRegressor(_BaseAdversarialTraining, BaseRegressor):
             scheduler_ = set_module.set_scheduler(
                 optimizers[0], self.scheduler_name, **self.scheduler_args
             )
+
+        # Check the training criterion
+        if not hasattr(self, "_criterion"):
+            self._criterion = nn.MSELoss()
 
         # Utils
         best_loss = float("inf")
