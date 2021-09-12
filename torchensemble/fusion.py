@@ -111,7 +111,7 @@ class FusionClassifier(BaseClassifier):
                     if torch.is_grad_enabled():
                         optimizer.zero_grad()
                     output = self._forward(*data)
-                    loss = criterion(output, target)
+                    loss = self._criterion(output, target)
                     if loss.requires_grad:
                         loss.backward()
                     return loss
@@ -272,7 +272,7 @@ class FusionRegressor(BaseRegressor):
                     if torch.is_grad_enabled():
                         optimizer.zero_grad()
                     output = self.forward(*data)
-                    loss = criterion(output, target)
+                    loss = self._criterion(output, target)
                     if loss.requires_grad:
                         loss.backward()
                     return loss
