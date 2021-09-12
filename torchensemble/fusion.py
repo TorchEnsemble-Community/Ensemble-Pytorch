@@ -57,6 +57,13 @@ class FusionClassifier(BaseClassifier):
         super().set_scheduler(scheduler_name, **kwargs)
 
     @torchensemble_model_doc(
+        """Set the training criterion for FusionClassifier.""",
+        "set_criterion",
+    )
+    def set_criterion(self, criterion):
+        super().set_criterion(criterion)
+
+    @torchensemble_model_doc(
         """Implementation on the training stage of FusionClassifier.""", "fit"
     )
     def fit(
@@ -84,8 +91,11 @@ class FusionClassifier(BaseClassifier):
                 optimizer, self.scheduler_name, **self.scheduler_args
             )
 
+        # Check the training criterion
+        if not hasattr(self, "_criterion"):
+            self._criterion = nn.CrossEntropyLoss()
+
         # Utils
-        criterion = nn.CrossEntropyLoss()
         best_acc = 0.0
         total_iters = 0
 
@@ -210,6 +220,13 @@ class FusionRegressor(BaseRegressor):
         super().set_scheduler(scheduler_name, **kwargs)
 
     @torchensemble_model_doc(
+        """Set the training criterion for FusionRegressor.""",
+        "set_criterion",
+    )
+    def set_criterion(self, criterion):
+        super().set_criterion(criterion)
+
+    @torchensemble_model_doc(
         """Implementation on the training stage of FusionRegressor.""", "fit"
     )
     def fit(
@@ -236,9 +253,12 @@ class FusionRegressor(BaseRegressor):
                 optimizer, self.scheduler_name, **self.scheduler_args
             )
 
+        # Check the training criterion
+        if not hasattr(self, "_criterion"):
+            self._criterion = nn.MSELoss()
+
         # Utils
-        criterion = nn.MSELoss()
-        best_mse = float("inf")
+        best_loss = float("inf")
         total_iters = 0
 
         # Training loop
@@ -280,26 +300,26 @@ class FusionRegressor(BaseRegressor):
             if test_loader:
                 self.eval()
                 with torch.no_grad():
-                    mse = 0.0
+                    val_loss = 0.0
                     for _, elem in enumerate(test_loader):
                         data, target = io.split_data_target(elem, self.device)
                         output = self.forward(*data)
-                        mse += criterion(output, target)
-                    mse /= len(test_loader)
+                        val_loss += self._criterion(output, target)
+                    val_loss /= len(test_loader)
 
-                    if mse < best_mse:
-                        best_mse = mse
+                    if val_loss < best_loss:
+                        best_loss = val_loss
                         if save_model:
                             io.save(self, save_dir, self.logger)
 
                     msg = (
-                        "Epoch: {:03d} | Validation MSE: {:.5f} |"
+                        "Epoch: {:03d} | Validation Loss: {:.5f} |"
                         " Historical Best: {:.5f}"
                     )
-                    self.logger.info(msg.format(epoch, mse, best_mse))
+                    self.logger.info(msg.format(epoch, val_loss, best_loss))
                     if self.tb_logger:
                         self.tb_logger.add_scalar(
-                            "fusion/Validation_MSE", mse, epoch
+                            "fusion/Validation_Loss", val_loss, epoch
                         )
 
             # Update the scheduler

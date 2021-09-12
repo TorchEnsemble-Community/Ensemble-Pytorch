@@ -246,6 +246,13 @@ class AdversarialTrainingClassifier(_BaseAdversarialTraining, BaseClassifier):
     def set_scheduler(self, scheduler_name, **kwargs):
         super().set_scheduler(scheduler_name, **kwargs)
 
+    @torchensemble_model_doc(
+        """Set the training criterion for AdversarialTrainingClassifier.""",
+        "set_criterion",
+    )
+    def set_criterion(self, criterion):
+        super().set_criterion(criterion)
+
     @_adversarial_training_model_doc(
         """Implementation on the training stage of AdversarialTrainingClassifier.""",  # noqa: E501
         "fit",
@@ -282,8 +289,11 @@ class AdversarialTrainingClassifier(_BaseAdversarialTraining, BaseClassifier):
                 optimizers[0], self.scheduler_name, **self.scheduler_args
             )
 
+        # Check the training criterion
+        if not hasattr(self, "_criterion"):
+            self._criterion = nn.CrossEntropyLoss()
+
         # Utils
-        criterion = nn.CrossEntropyLoss()
         best_acc = 0.0
 
         # Internal helper function on pesudo forward
@@ -318,7 +328,7 @@ class AdversarialTrainingClassifier(_BaseAdversarialTraining, BaseClassifier):
                         estimator,
                         cur_lr,
                         optimizer,
-                        criterion,
+                        self._criterion,
                         idx,
                         epoch,
                         log_interval,
@@ -424,6 +434,13 @@ class AdversarialTrainingRegressor(_BaseAdversarialTraining, BaseRegressor):
     def set_scheduler(self, scheduler_name, **kwargs):
         super().set_scheduler(scheduler_name, **kwargs)
 
+    @torchensemble_model_doc(
+        """Set the training criterion for AdversarialTrainingRegressor.""",
+        "set_criterion",
+    )
+    def set_criterion(self, criterion):
+        super().set_criterion(criterion)
+
     @_adversarial_training_model_doc(
         """Implementation on the training stage of AdversarialTrainingRegressor.""",  # noqa: E501
         "fit",
@@ -460,9 +477,12 @@ class AdversarialTrainingRegressor(_BaseAdversarialTraining, BaseRegressor):
                 optimizers[0], self.scheduler_name, **self.scheduler_args
             )
 
+        # Check the training criterion
+        if not hasattr(self, "_criterion"):
+            self._criterion = nn.MSELoss()
+
         # Utils
-        criterion = nn.MSELoss()
-        best_mse = float("inf")
+        best_loss = float("inf")
 
         # Internal helper function on pesudo forward
         def _forward(estimators, *x):
@@ -494,7 +514,7 @@ class AdversarialTrainingRegressor(_BaseAdversarialTraining, BaseRegressor):
                         estimator,
                         cur_lr,
                         optimizer,
-                        criterion,
+                        self._criterion,
                         idx,
                         epoch,
                         log_interval,
@@ -515,31 +535,33 @@ class AdversarialTrainingRegressor(_BaseAdversarialTraining, BaseRegressor):
                 if test_loader:
                     self.eval()
                     with torch.no_grad():
-                        mse = 0.0
+                        val_loss = 0.0
                         for _, elem in enumerate(test_loader):
                             data, target = io.split_data_target(
                                 elem, self.device
                             )
                             output = _forward(estimators, *data)
-                            mse += criterion(output, target)
-                        mse /= len(test_loader)
+                            val_loss += self._criterion(output, target)
+                        val_loss /= len(test_loader)
 
-                        if mse < best_mse:
-                            best_mse = mse
+                        if val_loss < best_loss:
+                            best_loss = val_loss
                             self.estimators_ = nn.ModuleList()
                             self.estimators_.extend(estimators)
                             if save_model:
                                 io.save(self, save_dir, self.logger)
 
                         msg = (
-                            "Epoch: {:03d} | Validation MSE:"
+                            "Epoch: {:03d} | Validation Loss:"
                             " {:.5f} | Historical Best: {:.5f}"
                         )
-                        self.logger.info(msg.format(epoch, mse, best_mse))
+                        self.logger.info(
+                            msg.format(epoch, val_loss, best_loss)
+                        )
                         if self.tb_logger:
                             self.tb_logger.add_scalar(
-                                "adversirial_training/Validation_MSE",
-                                mse,
+                                "adversirial_training/Validation_Loss",
+                                val_loss,
                                 epoch,
                             )
 

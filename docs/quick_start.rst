@@ -49,7 +49,7 @@ Ensemble-PyTorch uses a global logger to track and print the intermediate loggin
 
 .. code-block:: python
 
-    from torchensemble.utils import set_logger
+    from torchensemble.utils.logging import set_logger
 
     logger = set_logger('classification_mnist_mlp')
 
@@ -81,6 +81,17 @@ The meaning of different arguments is listed as follow:
 * ``estimator``: The class of your model, used to instantiate base estimators in the ensemble.
 * ``n_estimators``: The number of base estimators in the ensemble.
 * ``cuda``: Specify whether to use GPU for training and evaluating the ensemble.
+
+Set the Criterion
+-----------------
+
+The next step is to set the objective function. Since our ensemble model is a classifier, we 
+will use cross-entropy:
+
+.. code-block:: python
+
+    criterion = nn.CrossEntropyLoss()
+    model.set_criterion(criterion)
 
 Set the Optimizer
 -----------------
@@ -179,6 +190,10 @@ The script below shows an example on using VotingClassifier with 10 MLPs for cla
         n_estimators=10,
         cuda=True,
     )
+
+    # Set the criterion
+    criterion = nn.CrossEntropyLoss()
+    model.set_criterion(criterion)
 
     # Set the optimizer
     model.set_optimizer('Adam', lr=1e-3, weight_decay=5e-4)

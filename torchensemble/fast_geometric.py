@@ -202,6 +202,13 @@ class FastGeometricClassifier(_BaseFastGeometric, BaseClassifier):
     def set_scheduler(self, scheduler_name, **kwargs):
         super().set_scheduler(scheduler_name=scheduler_name, **kwargs)
 
+    @torchensemble_model_doc(
+        """Set the training criterion for FastGeometricClassifier.""",
+        "set_criterion",
+    )
+    def set_criterion(self, criterion):
+        super().set_criterion(criterion)
+
     @_fast_geometric_model_doc(
         """Implementation on the training stage of FastGeometricClassifier.""",  # noqa: E501
         "fit",
@@ -237,8 +244,11 @@ class FastGeometricClassifier(_BaseFastGeometric, BaseClassifier):
                 optimizer, self.scheduler_name, **self.scheduler_args
             )
 
+        # Check the training criterion
+        if not hasattr(self, "_criterion"):
+            self._criterion = nn.CrossEntropyLoss()
+
         # Utils
-        criterion = nn.CrossEntropyLoss()
         total_iters = 0
 
         for epoch in range(epochs):
@@ -252,7 +262,7 @@ class FastGeometricClassifier(_BaseFastGeometric, BaseClassifier):
 
                 optimizer.zero_grad()
                 output = estimator_(*data)
-                loss = criterion(output, target)
+                loss = self._criterion(output, target)
                 loss.backward()
                 optimizer.step()
 
@@ -318,7 +328,7 @@ class FastGeometricClassifier(_BaseFastGeometric, BaseClassifier):
 
                 optimizer.zero_grad()
                 output = estimator_(*data)
-                loss = criterion(output, target)
+                loss = self._criterion(output, target)
                 loss.backward()
                 optimizer.step()
 
@@ -445,6 +455,13 @@ class FastGeometricRegressor(_BaseFastGeometric, BaseRegressor):
     def set_scheduler(self, scheduler_name, **kwargs):
         super().set_scheduler(scheduler_name=scheduler_name, **kwargs)
 
+    @torchensemble_model_doc(
+        """Set the training criterion for FastGeometricRegressor.""",
+        "set_criterion",
+    )
+    def set_criterion(self, criterion):
+        super().set_criterion(criterion)
+
     @_fast_geometric_model_doc(
         """Implementation on the training stage of FastGeometricRegressor.""",  # noqa: E501
         "fit",
@@ -480,8 +497,11 @@ class FastGeometricRegressor(_BaseFastGeometric, BaseRegressor):
                 optimizer, self.scheduler_name, **self.scheduler_args
             )
 
+        # Check the training criterion
+        if not hasattr(self, "_criterion"):
+            self._criterion = nn.MSELoss()
+
         # Utils
-        criterion = nn.MSELoss()
         total_iters = 0
 
         for epoch in range(epochs):
@@ -494,7 +514,7 @@ class FastGeometricRegressor(_BaseFastGeometric, BaseRegressor):
 
                 optimizer.zero_grad()
                 output = estimator_(*data)
-                loss = criterion(output, target)
+                loss = self._criterion(output, target)
                 loss.backward()
                 optimizer.step()
 
@@ -525,7 +545,7 @@ class FastGeometricRegressor(_BaseFastGeometric, BaseRegressor):
         )
 
         # Utils
-        best_mse = float("inf")
+        best_loss = float("inf")
         n_iters = len(train_loader)
         updated = False
         epoch = 0
@@ -545,7 +565,7 @@ class FastGeometricRegressor(_BaseFastGeometric, BaseRegressor):
 
                 optimizer.zero_grad()
                 output = estimator_(*data)
-                loss = criterion(output, target)
+                loss = self._criterion(output, target)
                 loss.backward()
                 optimizer.step()
 
@@ -580,27 +600,27 @@ class FastGeometricRegressor(_BaseFastGeometric, BaseRegressor):
             if test_loader and updated:
                 self.eval()
                 with torch.no_grad():
-                    mse = 0.0
+                    val_loss = 0.0
                     for _, elem in enumerate(test_loader):
                         data, target = io.split_data_target(elem, self.device)
                         output = self.forward(*data)
-                        mse += criterion(output, target)
-                    mse /= len(test_loader)
+                        val_loss += self._criterion(output, target)
+                    val_loss /= len(test_loader)
 
-                    if mse < best_mse:
-                        best_mse = mse
+                    if val_loss < best_loss:
+                        best_loss = val_loss
                         if save_model:
                             io.save(self, save_dir, self.logger)
 
                     msg = (
-                        "Epoch: {:03d} | Validation MSE: {:.5f} |"
+                        "Epoch: {:03d} | Validation Loss: {:.5f} |"
                         " Historical Best: {:.5f}"
                     )
-                    self.logger.info(msg.format(epoch, mse, best_mse))
+                    self.logger.info(msg.format(epoch, val_loss, best_loss))
                     if self.tb_logger:
                         self.tb_logger.add_scalar(
-                            "fast_geometric/Ensemble_Est/Validation_MSE",
-                            mse,
+                            "fast_geometric/Ensemble_Est/Validation_Loss",
+                            val_loss,
                             len(self.estimators_),
                         )
                 updated = False  # reset the updating flag
