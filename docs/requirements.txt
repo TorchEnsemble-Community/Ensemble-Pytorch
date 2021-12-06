@@ -3,3 +3,4 @@ sphinx-panels==0.5.*
 sphinxemoji==0.1.8
 sphinx-copybutton
 m2r2==0.2.7
+mistune==2.0.0rc1
