@@ -18,6 +18,7 @@ Changelog
 Ver 0.1.*
 ---------
 
+* |Feature| |API| Add :mod:`metrics` module for classification, regression and uncertainty estimation | `@xuyxu <https://github.com/xuyxu>`__
 * |Feature| |API| Support arbitrary training criteria for all ensembles except Gradient Boosting | `@by256 <https://github.com/by256>`__ and `@xuyxu <https://github.com/xuyxu>`__
 * |Fix| Fix missing functionality of ``save_model`` for :meth:`fit` of Soft Gradient Boosting | `@xuyxu <https://github.com/xuyxu>`__
 * |Feature| |API| Add :class:`SoftGradientBoostingClassifier` and :class:`SoftGradientBoostingRegressor` | `@xuyxu <https://github.com/xuyxu>`__
