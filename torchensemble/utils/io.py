@@ -75,7 +75,7 @@ def load(model, save_dir="./", logger=None):
 
 def split_data_target(element, device, logger=None):
     """Split elements in dataloader according to pre-defined rules."""
-    if not isinstance(element, list):
+    if not (isinstance(element, list) or isinstance(element, tuple)):
         msg = (
             "Invalid dataloader, please check if the input dataloder is valid."
         )
