@@ -1,7 +1,6 @@
 import pytest
-import torchensemble
 import torch.nn as nn
-
+import torchensemble
 
 optimizer_list = [
     "Adadelta",
@@ -13,6 +12,7 @@ optimizer_list = [
     "RMSprop",
     "Rprop",
     "SGD",
+    "LBFGS",
 ]
 
 
@@ -33,9 +33,14 @@ class MLP(nn.Module):
 @pytest.mark.parametrize("optimizer_name", optimizer_list)
 def test_set_optimizer_normal(optimizer_name):
     model = MLP()
-    torchensemble.utils.set_module.set_optimizer(
-        model, optimizer_name, lr=1e-3
-    )
+    if optimizer_name != "LBFGS":
+        torchensemble.utils.set_module.set_optimizer(
+            model, optimizer_name, lr=1e-3
+        )
+    else:
+        torchensemble.utils.set_module.set_optimizer(
+            model, optimizer_name, history_size=7, max_iter=10
+        )
 
 
 def test_set_optimizer_Unknown():

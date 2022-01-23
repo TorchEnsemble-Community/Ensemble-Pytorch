@@ -6,19 +6,17 @@
 """
 
 
+import warnings
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
-import warnings
 from joblib import Parallel, delayed
 
-from ._base import BaseClassifier, BaseRegressor
-from ._base import torchensemble_model_doc
+from ._base import BaseClassifier, BaseRegressor, torchensemble_model_doc
 from .utils import io
-from .utils import set_module
 from .utils import operator as op
-
+from .utils import set_module
 
 __all__ = ["BaggingClassifier", "BaggingRegressor"]
 
@@ -59,11 +57,20 @@ def _parallel_fit_per_epoch(
         sampling_data = [tensor[sampling_mask] for tensor in data]
         sampling_target = target[sampling_mask]
 
-        optimizer.zero_grad()
+        def closure():
+            if torch.is_grad_enabled():
+                optimizer.zero_grad()
+            sampling_output = estimator(*sampling_data)
+            loss = criterion(sampling_output, sampling_target)
+            if loss.requires_grad:
+                loss.backward()
+            return loss
+
+        optimizer.step(closure)
+
+        # Calculate loss for logging
         sampling_output = estimator(*sampling_data)
-        loss = criterion(sampling_output, sampling_target)
-        loss.backward()
-        optimizer.step()
+        loss = closure()
 
         # Print training status
         if batch_idx % log_interval == 0:
@@ -79,7 +86,12 @@ def _parallel_fit_per_epoch(
                 )
                 print(
                     msg.format(
-                        idx, epoch, batch_idx, loss, correct, subsample_size
+                        idx,
+                        epoch,
+                        batch_idx,
+                        loss.item(),
+                        correct,
+                        subsample_size,
                     )
                 )
             else:
@@ -87,7 +99,7 @@ def _parallel_fit_per_epoch(
                     "Estimator: {:03d} | Epoch: {:03d} | Batch: {:03d}"
                     " | Loss: {:.5f}"
                 )
-                print(msg.format(idx, epoch, batch_idx, loss))
+                print(msg.format(idx, epoch, batch_idx, loss.item()))
 
     return estimator, optimizer
 

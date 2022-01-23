@@ -10,12 +10,10 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from ._base import BaseClassifier, BaseRegressor
-from ._base import torchensemble_model_doc
+from ._base import BaseClassifier, BaseRegressor, torchensemble_model_doc
 from .utils import io
-from .utils import set_module
 from .utils import operator as op
-
+from .utils import set_module
 
 __all__ = ["FusionClassifier", "FusionRegressor"]
 
@@ -109,11 +107,20 @@ class FusionClassifier(BaseClassifier):
                 data, target = io.split_data_target(elem, self.device)
                 batch_size = data[0].size(0)
 
-                optimizer.zero_grad()
+                def closure():
+                    if torch.is_grad_enabled():
+                        optimizer.zero_grad()
+                    output = self._forward(*data)
+                    loss = self._criterion(output, target)
+                    if loss.requires_grad:
+                        loss.backward()
+                    return loss
+
+                optimizer.step(closure)
+
+                # Calculate loss for logging
                 output = self._forward(*data)
-                loss = self._criterion(output, target)
-                loss.backward()
-                optimizer.step()
+                loss = closure()
 
                 # Print training status
                 if batch_idx % log_interval == 0:
@@ -127,12 +134,16 @@ class FusionClassifier(BaseClassifier):
                         )
                         self.logger.info(
                             msg.format(
-                                epoch, batch_idx, loss, correct, batch_size
+                                epoch,
+                                batch_idx,
+                                loss.item(),
+                                correct,
+                                batch_size,
                             )
                         )
                         if self.tb_logger:
                             self.tb_logger.add_scalar(
-                                "fusion/Train_Loss", loss, total_iters
+                                "fusion/Train_Loss", loss.item(), total_iters
                             )
                 total_iters += 1
 
@@ -257,20 +268,31 @@ class FusionRegressor(BaseRegressor):
 
                 data, target = io.split_data_target(elem, self.device)
 
-                optimizer.zero_grad()
+                def closure():
+                    if torch.is_grad_enabled():
+                        optimizer.zero_grad()
+                    output = self.forward(*data)
+                    loss = self._criterion(output, target)
+                    if loss.requires_grad:
+                        loss.backward()
+                    return loss
+
+                optimizer.step(closure)
+
+                # Calculate loss for logging
                 output = self.forward(*data)
-                loss = self._criterion(output, target)
-                loss.backward()
-                optimizer.step()
+                loss = closure()
 
                 # Print training status
                 if batch_idx % log_interval == 0:
                     with torch.no_grad():
                         msg = "Epoch: {:03d} | Batch: {:03d} | Loss: {:.5f}"
-                        self.logger.info(msg.format(epoch, batch_idx, loss))
+                        self.logger.info(
+                            msg.format(epoch, batch_idx, loss.item())
+                        )
                         if self.tb_logger:
                             self.tb_logger.add_scalar(
-                                "fusion/Train_Loss", loss, total_iters
+                                "fusion/Train_Loss", loss.item(), total_iters
                             )
                 total_iters += 1
 
