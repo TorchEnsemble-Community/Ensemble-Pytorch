@@ -140,3 +140,21 @@ def test_adversarial_training():
     with pytest.raises(ValueError) as excinfo:
         model.fit(train_loader, log_interval=-1)
     assert "number of batches to wait" in str(excinfo.value)
+
+
+def test_neural_forest():
+    model = torchensemble.NeuralForestClassifier(n_estimators=2, depth=-1)
+
+    with pytest.raises(ValueError) as excinfo:
+        model.fit(train_loader, epochs=1)
+    assert "tree depth should be strictly positive" in str(excinfo.value)
+
+    model = torchensemble.NeuralForestClassifier(
+        n_estimators=2,
+        depth=3,
+        lamda=-1e-3,
+    )
+
+    with pytest.raises(ValueError) as excinfo:
+        model.fit(train_loader, epochs=1)
+    assert "coefficient of the regularization term" in str(excinfo.value)
