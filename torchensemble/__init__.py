@@ -2,6 +2,8 @@ from .fusion import FusionClassifier
 from .fusion import FusionRegressor
 from .voting import VotingClassifier
 from .voting import VotingRegressor
+from .voting import NeuralForestClassifier
+from .voting import NeuralForestRegressor
 from .bagging import BaggingClassifier
 from .bagging import BaggingRegressor
 from .gradient_boosting import GradientBoostingClassifier
@@ -21,6 +23,8 @@ __all__ = [
     "FusionRegressor",
     "VotingClassifier",
     "VotingRegressor",
+    "NeuralForestClassifier",
+    "NeuralForestRegressor",
     "BaggingClassifier",
     "BaggingRegressor",
     "GradientBoostingClassifier",

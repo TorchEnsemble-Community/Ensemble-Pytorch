@@ -92,6 +92,29 @@ GradientBoostingRegressor
 .. autoclass:: torchensemble.gradient_boosting.GradientBoostingRegressor
     :members:
 
+Neural Tree Ensemble
+--------------------
+
+Neural tree ensemble are extensions of voting and gradient boosting, which
+uses the neural tree as the base estimator. Neural trees are differentiable
+trees that uses the logistic regression in internal nodes to split samples
+into child nodes with different probabilities. Model details are available at
+`Distilling a neural network into a soft decision tree
+<https://arxiv.org/abs/1711.09784>`_.
+
+
+NeuralForestClassifier
+**********************
+
+.. autoclass:: torchensemble.voting.NeuralForestClassifier
+    :members:
+
+NeuralForestRegressor
+**********************
+
+.. autoclass:: torchensemble.voting.NeuralForestRegressor
+    :members:
+
 Snapshot Ensemble
 -----------------
 

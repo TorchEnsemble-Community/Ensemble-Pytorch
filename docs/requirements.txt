@@ -5,3 +5,4 @@ sphinx-copybutton
 m2r2==0.2.7
 mistune==0.8.4
 Jinja2<3.1
+Numpy

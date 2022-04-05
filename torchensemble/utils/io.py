@@ -29,7 +29,12 @@ def save(model, save_dir, logger):
         "n_estimators": len(model.estimators_),
         "model": model.state_dict(),
         "_criterion": model._criterion,
+        "n_outputs": model.n_outputs,
     }
+
+    if hasattr(model, "n_inputs"):
+        state.update({"n_inputs": model.n_inputs})
+
     save_dir = os.path.join(save_dir, filename)
 
     logger.info("Saving the model to `{}`".format(save_dir))
@@ -66,6 +71,9 @@ def load(model, save_dir="./", logger=None):
     n_estimators = state["n_estimators"]
     model_params = state["model"]
     model._criterion = state["_criterion"]
+    model.n_outputs = state["n_outputs"]
+    if "n_inputs" in state:
+        model.n_inputs = state["n_inputs"]
 
     # Pre-allocate and load all base estimators
     for _ in range(n_estimators):
