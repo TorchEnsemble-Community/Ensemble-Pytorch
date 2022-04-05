@@ -201,7 +201,12 @@ class BaseModule(nn.Module):
 
 class BaseTreeEnsemble(BaseModule):
     def __init__(
-        self, n_estimators, depth=5, lamda=1e-3, cuda=False, n_jobs=None,
+        self,
+        n_estimators,
+        depth=5,
+        lamda=1e-3,
+        cuda=False,
+        n_jobs=None,
     ):
         super(BaseModule, self).__init__()
         self.base_estimator_ = BaseTree
@@ -328,7 +333,7 @@ class BaseRegressor(BaseModule):
 
 class BaseTree(nn.Module):
     """Fast implementation of soft decision tree in PyTorch, copied from:
-        `https://github.com/xuyxu/Soft-Decision-Tree/blob/master/SDT.py`
+    `https://github.com/xuyxu/Soft-Decision-Tree/blob/master/SDT.py`
     """
 
     def __init__(self, input_dim, output_dim, depth=5, lamda=1e-3, cuda=False):

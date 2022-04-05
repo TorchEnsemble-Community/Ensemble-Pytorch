@@ -278,7 +278,11 @@ class FastGeometricClassifier(_BaseFastGeometric, BaseClassifier):
                         )
                         self.logger.info(
                             msg.format(
-                                epoch, batch_idx, loss, correct, batch_size,
+                                epoch,
+                                batch_idx,
+                                loss,
+                                correct,
+                                batch_size,
                             )
                         )
                         if self.tb_logger:

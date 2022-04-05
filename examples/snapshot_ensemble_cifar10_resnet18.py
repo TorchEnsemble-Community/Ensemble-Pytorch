@@ -155,5 +155,7 @@ if __name__ == "__main__":
 
     # Train and Evaluate
     model.fit(
-        train_loader, epochs=epochs, test_loader=test_loader,
+        train_loader,
+        epochs=epochs,
+        test_loader=test_loader,
     )
