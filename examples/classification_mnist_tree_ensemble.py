@@ -1,6 +1,5 @@
 import time
 import torch
-from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 
 from torchensemble import NeuralForestClassifier
@@ -29,24 +28,32 @@ if __name__ == "__main__":
             data_dir,
             train=True,
             download=True,
-            transform=transforms.Compose([
-                transforms.ToTensor(),
-                transforms.Normalize((0.1307,), (0.3081,))
-            ])),
+            transform=transforms.Compose(
+                [
+                    transforms.ToTensor(),
+                    transforms.Normalize((0.1307,), (0.3081,)),
+                ]
+            ),
+        ),
         batch_size=batch_size,
-        shuffle=True)
+        shuffle=True,
+    )
 
     test_loader = torch.utils.data.DataLoader(
         datasets.MNIST(
             data_dir,
             train=False,
             download=True,
-            transform=transforms.Compose([
-                transforms.ToTensor(),
-                transforms.Normalize((0.1307,), (0.3081,))
-            ])),
+            transform=transforms.Compose(
+                [
+                    transforms.ToTensor(),
+                    transforms.Normalize((0.1307,), (0.3081,)),
+                ]
+            ),
+        ),
         batch_size=batch_size,
-        shuffle=True)
+        shuffle=True,
+    )
 
     logger = set_logger(
         "classification_mnist_tree_ensemble", use_tb_logger=False

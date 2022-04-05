@@ -209,8 +209,7 @@ class FusionRegressor(BaseRegressor):
         super().set_scheduler(scheduler_name, **kwargs)
 
     @torchensemble_model_doc(
-        """Set the training criterion for FusionRegressor.""",
-        "set_criterion",
+        """Set the training criterion for FusionRegressor.""", "set_criterion",
     )
     def set_criterion(self, criterion):
         super().set_criterion(criterion)

@@ -200,14 +200,8 @@ class BaseModule(nn.Module):
 
 
 class BaseTreeEnsemble(BaseModule):
-
     def __init__(
-        self,
-        n_estimators,
-        depth=5,
-        lamda=1e-3,
-        cuda=False,
-        n_jobs=None,
+        self, n_estimators, depth=5, lamda=1e-3, cuda=False, n_jobs=None,
     ):
         super(BaseModule, self).__init__()
         self.base_estimator_ = BaseTree
@@ -337,13 +331,7 @@ class BaseTree(nn.Module):
         `https://github.com/xuyxu/Soft-Decision-Tree/blob/master/SDT.py`
     """
 
-    def __init__(
-            self,
-            input_dim,
-            output_dim,
-            depth=5,
-            lamda=1e-3,
-            cuda=False):
+    def __init__(self, input_dim, output_dim, depth=5, lamda=1e-3, cuda=False):
         super(BaseTree, self).__init__()
 
         self.input_dim = input_dim
@@ -370,9 +358,9 @@ class BaseTree(nn.Module):
             nn.Sigmoid(),
         )
 
-        self.leaf_nodes = nn.Linear(self.leaf_node_num_,
-                                    self.output_dim,
-                                    bias=False)
+        self.leaf_nodes = nn.Linear(
+            self.leaf_node_num_, self.output_dim, bias=False
+        )
 
     def forward(self, X, is_training_data=False):
         _mu, _penalty = self._forward(X)
@@ -452,8 +440,10 @@ class BaseTree(nn.Module):
     def _validate_parameters(self):
 
         if not self.depth > 0:
-            msg = ("The tree depth should be strictly positive, but got {}"
-                   "instead.")
+            msg = (
+                "The tree depth should be strictly positive, but got {}"
+                "instead."
+            )
             raise ValueError(msg.format(self.depth))
 
         if not self.lamda >= 0:

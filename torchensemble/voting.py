@@ -19,11 +19,7 @@ from .utils import set_module
 from .utils import operator as op
 
 
-__all__ = [
-    "VotingClassifier",
-    "VotingRegressor",
-    "NeuralForestClassifier"
-]
+__all__ = ["VotingClassifier", "VotingRegressor", "NeuralForestClassifier"]
 
 
 def _parallel_fit_per_epoch(
@@ -311,16 +307,16 @@ class NeuralForestClassifier(BaseTreeEnsemble, VotingClassifier):
 
     @torchensemble_model_doc(
         """Implementation on the training stage of NeuralForestClassifier.""",
-        "fit"
+        "fit",
     )
     def fit(
-            self,
-            train_loader,
-            epochs=100,
-            log_interval=100,
-            test_loader=None,
-            save_model=True,
-            save_dir=None,
+        self,
+        train_loader,
+        epochs=100,
+        log_interval=100,
+        test_loader=None,
+        save_model=True,
+        save_dir=None,
     ):
         self.n_inputs = self._decidce_n_inputs(train_loader)
         super().fit(
@@ -361,8 +357,7 @@ class VotingRegressor(BaseRegressor):
         super().set_scheduler(scheduler_name, **kwargs)
 
     @torchensemble_model_doc(
-        """Set the training criterion for VotingRegressor.""",
-        "set_criterion",
+        """Set the training criterion for VotingRegressor.""", "set_criterion",
     )
     def set_criterion(self, criterion):
         super().set_criterion(criterion)

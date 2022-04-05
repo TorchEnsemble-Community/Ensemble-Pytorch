@@ -18,9 +18,7 @@ def save(model, save_dir, logger):
 
     # {Ensemble_Model_Name}_{Base_Estimator_Name}_{n_estimators}
     filename = "{}_{}_{}_ckpt.pth".format(
-        type(model).__name__,
-        base_estimator_name,
-        model.n_estimators,
+        type(model).__name__, base_estimator_name, model.n_estimators,
     )
 
     # The real number of base estimators in some ensembles is not same as
@@ -53,9 +51,7 @@ def load(model, save_dir="./", logger=None):
 
     # {Ensemble_Model_Name}_{Base_Estimator_Name}_{n_estimators}
     filename = "{}_{}_{}_ckpt.pth".format(
-        type(model).__name__,
-        base_estimator_name,
-        model.n_estimators,
+        type(model).__name__, base_estimator_name, model.n_estimators,
     )
     save_dir = os.path.join(save_dir, filename)
 
