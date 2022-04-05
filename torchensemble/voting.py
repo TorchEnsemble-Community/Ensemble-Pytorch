@@ -12,14 +12,18 @@ import torch.nn.functional as F
 import warnings
 from joblib import Parallel, delayed
 
-from ._base import BaseClassifier, BaseRegressor
+from ._base import BaseClassifier, BaseRegressor, BaseTreeEnsemble
 from ._base import torchensemble_model_doc
 from .utils import io
 from .utils import set_module
 from .utils import operator as op
 
 
-__all__ = ["VotingClassifier", "VotingRegressor"]
+__all__ = [
+    "VotingClassifier",
+    "VotingRegressor",
+    "NeuralForestClassifier"
+]
 
 
 def _parallel_fit_per_epoch(
@@ -265,6 +269,68 @@ class VotingClassifier(BaseClassifier):
     @torchensemble_model_doc(item="predict")
     def predict(self, *x):
         return super().predict(*x)
+
+
+@torchensemble_model_doc(
+    """Implementation on the NeuralForestClassifier.""", "model"
+)
+class NeuralForestClassifier(BaseTreeEnsemble, VotingClassifier):
+    @torchensemble_model_doc(
+        """Implementation on the data forwarding in NeuralForestClassifier.""",
+        "classifier_forward",
+    )
+    def forward(self, *x):
+        # Average over class distributions from all base estimators.
+        outputs = [
+            F.softmax(estimator(*x), dim=1) for estimator in self.estimators_
+        ]
+        proba = op.average(outputs)
+
+        return proba
+
+    @torchensemble_model_doc(
+        """Set the attributes on optimizer for NeuralForestClassifier.""",
+        "set_optimizer",
+    )
+    def set_optimizer(self, optimizer_name, **kwargs):
+        super().set_optimizer(optimizer_name, **kwargs)
+
+    @torchensemble_model_doc(
+        """Set the attributes on scheduler for NeuralForestClassifier.""",
+        "set_scheduler",
+    )
+    def set_scheduler(self, scheduler_name, **kwargs):
+        super().set_scheduler(scheduler_name, **kwargs)
+
+    @torchensemble_model_doc(
+        """Set the training criterion for NeuralForestClassifier.""",
+        "set_criterion",
+    )
+    def set_criterion(self, criterion):
+        super().set_criterion(criterion)
+
+    @torchensemble_model_doc(
+        """Implementation on the training stage of NeuralForestClassifier.""",
+        "fit"
+    )
+    def fit(
+            self,
+            train_loader,
+            epochs=100,
+            log_interval=100,
+            test_loader=None,
+            save_model=True,
+            save_dir=None,
+    ):
+        self.n_inputs = self._decidce_n_inputs(train_loader)
+        super().fit(
+            train_loader=train_loader,
+            epochs=epochs,
+            log_interval=log_interval,
+            test_loader=test_loader,
+            save_model=save_model,
+            save_dir=save_dir,
+        )
 
 
 @torchensemble_model_doc("""Implementation on the VotingRegressor.""", "model")
