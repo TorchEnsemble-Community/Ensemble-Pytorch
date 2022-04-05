@@ -186,3 +186,18 @@ SoftGradientBoostingRegressor
 
 .. autoclass:: torchensemble.soft_gradient_boosting.SoftGradientBoostingRegressor
     :members:
+
+Neural Tree Ensemble
+--------------------
+
+NeuralForestClassifier
+**********************
+
+.. autoclass:: torchensemble.voting.NeuralForestClassifier
+    :members:
+
+NeuralForestRegressor
+**********************
+
+.. autoclass:: torchensemble.voting.NeuralForestRegressor
+    :members:

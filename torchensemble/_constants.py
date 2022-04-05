@@ -31,6 +31,36 @@ __model_doc = """
 """
 
 
+__tree_ensemble_doc = """
+    Parameters
+    ----------
+    n_estimators : int
+        The number of neural trees in the ensemble.
+    depth : int, default=5
+        The depth of neural tree. A tree with depth ``d`` is with :math:`2^d`
+        leaf nodes and :math:`2^d-1` internal nodes.
+    lamda : float, default=1e-3
+        The coefficient of the regularization term when training neural
+        trees, proposed in the paper: Distilling a neural network into a
+        soft decision tree.
+     cuda : bool, default=True
+
+        - If ``True``, use GPU to train and evaluate the ensemble.
+        - If ``False``, use CPU to train and evaluate the ensemble.
+    n_jobs : int, default=None
+        The number of workers for training the ensemble. This input
+        argument is used for parallel ensemble methods such as
+        :mod:`voting` and :mod:`bagging`. Setting it to an integer larger
+        than ``1`` enables ``n_jobs`` base estimators to be trained
+        simultaneously.
+
+    Attributes
+    ----------
+    estimators_ : torch.nn.ModuleList
+        An internal container that stores all fitted base estimators.
+"""
+
+
 __seq_model_doc = """
     Parameters
     ----------

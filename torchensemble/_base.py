@@ -29,6 +29,7 @@ def torchensemble_model_doc(header="", item="model"):
         __doc = {
             "model": const.__model_doc,
             "seq_model": const.__seq_model_doc,
+            "tree_ensmeble_model": const.__tree_ensemble_doc,
             "fit": const.__fit_doc,
             "predict": const.__predict_doc,
             "set_optimizer": const.__set_optimizer_doc,
