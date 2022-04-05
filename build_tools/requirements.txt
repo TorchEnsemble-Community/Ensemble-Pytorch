@@ -1,5 +1,5 @@
 flake8
 pytest-cov
-click==8.0.4
+click==8.0.3
 black==20.8b1
 tensorboard==2.*
