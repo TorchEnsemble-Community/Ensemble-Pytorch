@@ -20,7 +20,7 @@ Ensemble PyTorch
 A unified ensemble framework for pytorch_ to easily improve the performance and robustness of your deep learning model. Ensemble-PyTorch is part of the `pytorch ecosystem <https://pytorch.org/ecosystem/>`__ which requires the project to be well maintained.
 
 * `Document <https://ensemble-pytorch.readthedocs.io/>`__
-* `Source Code <https://github.com/TorchEnsemble-Community/Ensemble-Pytorch/Ensemble-Pytorch>`__
+* `Source Code <https://github.com/TorchEnsemble-Community/Ensemble-Pytorch>`__
 * `Experiment <https://ensemble-pytorch.readthedocs.io/en/stable/experiment.html>`__
 
 Installation
