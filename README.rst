@@ -17,10 +17,9 @@
 Ensemble PyTorch
 ================
 
-A unified ensemble framework for pytorch_ to easily improve the performance and robustness of your deep learning model. Ensemble-PyTorch is part of the `pytorch ecosystem <https://pytorch.org/ecosystem/>`__ which requires the project to be well maintained.
+A unified ensemble framework for pytorch_ to easily improve the performance and robustness of your deep learning model. Ensemble-PyTorch is part of the `pytorch ecosystem <https://pytorch.org/ecosystem/>`__, which requires the project to be well maintained.
 
 * `Document <https://ensemble-pytorch.readthedocs.io/>`__
-* `Source Code <https://github.com/TorchEnsemble-Community/Ensemble-Pytorch>`__
 * `Experiment <https://ensemble-pytorch.readthedocs.io/en/stable/experiment.html>`__
 
 Installation
@@ -51,7 +50,7 @@ Example
 
     # Define the ensemble
     ensemble = VotingClassifier(
-        estimator=base_estimator,               # here is your deep learning model
+        estimator=base_estimator,               # estimator is your pytorch model
         n_estimators=10,                        # number of base estimators
     )
 
@@ -80,27 +79,27 @@ Example
 Supported Ensemble
 ------------------
 
-+------------------------------+------------+---------------------------+
-|       **Ensemble Name**      |  **Type**  |      **Source Code**      |
-+==============================+============+===========================+
-|            Fusion            |    Mixed   |         fusion.py         |
-+------------------------------+------------+---------------------------+
-|          Voting [1]_         |  Parallel  |         voting.py         |
-+------------------------------+------------+---------------------------+
-|         Neural Forest        |  Parallel  |         voting.py         |
-+------------------------------+------------+---------------------------+
-|         Bagging [2]_         |  Parallel  |         bagging.py        |
-+------------------------------+------------+---------------------------+
-|    Gradient Boosting [3]_    | Sequential |    gradient_boosting.py   |
-+------------------------------+------------+---------------------------+
-|    Snapshot Ensemble [4]_    | Sequential |    snapshot_ensemble.py   |
-+------------------------------+------------+---------------------------+
-|   Adversarial Training [5]_  |  Parallel  |  adversarial_training.py  |
-+------------------------------+------------+---------------------------+
-| Fast Geometric Ensemble [6]_ | Sequential |     fast_geometric.py     |
-+------------------------------+------------+---------------------------+
-|  Soft Gradient Boosting [7]_ |  Parallel  | soft_gradient_boosting.py |
-+------------------------------+------------+---------------------------+
++------------------------------+------------+---------------------------+-----------------------------+
+|       **Ensemble Name**      |  **Type**  |      **Source Code**      |          **Problem**        |
++==============================+============+===========================+=============================+
+|            Fusion            |    Mixed   |         fusion.py         | Classification / Regression |
++------------------------------+------------+---------------------------+-----------------------------+
+|          Voting [1]_         |  Parallel  |         voting.py         | Classification / Regression |
++------------------------------+------------+---------------------------+-----------------------------+
+|         Neural Forest        |  Parallel  |         voting.py         | Classification / Regression |
++------------------------------+------------+---------------------------+-----------------------------+
+|         Bagging [2]_         |  Parallel  |         bagging.py        | Classification / Regression |
++------------------------------+------------+---------------------------+-----------------------------+
+|    Gradient Boosting [3]_    | Sequential |    gradient_boosting.py   | Classification / Regression |
++------------------------------+------------+---------------------------+-----------------------------+
+|    Snapshot Ensemble [4]_    | Sequential |    snapshot_ensemble.py   | Classification / Regression |
++------------------------------+------------+---------------------------+-----------------------------+
+|   Adversarial Training [5]_  |  Parallel  |  adversarial_training.py  | Classification / Regression |
++------------------------------+------------+---------------------------+-----------------------------+
+| Fast Geometric Ensemble [6]_ | Sequential |     fast_geometric.py     | Classification / Regression |
++------------------------------+------------+---------------------------+-----------------------------+
+|  Soft Gradient Boosting [7]_ |  Parallel  | soft_gradient_boosting.py | Classification / Regression |
++------------------------------+------------+---------------------------+-----------------------------+
 
 Dependencies
 ------------
