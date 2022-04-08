@@ -25,17 +25,9 @@ A unified ensemble framework for pytorch_ to easily improve the performance and 
 Installation
 ------------
 
-Stable version:
-
 .. code:: bash
 
     pip install torchensemble
-
-Latest version (under development):
-
-.. code:: bash
-
-    pip install git+https://github.com/TorchEnsemble-Community/Ensemble-Pytorch.git
 
 Example
 -------
