@@ -87,6 +87,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "Arcify",
+      "name": "Arcify",
+      "avatar_url": "https://avatars.githubusercontent.com/u/96500824?v=4",
+      "profile": "https://github.com/Arcify",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
