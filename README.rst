@@ -66,7 +66,7 @@ Example
     )
 
     # Evaluate the ensemble
-    acc = ensemble.predict(test_loader)         # testing accuracy
+    acc = ensemble.evaluate(test_loader)         # testing accuracy
 
 Supported Ensemble
 ------------------
