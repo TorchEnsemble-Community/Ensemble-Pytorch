@@ -18,6 +18,7 @@ Changelog
 Ver 0.1.*
 ---------
 
+* |Feature| |API| Add the general :class:`Metrics` module and `metric_name` parameter for :meth:`evaluate` | `@xuyxu <https://github.com/xuyxu>`__
 * |Feature| |API| Add :class:`NeuralForestClassifier` and :class:`NeuralForestRegressor` | `@xuyxu <https://github.com/xuyxu>`__
 * |Fix| Relax check on input dataloader | `@xuyxu <https://github.com/xuyxu>`__
 * |Feature| |API| Support arbitrary training criteria for all ensembles except Gradient Boosting | `@by256 <https://github.com/by256>`__ and `@xuyxu <https://github.com/xuyxu>`__
