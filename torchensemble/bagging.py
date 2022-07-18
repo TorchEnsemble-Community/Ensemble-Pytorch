@@ -44,24 +44,15 @@ def _parallel_fit_per_epoch(
     if cur_lr:
         # Parallelization corrupts the binding between optimizer and scheduler
         set_module.update_lr(optimizer, cur_lr)
-
+    
     for batch_idx, elem in enumerate(train_loader):
 
         data, target = io.split_data_target(elem, device)
         batch_size = data[0].size(0)
 
-        # Sampling with replacement
-        sampling_mask = torch.randint(
-            high=batch_size, size=(int(batch_size),), dtype=torch.int64
-        )
-        sampling_mask = torch.unique(sampling_mask)  # remove duplicates
-        subsample_size = sampling_mask.size(0)
-        sampling_data = [tensor[sampling_mask] for tensor in data]
-        sampling_target = target[sampling_mask]
-
         optimizer.zero_grad()
-        sampling_output = estimator(*sampling_data)
-        loss = criterion(sampling_output, sampling_target)
+        output = estimator(*data)
+        loss = criterion(output, target)
         loss.backward()
         optimizer.step()
 
@@ -70,8 +61,8 @@ def _parallel_fit_per_epoch(
 
             # Classification
             if is_classification:
-                _, predicted = torch.max(sampling_output.data, 1)
-                correct = (predicted == sampling_target).sum().item()
+                _, predicted = torch.max(output.data, 1)
+                correct = (predicted == target).sum().item()
 
                 msg = (
                     "Estimator: {:03d} | Epoch: {:03d} | Batch: {:03d}"
@@ -79,7 +70,7 @@ def _parallel_fit_per_epoch(
                 )
                 print(
                     msg.format(
-                        idx, epoch, batch_idx, loss, correct, subsample_size
+                        idx, epoch, batch_idx, loss, correct, batch_size
                     )
                 )
             else:
@@ -180,6 +171,9 @@ class BaggingClassifier(BaseClassifier):
 
             return proba
 
+        # turn train_loader into a list of train_loaders (sampling with replacement)
+        train_loader = _get_bagging_dataloaders(train_loader, self.n_estimators)
+
         # Maintain a pool of workers
         with Parallel(n_jobs=self.n_jobs) as parallel:
 
@@ -198,7 +192,7 @@ class BaggingClassifier(BaseClassifier):
 
                 rets = parallel(
                     delayed(_parallel_fit_per_epoch)(
-                        train_loader,
+                        dataloader,
                         estimator,
                         cur_lr,
                         optimizer,
@@ -209,8 +203,8 @@ class BaggingClassifier(BaseClassifier):
                         self.device,
                         True,
                     )
-                    for idx, (estimator, optimizer) in enumerate(
-                        zip(estimators, optimizers)
+                    for idx, (estimator, optimizer, dataloader) in enumerate(
+                        zip(estimators, optimizers, train_loader)
                     )
                 )
 
@@ -359,6 +353,9 @@ class BaggingRegressor(BaseRegressor):
             pred = op.average(outputs)
 
             return pred
+        
+        # turn train_loader into a list of train_loaders (sampling with replacement)
+        train_loader = _get_bagging_dataloaders(train_loader, self.n_estimators)
 
         # Maintain a pool of workers
         with Parallel(n_jobs=self.n_jobs) as parallel:
@@ -378,7 +375,7 @@ class BaggingRegressor(BaseRegressor):
 
                 rets = parallel(
                     delayed(_parallel_fit_per_epoch)(
-                        train_loader,
+                        dataloader,
                         estimator,
                         cur_lr,
                         optimizer,
@@ -389,8 +386,8 @@ class BaggingRegressor(BaseRegressor):
                         self.device,
                         False,
                     )
-                    for idx, (estimator, optimizer) in enumerate(
-                        zip(estimators, optimizers)
+                    for idx, (estimator, optimizer, dataloader) in enumerate(
+                        zip(estimators, optimizers, train_loader)
                     )
                 )
 
@@ -450,3 +447,24 @@ class BaggingRegressor(BaseRegressor):
     @torchensemble_model_doc(item="predict")
     def predict(self, *x):
         return super().predict(*x)
+
+
+
+def _get_bagging_dataloaders(original_dataloader, n_estimators):
+    dataset = original_dataloader.dataset
+    dataloaders = []
+    for i in range(n_estimators):
+        # sampling with replacement
+        indices = torch.randint(high=len(dataset), 
+                                size=(len(dataset),), 
+                                dtype=torch.int64)
+        sub_dataset = torch.utils.data.Subset(dataset, indices)
+        dataloader = torch.utils.data.DataLoader(
+            sub_dataset,
+            batch_size=original_dataloader.batch_size,
+            num_workers=original_dataloader.num_workers,
+            shuffle=True
+        )
+        dataloaders.append(dataloader)
+    return dataloaders
+
