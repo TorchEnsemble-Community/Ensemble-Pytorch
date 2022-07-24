@@ -173,7 +173,8 @@ class BaggingClassifier(BaseClassifier):
 
         # turn train_loader into a list of train_loaders (sampling with replacement)
         train_loader = _get_bagging_dataloaders(
-            train_loader, self.n_estimators)
+            train_loader, self.n_estimators
+        )
 
         # Maintain a pool of workers
         with Parallel(n_jobs=self.n_jobs) as parallel:
@@ -357,7 +358,8 @@ class BaggingRegressor(BaseRegressor):
 
         # turn train_loader into a list of train_loaders (sampling with replacement)
         train_loader = _get_bagging_dataloaders(
-            train_loader, self.n_estimators)
+            train_loader, self.n_estimators
+        )
 
         # Maintain a pool of workers
         with Parallel(n_jobs=self.n_jobs) as parallel:
@@ -456,15 +458,15 @@ def _get_bagging_dataloaders(original_dataloader, n_estimators):
     dataloaders = []
     for i in range(n_estimators):
         # sampling with replacement
-        indices = torch.randint(high=len(dataset),
-                                size=(len(dataset),),
-                                dtype=torch.int64)
+        indices = torch.randint(
+            high=len(dataset), size=(len(dataset),), dtype=torch.int64
+        )
         sub_dataset = torch.utils.data.Subset(dataset, indices)
         dataloader = torch.utils.data.DataLoader(
             sub_dataset,
             batch_size=original_dataloader.batch_size,
             num_workers=original_dataloader.num_workers,
-            shuffle=True
+            shuffle=True,
         )
         dataloaders.append(dataloader)
     return dataloaders
