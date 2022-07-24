@@ -171,7 +171,8 @@ class BaggingClassifier(BaseClassifier):
 
             return proba
 
-        # turn train_loader into a list of train_loaders (sampling with replacement)
+        # Turn train_loader into a list of train_loaders,
+        # sampling with replacement
         train_loader = _get_bagging_dataloaders(
             train_loader, self.n_estimators
         )
@@ -356,7 +357,8 @@ class BaggingRegressor(BaseRegressor):
 
             return pred
 
-        # turn train_loader into a list of train_loaders (sampling with replacement)
+        # Turn train_loader into a list of train_loaders,
+        # sampling with replacement
         train_loader = _get_bagging_dataloaders(
             train_loader, self.n_estimators
         )
