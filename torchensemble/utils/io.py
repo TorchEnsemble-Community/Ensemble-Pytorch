@@ -42,6 +42,9 @@ def save(model, save_dir, logger):
     # Save
     torch.save(state, save_dir)
 
+    if not os.path.exists(save_dir):
+        raise RuntimeError("Missing dumped model `{}`".format(save_dir))
+
     return
 
 
