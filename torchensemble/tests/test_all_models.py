@@ -38,8 +38,7 @@ all_reg = [
 
 np.random.seed(0)
 torch.manual_seed(0)
-set_logger("pytest_all_models")
-
+logger = set_logger("pytest_all_models")
 
 # Base estimator
 class MLP_clf(nn.Module):
@@ -117,8 +116,9 @@ def test_clf_class(clf):
     # Train
     model.fit(train_loader, epochs=epochs, test_loader=test_loader)
 
-    # Evaluate
+    # Evaluate & Save
     model.evaluate(test_loader)
+    io.save(model, "./", logger)
 
     # Predict
     for _, (data, target) in enumerate(test_loader):
@@ -166,8 +166,9 @@ def test_clf_object(clf):
     # Train
     model.fit(train_loader, epochs=epochs, test_loader=test_loader)
 
-    # Evaluate
+    # Evaluate & Save
     model.evaluate(test_loader)
+    io.save(model, "./", logger)
 
     # Predict
     for _, (data, target) in enumerate(test_loader):
@@ -215,8 +216,9 @@ def test_reg_class(reg):
     # Train
     model.fit(train_loader, epochs=epochs, test_loader=test_loader)
 
-    # Evaluate
+    # Evaluate & Save
     model.evaluate(test_loader)
+    io.save(model, "./", logger)
 
     # Predict
     for _, (data, target) in enumerate(test_loader):
@@ -264,8 +266,9 @@ def test_reg_object(reg):
     # Train
     model.fit(train_loader, epochs=epochs, test_loader=test_loader)
 
-    # Evaluate
+    # Evaluate & Save
     model.evaluate(test_loader)
+    io.save(model, "./", logger)
 
     # Predict
     for _, (data, target) in enumerate(test_loader):
