@@ -36,6 +36,7 @@ def save(model, save_dir, logger):
         state.update({"n_inputs": model.n_inputs})
 
     save_dir = os.path.join(save_dir, filename)
+    print("\n***** {} *****\n".format(save_dir))
 
     logger.info("Saving the model to `{}`".format(save_dir))
 

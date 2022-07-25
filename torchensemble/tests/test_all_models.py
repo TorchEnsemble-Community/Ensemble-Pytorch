@@ -12,14 +12,14 @@ from torchensemble.utils.logging import set_logger
 
 # All classifiers
 all_clf = [
-    torchensemble.FusionClassifier,
-    torchensemble.VotingClassifier,
-    torchensemble.BaggingClassifier,
-    torchensemble.GradientBoostingClassifier,
+    # torchensemble.FusionClassifier,
+    # torchensemble.VotingClassifier,
+    # torchensemble.BaggingClassifier,
+    # torchensemble.GradientBoostingClassifier,
     # torchensemble.SnapshotEnsembleClassifier,
-    torchensemble.AdversarialTrainingClassifier,
-    # torchensemble.FastGeometricClassifier,
-    torchensemble.SoftGradientBoostingClassifier,
+    # torchensemble.AdversarialTrainingClassifier,
+    torchensemble.FastGeometricClassifier,
+    # torchensemble.SoftGradientBoostingClassifier,
 ]
 
 
