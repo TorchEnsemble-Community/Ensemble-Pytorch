@@ -1,5 +1,6 @@
 import os
 import torch
+import joblib
 
 
 def save(model, save_dir, logger):
@@ -40,10 +41,8 @@ def save(model, save_dir, logger):
     logger.info("Saving the model to `{}`".format(save_dir))
 
     # Save
-    torch.save(state, save_dir)
-
-    if not os.path.exists(save_dir):
-        raise RuntimeError("Missing dumped model `{}`".format(save_dir))
+    # torch.save(state, save_dir)
+    joblib.dump(state, open(save_dir, "wb"))
 
     return
 
@@ -70,7 +69,8 @@ def load(model, save_dir="./", logger=None):
     if logger:
         logger.info("Loading the model from `{}`".format(save_dir))
 
-    state = torch.load(save_dir)
+    # state = torch.load(save_dir)
+    state = joblib.load(open(save_dir, "rb"))
     n_estimators = state["n_estimators"]
     model_params = state["model"]
     model._criterion = state["_criterion"]
