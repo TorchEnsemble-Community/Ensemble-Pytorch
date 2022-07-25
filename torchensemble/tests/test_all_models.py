@@ -40,6 +40,7 @@ np.random.seed(0)
 torch.manual_seed(0)
 logger = set_logger("pytest_all_models")
 
+
 # Base estimator
 class MLP_clf(nn.Module):
     def __init__(self):
