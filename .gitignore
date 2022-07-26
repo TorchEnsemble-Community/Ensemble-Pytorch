@@ -15,5 +15,4 @@ build/
 _build/
 dist/
 logs/
-node_modules/
 torchensemble.egg-info
