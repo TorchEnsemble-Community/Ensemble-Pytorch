@@ -468,6 +468,7 @@ def _get_bagging_dataloaders(original_dataloader, n_estimators):
             sub_dataset,
             batch_size=original_dataloader.batch_size,
             num_workers=original_dataloader.num_workers,
+            collate_fn=original_dataloader.collate_fn,
             shuffle=True,
         )
         dataloaders.append(dataloader)
