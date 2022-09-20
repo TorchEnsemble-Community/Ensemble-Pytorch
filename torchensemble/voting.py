@@ -92,7 +92,6 @@ def _parallel_fit_per_epoch(
     """Implementation on the VotingClassifier.""", "model"
 )
 class VotingClassifier(BaseClassifier):
-
     def __init__(self, voting_strategy="soft", **kwargs):
         super(VotingClassifier, self).__init__(**kwargs)
 
@@ -123,7 +122,8 @@ class VotingClassifier(BaseClassifier):
             F.softmax(estimator(*x), dim=1) for estimator in self.estimators_
         ]
 
-        if self.voting_strategy == "soft": proba = op.average(outputs)
+        if self.voting_strategy == "soft":
+            proba = op.average(outputs)
 
         elif self.voting_strategy == "hard":
             # Do hard majority voting
@@ -137,7 +137,7 @@ class VotingClassifier(BaseClassifier):
             # predict and evaluate
 
         # Returns averaged class probabilities for each sample
-        # proba shape: (batch_size, n_classes) 
+        # proba shape: (batch_size, n_classes)
         return proba
 
     @torchensemble_model_doc(
@@ -208,7 +208,8 @@ class VotingClassifier(BaseClassifier):
                 F.softmax(estimator(*x), dim=1) for estimator in estimators
             ]
 
-            if self.voting_strategy == "soft": proba = op.average(outputs)
+            if self.voting_strategy == "soft":
+                proba = op.average(outputs)
 
             # Maybe the voting strategy can be packaged as a function?
             elif self.voting_strategy == "hard":

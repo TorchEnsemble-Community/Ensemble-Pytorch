@@ -357,8 +357,8 @@ class BaseTree(nn.Module):
 
         self._validate_parameters()
 
-        self.internal_node_num_ = 2 ** self.depth - 1
-        self.leaf_node_num_ = 2 ** self.depth
+        self.internal_node_num_ = 2**self.depth - 1
+        self.leaf_node_num_ = 2**self.depth
 
         # Different penalty coefficients for nodes in different layers
         self.penalty_list = [
@@ -428,7 +428,7 @@ class BaseTree(nn.Module):
         penalty = torch.tensor(0.0).to(self.device)
 
         batch_size = _mu.size()[0]
-        _mu = _mu.view(batch_size, 2 ** layer_idx)
+        _mu = _mu.view(batch_size, 2**layer_idx)
         _path_prob = _path_prob.view(batch_size, 2 ** (layer_idx + 1))
 
         for node in range(0, 2 ** (layer_idx + 1)):
