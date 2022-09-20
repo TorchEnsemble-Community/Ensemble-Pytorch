@@ -280,8 +280,16 @@ class BaseClassifier(BaseModule):
 
         for _, elem in enumerate(test_loader):
             data, target = split_data_target(elem, self.device)
+
+            # Get averaged probabilities over all base estimators
+            # for each sample in batch.
+            # Output shape: (batch_size, n_classes)
             output = self.forward(*data)
+
+            # get val, idx for the class w max log-prob for each sample
+            # predicted shape: (batch_size)
             _, predicted = torch.max(output.data, 1)
+
             correct += (predicted == target).sum().item()
             total += target.size(0)
             loss += self._criterion(output, target)
