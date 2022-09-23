@@ -150,7 +150,7 @@ def test_fit_w_all_schedulers(scheduler_dict, test_dataloader, n_estimators, ens
     )
     model.set_optimizer("Adam", lr=1e-1)
     model.set_scheduler(**scheduler_dict)
-    model.fit(train_loader, epochs=50, test_loader=test_dataloader)
+    model.fit(train_loader, epochs=50, test_loader=test_dataloader, save_model=False)
 
 
 @pytest.mark.parametrize(
