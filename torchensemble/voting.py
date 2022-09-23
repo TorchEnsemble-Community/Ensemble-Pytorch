@@ -95,17 +95,14 @@ class VotingClassifier(BaseClassifier):
     def __init__(self, voting_strategy="soft", **kwargs):
         super(VotingClassifier, self).__init__(**kwargs)
 
-        self._implemented_voting_strategies = ["soft", "hard"]
-
-        if voting_strategy not in self._implemented_voting_strategies:
+        implemented_strategies = {"soft", "hard"}
+        if voting_strategy not in implemented_strategies:
             msg = (
                 "Voting strategy {} is not implemented, "
                 "please choose from {}."
             )
             raise ValueError(
-                msg.format(
-                    voting_strategy, self._implemented_voting_strategies
-                )
+                msg.format(voting_strategy, implemented_strategies)
             )
 
         self.voting_strategy = voting_strategy
@@ -117,7 +114,6 @@ class VotingClassifier(BaseClassifier):
     def forward(self, *x):
         # Average over class distributions from all base estimators.
 
-        # output: (n_estimators, batch_size, n_classes)
         outputs = [
             F.softmax(estimator(*x), dim=1) for estimator in self.estimators_
         ]
@@ -126,18 +122,10 @@ class VotingClassifier(BaseClassifier):
             proba = op.average(outputs)
 
         elif self.voting_strategy == "hard":
-            # Do hard majority voting
-            # votes: (batch_size)
             votes = torch.stack(outputs).argmax(dim=2).mode(dim=0)[0]
-            # Set the probability of the most voted class to 1
             proba = torch.zeros_like(outputs[0])
             proba.scatter_(1, votes.view(-1, 1), 1)
 
-            # TODO: make sure this is compatible with
-            # predict and evaluate
-
-        # Returns averaged class probabilities for each sample
-        # proba shape: (batch_size, n_classes)
         return proba
 
     @torchensemble_model_doc(
@@ -202,7 +190,7 @@ class VotingClassifier(BaseClassifier):
         # Utils
         best_acc = 0.0
 
-        # Internal helper function on psuedo forward
+        # Internal helper function on pseudo forward
         def _forward(estimators, *x):
             outputs = [
                 F.softmax(estimator(*x), dim=1) for estimator in estimators
@@ -211,7 +199,6 @@ class VotingClassifier(BaseClassifier):
             if self.voting_strategy == "soft":
                 proba = op.average(outputs)
 
-            # Maybe the voting strategy can be packaged as a function?
             elif self.voting_strategy == "hard":
                 votes = torch.stack(outputs).argmax(dim=2).mode(dim=0)[0]
                 proba = torch.zeros_like(outputs[0])
@@ -452,7 +439,7 @@ class VotingRegressor(BaseRegressor):
         # Utils
         best_loss = float("inf")
 
-        # Internal helper function on psuedo forward
+        # Internal helper function on pseudo forward
         def _forward(estimators, *x):
             outputs = [estimator(*x) for estimator in estimators]
             pred = op.average(outputs)
