@@ -9,7 +9,7 @@ from torch.utils.data import DataLoader, TensorDataset
 all_reg = [
     # torchensemble.FusionRegressor,
     torchensemble.VotingRegressor,
-    # torchensemble.BaggingRegressor,
+    torchensemble.BaggingRegressor,
     # torchensemble.GradientBoostingRegressor,
     # torchensemble.SnapshotEnsembleRegressor,
     torchensemble.AdversarialTrainingRegressor,
@@ -21,7 +21,7 @@ all_reg = [
 all_clf = [
     # torchensemble.FusionClassifier,
     torchensemble.VotingClassifier,
-    # torchensemble.BaggingClassifier,
+    torchensemble.BaggingClassifier,
     # torchensemble.GradientBoostingClassifier,
     # torchensemble.SnapshotEnsembleClassifier,
     torchensemble.AdversarialTrainingClassifier,
