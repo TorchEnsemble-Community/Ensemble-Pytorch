@@ -277,7 +277,9 @@ class _BaseSoftGradientBoosting(BaseModule):
 
             # Validation
             if test_loader:
-                flag, test_metric_val = self._evaluate_during_fit(test_loader, epoch)
+                flag, test_metric_val = self._evaluate_during_fit(
+                    test_loader, epoch
+                )
                 if save_model and flag:
                     io.save(self, save_dir, self.logger)
 
@@ -285,7 +287,9 @@ class _BaseSoftGradientBoosting(BaseModule):
             if self.use_scheduler_:
                 if self.scheduler_name == "ReduceLROnPlateau":
                     if test_loader:
-                        scheduler.step(test_metric_val)  # step scheduler based on either mse or acc
+                        scheduler.step(
+                            test_metric_val
+                        )  # step scheduler based on either mse or acc
                     else:
                         scheduler.step(loss)
                 else:
