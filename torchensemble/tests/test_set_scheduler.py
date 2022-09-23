@@ -12,7 +12,7 @@ all_reg = [
     # torchensemble.BaggingRegressor,
     # torchensemble.GradientBoostingRegressor,
     # torchensemble.SnapshotEnsembleRegressor,
-    # torchensemble.AdversarialTrainingRegressor,
+    torchensemble.AdversarialTrainingRegressor,
     # torchensemble.FastGeometricRegressor,
     torchensemble.SoftGradientBoostingRegressor,
 ]
@@ -24,7 +24,7 @@ all_clf = [
     # torchensemble.BaggingClassifier,
     # torchensemble.GradientBoostingClassifier,
     # torchensemble.SnapshotEnsembleClassifier,
-    # torchensemble.AdversarialTrainingClassifier,
+    torchensemble.AdversarialTrainingClassifier,
     # torchensemble.FastGeometricClassifier,
     # torchensemble.SoftGradientBoostingClassifier,  # failing
 ]
@@ -178,7 +178,7 @@ def test_fit_w_all_schedulers_clf(scheduler_dict, test_dataloader, n_estimators,
     )
     model.set_optimizer("Adam", lr=1e-1)
     model.set_scheduler(**scheduler_dict)
-    model.fit(train_loader, epochs=50, test_loader=test_dataloader)
+    model.fit(train_loader, epochs=50, test_loader=test_dataloader, save_model=False)
 
 
 def test_set_scheduler_Unknown():
