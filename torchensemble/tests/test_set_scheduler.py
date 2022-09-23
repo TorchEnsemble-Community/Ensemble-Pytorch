@@ -7,7 +7,7 @@ from torch.utils.data import DataLoader, TensorDataset
 
 # All regressors
 all_reg = [
-    # torchensemble.FusionRegressor,
+    torchensemble.FusionRegressor,
     torchensemble.VotingRegressor,
     torchensemble.BaggingRegressor,
     # torchensemble.GradientBoostingRegressor,
@@ -19,7 +19,7 @@ all_reg = [
 
 # All classifiers
 all_clf = [
-    # torchensemble.FusionClassifier,
+    torchensemble.FusionClassifier,
     torchensemble.VotingClassifier,
     torchensemble.BaggingClassifier,
     # torchensemble.GradientBoostingClassifier,
@@ -41,6 +41,7 @@ class MLP(nn.Module):
         output = self.linear1(X)
         output = self.linear2(output)
         return output
+
 
 class MLP_clf(nn.Module):
     def __init__(self):
@@ -143,14 +144,18 @@ def test_set_scheduler_ReduceLROnPlateau():
     "n_estimators", [1, 10]
 )  # LR scheduling works for 1 as well as many estimators
 @pytest.mark.parametrize("ensemble_model", all_reg)
-def test_fit_w_all_schedulers(scheduler_dict, test_dataloader, n_estimators, ensemble_model):
+def test_fit_w_all_schedulers(
+    scheduler_dict, test_dataloader, n_estimators, ensemble_model
+):
     """Test if LR schedulers work when `fit` is called."""
     model = ensemble_model(
         estimator=MLP, n_estimators=n_estimators, cuda=False
     )
     model.set_optimizer("Adam", lr=1e-1)
     model.set_scheduler(**scheduler_dict)
-    model.fit(train_loader, epochs=50, test_loader=test_dataloader, save_model=False)
+    model.fit(
+        train_loader, epochs=50, test_loader=test_dataloader, save_model=False
+    )
 
 
 @pytest.mark.parametrize(
@@ -171,14 +176,18 @@ def test_fit_w_all_schedulers(scheduler_dict, test_dataloader, n_estimators, ens
     "n_estimators", [1, 10]
 )  # LR scheduling works for 1 as well as many estimators
 @pytest.mark.parametrize("ensemble_model", all_clf)
-def test_fit_w_all_schedulers_clf(scheduler_dict, test_dataloader, n_estimators, ensemble_model):
+def test_fit_w_all_schedulers_clf(
+    scheduler_dict, test_dataloader, n_estimators, ensemble_model
+):
     """Test if LR schedulers work when `fit` is called."""
     model = ensemble_model(
         estimator=MLP_clf, n_estimators=n_estimators, cuda=False
     )
     model.set_optimizer("Adam", lr=1e-1)
     model.set_scheduler(**scheduler_dict)
-    model.fit(train_loader, epochs=50, test_loader=test_dataloader, save_model=False)
+    model.fit(
+        train_loader, epochs=50, test_loader=test_dataloader, save_model=False
+    )
 
 
 def test_set_scheduler_Unknown():
