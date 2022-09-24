@@ -12,9 +12,8 @@ all_reg = [
     torchensemble.VotingRegressor,
     torchensemble.BaggingRegressor,
     torchensemble.GradientBoostingRegressor,
-    # torchensemble.SnapshotEnsembleRegressor,
     torchensemble.AdversarialTrainingRegressor,
-    # torchensemble.FastGeometricRegressor,
+    torchensemble.FastGeometricRegressor,
     torchensemble.SoftGradientBoostingRegressor,
 ]
 
@@ -24,9 +23,8 @@ all_clf = [
     torchensemble.VotingClassifier,
     torchensemble.BaggingClassifier,
     torchensemble.GradientBoostingClassifier,
-    # torchensemble.SnapshotEnsembleClassifier,
     torchensemble.AdversarialTrainingClassifier,
-    # torchensemble.FastGeometricClassifier,
+    torchensemble.FastGeometricClassifier,
     torchensemble.SoftGradientBoostingClassifier,
 ]
 
