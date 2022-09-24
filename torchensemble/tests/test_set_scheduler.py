@@ -29,6 +29,7 @@ all_clf = [
     # torchensemble.SoftGradientBoostingClassifier,  # failing
 ]
 
+
 # Base estimator
 class MLP(nn.Module):
     def __init__(self):
