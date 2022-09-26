@@ -333,7 +333,7 @@ class AdversarialTrainingClassifier(_BaseAdversarialTraining, BaseClassifier):
                         epoch,
                         log_interval,
                         self.device,
-                        False,
+                        True,
                     )
                     for idx, (estimator, optimizer) in enumerate(
                         zip(estimators, optimizers)
@@ -519,7 +519,7 @@ class AdversarialTrainingRegressor(_BaseAdversarialTraining, BaseRegressor):
                         epoch,
                         log_interval,
                         self.device,
-                        True,
+                        False,
                     )
                     for idx, (estimator, optimizer) in enumerate(
                         zip(estimators, optimizers)
