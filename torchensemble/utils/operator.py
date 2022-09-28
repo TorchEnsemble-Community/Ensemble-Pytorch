@@ -57,7 +57,8 @@ def pseudo_residual_regression(target, output):
 
 def majority_vote(outputs: List[torch.Tensor]) -> torch.Tensor:
     """Compute the majority vote for a list of model outputs.
-    outputs: list of length (n_models) of tensors with shape (n_samples, n_classes)
+    outputs: list of length (n_models)
+    containing tensors with shape (n_samples, n_classes)
     majority_one_hots: (n_samples, n_classes)
     """
 
