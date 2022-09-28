@@ -209,14 +209,29 @@ class _BaseSnapshotEnsemble(BaseModule):
     """Implementation on the SnapshotEnsembleClassifier.""", "seq_model"
 )
 class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble, BaseClassifier):
+
+    def __init__(self, voting_strategy="soft", **kwargs):
+        super().__init__(**kwargs)
+
+        self.voting_strategy = voting_strategy
+
     @torchensemble_model_doc(
         """Implementation on the data forwarding in SnapshotEnsembleClassifier.""",  # noqa: E501
         "classifier_forward",
     )
     def forward(self, *x):
-        proba = self._forward(*x)
 
-        return F.softmax(proba, dim=1)
+        outputs = [
+            F.softmax(estimator(*x), dim=1) for estimator in self.estimators_
+        ]
+
+        if self.voting_strategy == "soft":
+            proba = op.average(outputs)
+
+        elif self.voting_strategy == "hard":
+            proba = op.majority_vote(outputs)
+
+        return proba
 
     @torchensemble_model_doc(
         """Set the attributes on optimizer for SnapshotEnsembleClassifier.""",

@@ -43,3 +43,14 @@ def test_residual_regression_invalid_shape():
             label.view(-1, 1),  # 4 * 1
         )
     assert "should be the same as output" in str(excinfo.value)
+
+
+def test_majority_voting():
+    outputs = [
+        torch.FloatTensor(np.array(([0.9, 0.1], [0.2, 0.8]))),
+        torch.FloatTensor(np.array(([0.7, 0.3], [0.1, 0.9]))),
+        torch.FloatTensor(np.array(([0.1, 0.9], [0.8, 0.2]))),
+    ]
+    actual = op.majority_vote(outputs).numpy() 
+    expected = np.array(([1, 0], [0, 1]))
+    assert_array_almost_equal(actual, expected)
