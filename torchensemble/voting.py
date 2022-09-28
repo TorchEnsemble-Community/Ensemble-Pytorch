@@ -92,7 +92,6 @@ def _parallel_fit_per_epoch(
     """Implementation on the VotingClassifier.""", "model"
 )
 class VotingClassifier(BaseClassifier):
-
     def __init__(self, voting_strategy="soft", **kwargs):
         super(VotingClassifier, self).__init__(**kwargs)
 
@@ -302,7 +301,6 @@ class VotingClassifier(BaseClassifier):
     """Implementation on the NeuralForestClassifier.""", "tree_ensmeble_model"
 )
 class NeuralForestClassifier(BaseTreeEnsemble, VotingClassifier):
-
     def __init__(self, voting_strategy="soft", **kwargs):
         super().__init__(**kwargs)
 

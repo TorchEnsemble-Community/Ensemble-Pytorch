@@ -51,6 +51,6 @@ def test_majority_voting():
         torch.FloatTensor(np.array(([0.7, 0.3], [0.1, 0.9]))),
         torch.FloatTensor(np.array(([0.1, 0.9], [0.8, 0.2]))),
     ]
-    actual = op.majority_vote(outputs).numpy() 
+    actual = op.majority_vote(outputs).numpy()
     expected = np.array(([1, 0], [0, 1]))
     assert_array_almost_equal(actual, expected)

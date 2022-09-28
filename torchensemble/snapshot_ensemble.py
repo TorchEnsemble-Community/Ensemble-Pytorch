@@ -209,7 +209,6 @@ class _BaseSnapshotEnsemble(BaseModule):
     """Implementation on the SnapshotEnsembleClassifier.""", "seq_model"
 )
 class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble, BaseClassifier):
-
     def __init__(self, voting_strategy="soft", **kwargs):
         super().__init__(**kwargs)
 
