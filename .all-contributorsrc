@@ -114,6 +114,16 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "SarthakJariwala",
+      "name": "SarthakJariwala",
+      "avatar_url": "https://avatars.githubusercontent.com/u/35085572?v=4",
+      "profile": "http://www.sarthakjariwala.com",
+      "contributions": [
+        "code",
+        "test"
+      ]
     }
   ],
   "contributorsPerLine": 7,
