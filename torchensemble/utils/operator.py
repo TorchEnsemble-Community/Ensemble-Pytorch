@@ -62,9 +62,11 @@ def majority_vote(outputs: List[torch.Tensor]) -> torch.Tensor:
     majority_one_hots: (n_samples, n_classes)
     """
 
-    assert (
-        len(outputs[0].shape) == 2
-    ), "The shape of outputs should be (n_models, n_samples, n_classes)."
+    if len(outputs[0].shape) != 2:
+        msg = """The shape of outputs should be a list tensors of 
+        length (n_models) with sizes (n_samples, n_classes). 
+        The first tensor had shape {} """
+        raise ValueError(msg.format(outputs[0].shape))
 
     votes = torch.stack(outputs).argmax(dim=2).mode(dim=0)[0]
     proba = torch.zeros_like(outputs[0])
