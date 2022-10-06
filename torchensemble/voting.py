@@ -92,16 +92,36 @@ def _parallel_fit_per_epoch(
     """Implementation on the VotingClassifier.""", "model"
 )
 class VotingClassifier(BaseClassifier):
+    def __init__(self, voting_strategy="soft", **kwargs):
+        super(VotingClassifier, self).__init__(**kwargs)
+
+        implemented_strategies = {"soft", "hard"}
+        if voting_strategy not in implemented_strategies:
+            msg = (
+                "Voting strategy {} is not implemented, "
+                "please choose from {}."
+            )
+            raise ValueError(
+                msg.format(voting_strategy, implemented_strategies)
+            )
+
+        self.voting_strategy = voting_strategy
+
     @torchensemble_model_doc(
         """Implementation on the data forwarding in VotingClassifier.""",
         "classifier_forward",
     )
     def forward(self, *x):
-        # Average over class distributions from all base estimators.
+
         outputs = [
             F.softmax(estimator(*x), dim=1) for estimator in self.estimators_
         ]
-        proba = op.average(outputs)
+
+        if self.voting_strategy == "soft":
+            proba = op.average(outputs)
+
+        elif self.voting_strategy == "hard":
+            proba = op.majority_vote(outputs)
 
         return proba
 
@@ -167,12 +187,17 @@ class VotingClassifier(BaseClassifier):
         # Utils
         best_acc = 0.0
 
-        # Internal helper function on pesudo forward
+        # Internal helper function on pseudo forward
         def _forward(estimators, *x):
             outputs = [
                 F.softmax(estimator(*x), dim=1) for estimator in estimators
             ]
-            proba = op.average(outputs)
+
+            if self.voting_strategy == "soft":
+                proba = op.average(outputs)
+
+            elif self.voting_strategy == "hard":
+                proba = op.majority_vote(outputs)
 
             return proba
 
@@ -287,6 +312,11 @@ class VotingClassifier(BaseClassifier):
     """Implementation on the NeuralForestClassifier.""", "tree_ensmeble_model"
 )
 class NeuralForestClassifier(BaseTreeEnsemble, VotingClassifier):
+    def __init__(self, voting_strategy="soft", **kwargs):
+        super().__init__(**kwargs)
+
+        self.voting_strategy = voting_strategy
+
     @torchensemble_model_doc(
         """Implementation on the data forwarding in NeuralForestClassifier.""",
         "classifier_forward",
@@ -420,7 +450,7 @@ class VotingRegressor(BaseRegressor):
         # Utils
         best_loss = float("inf")
 
-        # Internal helper function on pesudo forward
+        # Internal helper function on pseudo forward
         def _forward(estimators, *x):
             outputs = [estimator(*x) for estimator in estimators]
             pred = op.average(outputs)
