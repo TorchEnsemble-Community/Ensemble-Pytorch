@@ -63,8 +63,8 @@ def majority_vote(outputs: List[torch.Tensor]) -> torch.Tensor:
     """
 
     if len(outputs[0].shape) != 2:
-        msg = """The shape of outputs should be a list tensors of 
-        length (n_models) with sizes (n_samples, n_classes). 
+        msg = """The shape of outputs should be a list tensors of
+        length (n_models) with sizes (n_samples, n_classes).
         The first tensor had shape {} """
         raise ValueError(msg.format(outputs[0].shape))
 
