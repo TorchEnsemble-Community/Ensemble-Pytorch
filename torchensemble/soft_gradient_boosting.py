@@ -277,13 +277,23 @@ class _BaseSoftGradientBoosting(BaseModule):
 
             # Validation
             if test_loader:
-                flag = self._evaluate_during_fit(test_loader, epoch)
+                flag, test_metric_val = self._evaluate_during_fit(
+                    test_loader, epoch
+                )
                 if save_model and flag:
                     io.save(self, save_dir, self.logger)
 
             # Update the scheduler
             if self.use_scheduler_:
-                scheduler.step()
+                if self.scheduler_name == "ReduceLROnPlateau":
+                    if test_loader:
+                        scheduler.step(
+                            test_metric_val
+                        )  # step scheduler based on either mse or acc
+                    else:
+                        scheduler.step(loss)
+                else:
+                    scheduler.step()
 
         if save_model and not test_loader:
             io.save(self, save_dir, self.logger)
@@ -344,7 +354,7 @@ class SoftGradientBoostingClassifier(
                 "soft_gradient_boosting/Validation_Acc", acc, epoch
             )
 
-        return flag
+        return flag, acc
 
     @torchensemble_model_doc(
         """Set the attributes on optimizer for SoftGradientBoostingClassifier.""",  # noqa: E501
@@ -461,7 +471,7 @@ class SoftGradientBoostingRegressor(_BaseSoftGradientBoosting, BaseRegressor):
                 "soft_gradient_boosting/Validation_MSE", mse, epoch
             )
 
-        return flag
+        return flag, mse
 
     @torchensemble_model_doc(
         """Set the attributes on optimizer for SoftGradientBoostingRegressor.""",  # noqa: E501

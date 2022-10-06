@@ -80,7 +80,7 @@ def _parallel_fit_per_epoch(
                 )
                 print(msg.format(idx, epoch, batch_idx, loss))
 
-    return estimator, optimizer
+    return estimator, optimizer, loss
 
 
 @torchensemble_model_doc(
@@ -185,7 +185,10 @@ class BaggingClassifier(BaseClassifier):
                 self.train()
 
                 if self.use_scheduler_:
-                    cur_lr = scheduler_.get_last_lr()[0]
+                    if self.scheduler_name == "ReduceLROnPlateau":
+                        cur_lr = optimizers[0].param_groups[0]["lr"]
+                    else:
+                        cur_lr = scheduler_.get_last_lr()[0]
                 else:
                     cur_lr = None
 
@@ -211,10 +214,11 @@ class BaggingClassifier(BaseClassifier):
                     )
                 )
 
-                estimators, optimizers = [], []
-                for estimator, optimizer in rets:
+                estimators, optimizers, losses = [], [], []
+                for estimator, optimizer, loss in rets:
                     estimators.append(estimator)
                     optimizers.append(optimizer)
+                    losses.append(loss)
 
                 # Validation
                 if test_loader:
@@ -257,7 +261,14 @@ class BaggingClassifier(BaseClassifier):
                     warnings.simplefilter("ignore", UserWarning)
 
                     if self.use_scheduler_:
-                        scheduler_.step()
+                        if self.scheduler_name == "ReduceLROnPlateau":
+                            if test_loader:
+                                scheduler_.step(acc)
+                            else:
+                                loss = torch.mean(torch.tensor(losses))
+                                scheduler_.step(loss)
+                        else:
+                            scheduler_.step()
 
         self.estimators_ = nn.ModuleList()
         self.estimators_.extend(estimators)
@@ -371,7 +382,10 @@ class BaggingRegressor(BaseRegressor):
                 self.train()
 
                 if self.use_scheduler_:
-                    cur_lr = scheduler_.get_last_lr()[0]
+                    if self.scheduler_name == "ReduceLROnPlateau":
+                        cur_lr = optimizers[0].param_groups[0]["lr"]
+                    else:
+                        cur_lr = scheduler_.get_last_lr()[0]
                 else:
                     cur_lr = None
 
@@ -397,10 +411,11 @@ class BaggingRegressor(BaseRegressor):
                     )
                 )
 
-                estimators, optimizers = [], []
-                for estimator, optimizer in rets:
+                estimators, optimizers, losses = [], [], []
+                for estimator, optimizer, loss in rets:
                     estimators.append(estimator)
                     optimizers.append(optimizer)
+                    losses.append(loss)
 
                 # Validation
                 if test_loader:
@@ -439,7 +454,14 @@ class BaggingRegressor(BaseRegressor):
                     warnings.simplefilter("ignore", UserWarning)
 
                     if self.use_scheduler_:
-                        scheduler_.step()
+                        if self.scheduler_name == "ReduceLROnPlateau":
+                            if test_loader:
+                                scheduler_.step(val_loss)
+                            else:
+                                loss = torch.mean(torch.tensor(losses))
+                                scheduler_.step(loss)
+                        else:
+                            scheduler_.step()
 
         self.estimators_ = nn.ModuleList()
         self.estimators_.extend(estimators)

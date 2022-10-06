@@ -167,7 +167,13 @@ class FusionClassifier(BaseClassifier):
 
             # Update the scheduler
             if hasattr(self, "scheduler_"):
-                self.scheduler_.step()
+                if self.scheduler_name == "ReduceLROnPlateau":
+                    if test_loader:
+                        self.scheduler_.step(acc)
+                    else:
+                        self.scheduler_.step(loss)
+                else:
+                    self.scheduler_.step()
 
         if save_model and not test_loader:
             io.save(self, save_dir, self.logger)
@@ -302,7 +308,13 @@ class FusionRegressor(BaseRegressor):
 
             # Update the scheduler
             if hasattr(self, "scheduler_"):
-                self.scheduler_.step()
+                if self.scheduler_name == "ReduceLROnPlateau":
+                    if test_loader:
+                        self.scheduler_.step(val_loss)
+                    else:
+                        self.scheduler_.step(loss)
+                else:
+                    self.scheduler_.step()
 
         if save_model and not test_loader:
             io.save(self, save_dir, self.logger)

@@ -85,23 +85,43 @@ def _parallel_fit_per_epoch(
                 )
                 print(msg.format(idx, epoch, batch_idx, loss))
 
-    return estimator, optimizer
+    return estimator, optimizer, loss
 
 
 @torchensemble_model_doc(
     """Implementation on the VotingClassifier.""", "model"
 )
 class VotingClassifier(BaseClassifier):
+    def __init__(self, voting_strategy="soft", **kwargs):
+        super(VotingClassifier, self).__init__(**kwargs)
+
+        implemented_strategies = {"soft", "hard"}
+        if voting_strategy not in implemented_strategies:
+            msg = (
+                "Voting strategy {} is not implemented, "
+                "please choose from {}."
+            )
+            raise ValueError(
+                msg.format(voting_strategy, implemented_strategies)
+            )
+
+        self.voting_strategy = voting_strategy
+
     @torchensemble_model_doc(
         """Implementation on the data forwarding in VotingClassifier.""",
         "classifier_forward",
     )
     def forward(self, *x):
-        # Average over class distributions from all base estimators.
+
         outputs = [
             F.softmax(estimator(*x), dim=1) for estimator in self.estimators_
         ]
-        proba = op.average(outputs)
+
+        if self.voting_strategy == "soft":
+            proba = op.average(outputs)
+
+        elif self.voting_strategy == "hard":
+            proba = op.majority_vote(outputs)
 
         return proba
 
@@ -167,12 +187,17 @@ class VotingClassifier(BaseClassifier):
         # Utils
         best_acc = 0.0
 
-        # Internal helper function on pesudo forward
+        # Internal helper function on pseudo forward
         def _forward(estimators, *x):
             outputs = [
                 F.softmax(estimator(*x), dim=1) for estimator in estimators
             ]
-            proba = op.average(outputs)
+
+            if self.voting_strategy == "soft":
+                proba = op.average(outputs)
+
+            elif self.voting_strategy == "hard":
+                proba = op.majority_vote(outputs)
 
             return proba
 
@@ -184,7 +209,10 @@ class VotingClassifier(BaseClassifier):
                 self.train()
 
                 if self.use_scheduler_:
-                    cur_lr = scheduler_.get_last_lr()[0]
+                    if self.scheduler_name == "ReduceLROnPlateau":
+                        cur_lr = optimizers[0].param_groups[0]["lr"]
+                    else:
+                        cur_lr = scheduler_.get_last_lr()[0]
                 else:
                     cur_lr = None
 
@@ -210,10 +238,11 @@ class VotingClassifier(BaseClassifier):
                     )
                 )
 
-                estimators, optimizers = [], []
-                for estimator, optimizer in rets:
+                estimators, optimizers, losses = [], [], []
+                for estimator, optimizer, loss in rets:
                     estimators.append(estimator)
                     optimizers.append(optimizer)
+                    losses.append(loss)
 
                 # Validation
                 if test_loader:
@@ -256,7 +285,14 @@ class VotingClassifier(BaseClassifier):
                     warnings.simplefilter("ignore", UserWarning)
 
                     if self.use_scheduler_:
-                        scheduler_.step()
+                        if self.scheduler_name == "ReduceLROnPlateau":
+                            if test_loader:
+                                scheduler_.step(acc)
+                            else:
+                                loss = torch.mean(torch.tensor(losses))
+                                scheduler_.step(loss)
+                        else:
+                            scheduler_.step()
 
         self.estimators_ = nn.ModuleList()
         self.estimators_.extend(estimators)
@@ -276,6 +312,11 @@ class VotingClassifier(BaseClassifier):
     """Implementation on the NeuralForestClassifier.""", "tree_ensmeble_model"
 )
 class NeuralForestClassifier(BaseTreeEnsemble, VotingClassifier):
+    def __init__(self, voting_strategy="soft", **kwargs):
+        super().__init__(**kwargs)
+
+        self.voting_strategy = voting_strategy
+
     @torchensemble_model_doc(
         """Implementation on the data forwarding in NeuralForestClassifier.""",
         "classifier_forward",
@@ -409,7 +450,7 @@ class VotingRegressor(BaseRegressor):
         # Utils
         best_loss = float("inf")
 
-        # Internal helper function on pesudo forward
+        # Internal helper function on pseudo forward
         def _forward(estimators, *x):
             outputs = [estimator(*x) for estimator in estimators]
             pred = op.average(outputs)
@@ -424,7 +465,10 @@ class VotingRegressor(BaseRegressor):
                 self.train()
 
                 if self.use_scheduler_:
-                    cur_lr = scheduler_.get_last_lr()[0]
+                    if self.scheduler_name == "ReduceLROnPlateau":
+                        cur_lr = optimizers[0].param_groups[0]["lr"]
+                    else:
+                        cur_lr = scheduler_.get_last_lr()[0]
                 else:
                     cur_lr = None
 
@@ -450,10 +494,11 @@ class VotingRegressor(BaseRegressor):
                     )
                 )
 
-                estimators, optimizers = [], []
-                for estimator, optimizer in rets:
+                estimators, optimizers, losses = [], [], []
+                for estimator, optimizer, loss in rets:
                     estimators.append(estimator)
                     optimizers.append(optimizer)
+                    losses.append(loss)
 
                 # Validation
                 if test_loader:
@@ -492,7 +537,14 @@ class VotingRegressor(BaseRegressor):
                     warnings.simplefilter("ignore", UserWarning)
 
                     if self.use_scheduler_:
-                        scheduler_.step()
+                        if self.scheduler_name == "ReduceLROnPlateau":
+                            if test_loader:
+                                scheduler_.step(val_loss)
+                            else:
+                                loss = torch.mean(torch.tensor(losses))
+                                scheduler_.step(loss)
+                        else:
+                            scheduler_.step()
 
         self.estimators_ = nn.ModuleList()
         self.estimators_.extend(estimators)

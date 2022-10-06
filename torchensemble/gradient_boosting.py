@@ -283,11 +283,16 @@ class _BaseGradientBoosting(BaseModule):
                     total_iters += 1
 
                 if self.use_scheduler_:
-                    learner_scheduler.step()
+                    if self.scheduler_name == "ReduceLROnPlateau":
+                        learner_scheduler.step(loss)
+                    else:
+                        learner_scheduler.step()
 
             # Validation
             if test_loader:
-                flag = self._handle_early_stopping(test_loader, est_idx)
+                flag, test_metric_val = self._handle_early_stopping(
+                    test_loader, est_idx
+                )
 
                 if flag:
                     n_counter += 1
@@ -367,7 +372,7 @@ class GradientBoostingClassifier(_BaseGradientBoosting, BaseClassifier):
                 "gradient_boosting/Validation_Acc", acc, est_idx
             )
 
-        return flag
+        return flag, acc
 
     @torchensemble_model_doc(
         """Set the attributes on optimizer for GradientBoostingClassifier.""",
@@ -476,7 +481,7 @@ class GradientBoostingRegressor(_BaseGradientBoosting, BaseRegressor):
                 "gradient_boosting/Validation_MSE", mse, est_idx
             )
 
-        return flag
+        return flag, mse
 
     @torchensemble_model_doc(
         """Set the attributes on optimizer for GradientBoostingRegressor.""",

@@ -294,7 +294,10 @@ class FastGeometricClassifier(_BaseFastGeometric, BaseClassifier):
                 total_iters += 1
 
             if self.use_scheduler_:
-                scheduler.step()
+                if self.scheduler_name == "ReduceLROnPlateau":
+                    scheduler.step(loss)
+                else:
+                    scheduler.step()
 
         # ====================================================================
         #                        Generate the ensemble
@@ -532,7 +535,10 @@ class FastGeometricRegressor(_BaseFastGeometric, BaseRegressor):
                 total_iters += 1
 
             if self.use_scheduler_:
-                scheduler.step()
+                if self.scheduler_name == "ReduceLROnPlateau":
+                    scheduler.step(loss)
+                else:
+                    scheduler.step()
 
         # ====================================================================
         #                        Generate the ensemble
