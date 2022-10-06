@@ -23,6 +23,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
       <td align="center"><a href="https://github.com/cspsampedro"><img src="https://avatars.githubusercontent.com/u/7384605?v=4?s=100" width="100px;" alt="cspsampedro"/><br /><sub><b>cspsampedro</b></sub></a><br /><a href="#ideas-cspsampedro" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/TorchEnsemble-Community/Ensemble-Pytorch/commits?author=cspsampedro" title="Code">💻</a></td>
       <td align="center"><a href="https://github.com/kiranchari"><img src="https://avatars.githubusercontent.com/u/1838910?v=4?s=100" width="100px;" alt="kiranchari"/><br /><sub><b>kiranchari</b></sub></a><br /><a href="https://github.com/TorchEnsemble-Community/Ensemble-Pytorch/commits?author=kiranchari" title="Documentation">📖</a></td>
       <td align="center"><a href="https://github.com/nolaurence"><img src="https://avatars.githubusercontent.com/u/53215736?v=4?s=100" width="100px;" alt="nolaurence"/><br /><sub><b>nolaurence</b></sub></a><br /><a href="https://github.com/TorchEnsemble-Community/Ensemble-Pytorch/commits?author=nolaurence" title="Code">💻</a></td>
+      <td align="center"><a href="https://github.com/LukasGardberg"><img src="https://avatars.githubusercontent.com/u/52111220?v=4?s=100" width="100px;" alt=""/><br /><sub><b>LukasGardberg</b></sub></a><br /><a href="https://github.com/TorchEnsemble-Community/Ensemble-Pytorch/commits?author=LukasGardberg" title="Code">💻</a></td>
     </tr>
   </tbody>
   <tfoot>
