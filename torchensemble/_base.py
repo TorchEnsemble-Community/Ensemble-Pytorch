@@ -218,7 +218,12 @@ class BaseModule(nn.Module):
 
 class BaseTreeEnsemble(BaseModule):
     def __init__(
-        self, n_estimators=10, depth=5, lamda=1e-3, cuda=False, n_jobs=None,
+        self,
+        n_estimators=10,
+        depth=5,
+        lamda=1e-3,
+        cuda=False,
+        n_jobs=None,
     ):
         super(BaseModule, self).__init__()
         self.base_estimator_ = BaseTree
