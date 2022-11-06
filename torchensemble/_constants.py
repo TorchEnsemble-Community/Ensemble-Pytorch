@@ -185,7 +185,7 @@ __vectorize_doc = """
         Tuple of stacked model parameters in the ensemble.
     buffers : tuple
         Tuple of buffers, empty if not exists.
-"""
+"""  # noqa: E501
 
 
 __classification_forward_doc = """
