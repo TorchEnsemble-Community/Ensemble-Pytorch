@@ -174,7 +174,8 @@ __predict_doc = """
 
 
 __vectorize_doc = """
-    Return the vectorization result of the ensemble using functorch.
+    Return the vectorization result of the ensemble using functorch. Details
+    available at `functorch model ensembling <https://pytorch.org/functorch/stable/notebooks/ensembling.html>`_.
 
     Returns
     -------
