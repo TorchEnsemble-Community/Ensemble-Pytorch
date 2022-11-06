@@ -309,7 +309,7 @@ class VotingClassifier(BaseClassifier):
 
 
 @torchensemble_model_doc(
-    """Implementation on the NeuralForestClassifier.""", "tree_ensmeble_model"
+    """Implementation on the NeuralForestClassifier.""", "tree_ensemble_model"
 )
 class NeuralForestClassifier(BaseTreeEnsemble, VotingClassifier):
     def __init__(self, voting_strategy="soft", **kwargs):
@@ -561,7 +561,7 @@ class VotingRegressor(BaseRegressor):
 
 
 @torchensemble_model_doc(
-    """Implementation on the NeuralForestRegressor.""", "tree_ensmeble_model"
+    """Implementation on the NeuralForestRegressor.""", "tree_ensemble_model"
 )
 class NeuralForestRegressor(BaseTreeEnsemble, VotingRegressor):
     @torchensemble_model_doc(

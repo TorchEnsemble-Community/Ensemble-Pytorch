@@ -173,6 +173,20 @@ __predict_doc = """
 """
 
 
+__vectorize_doc = """
+    Return the vectorization result of the ensemble using functorch.
+
+    Returns
+    -------
+    fmodel : FunctionalModuleWithBuffers
+        Functional version of one of the models in the ensemble.
+    params : tuple
+        Tuple of stacked model parameters in the ensemble.
+    buffers : tuple
+        Tuple of buffers, empty if not exists.
+"""
+
+
 __classification_forward_doc = """
     Parameters
     ----------
