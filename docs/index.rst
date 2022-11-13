@@ -72,6 +72,7 @@ Content
   Guidance <guide>
   Experiment <experiment>
   API Reference <parameters>
+  Advanced Usage <advanced>
 
 .. toctree::
   :maxdepth: 1
