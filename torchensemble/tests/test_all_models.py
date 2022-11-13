@@ -3,6 +3,8 @@ import pytest
 import numpy as np
 import torch.nn as nn
 from numpy.testing import assert_array_equal
+
+from functorch import vmap
 from torch.utils.data import TensorDataset, DataLoader
 
 import torchensemble
@@ -302,3 +304,79 @@ def test_predict():
     with pytest.raises(ValueError) as excinfo:
         model.predict([X_test])  # list
     assert "The type of input X should be one of" in str(excinfo.value)
+
+
+@pytest.mark.parametrize("clf", all_clf)
+def test_clf_vectorize_same_output(clf):
+    """
+    This unit test checks the inference with/without vectorize for all
+    classifiers.
+    """
+    epochs = 2
+    n_estimators = 2
+
+    model = clf(estimator=MLP_clf, n_estimators=n_estimators, cuda=False)
+
+    # Optimizer
+    model.set_optimizer("Adam", lr=1e-3, weight_decay=5e-4)
+
+    # Prepare data
+    train = TensorDataset(X_train, y_train_clf)
+    train_loader = DataLoader(train, batch_size=2, shuffle=False)
+    test = TensorDataset(X_test, y_test_clf)
+    test_loader = DataLoader(test, batch_size=2, shuffle=False)
+
+    # Train
+    model.fit(train_loader, epochs=epochs, test_loader=test_loader)
+
+    fmodel, params, buffers = model.vectorize()
+
+    with torch.no_grad():
+        for idx, (data, target) in enumerate(test_loader):
+            vmap_output = vmap(fmodel, in_dims=(0, 0, None))(
+                params, buffers, data
+            )
+            pytorch_output = [
+                estimator(data) for estimator in model.estimators_
+            ]
+            assert torch.allclose(
+                vmap_output, torch.stack(pytorch_output), atol=1e-3, rtol=1e-5
+            )
+
+
+@pytest.mark.parametrize("reg", all_reg)
+def test_reg_vectorize_same_output(reg):
+    """
+    This unit test checks the inference with/without vectorize for all
+    classifiers.
+    """
+    epochs = 2
+    n_estimators = 2
+
+    model = reg(estimator=MLP_reg, n_estimators=n_estimators, cuda=False)
+
+    # Optimizer
+    model.set_optimizer("Adam", lr=1e-3, weight_decay=5e-4)
+
+    # Prepare data
+    train = TensorDataset(X_train, y_train_reg)
+    train_loader = DataLoader(train, batch_size=2, shuffle=False)
+    test = TensorDataset(X_test, y_test_reg)
+    test_loader = DataLoader(test, batch_size=2, shuffle=False)
+
+    # Train
+    model.fit(train_loader, epochs=epochs, test_loader=test_loader)
+
+    fmodel, params, buffers = model.vectorize()
+
+    with torch.no_grad():
+        for idx, (data, target) in enumerate(test_loader):
+            vmap_output = vmap(fmodel, in_dims=(0, 0, None))(
+                params, buffers, data
+            )
+            pytorch_output = [
+                estimator(data) for estimator in model.estimators_
+            ]
+            assert torch.allclose(
+                vmap_output, torch.stack(pytorch_output), atol=1e-3, rtol=1e-5
+            )

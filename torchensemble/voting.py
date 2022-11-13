@@ -307,9 +307,13 @@ class VotingClassifier(BaseClassifier):
     def predict(self, *x):
         return super().predict(*x)
 
+    @torchensemble_model_doc(item="vectorize")
+    def vectorize(self):
+        return super().vectorize()
+
 
 @torchensemble_model_doc(
-    """Implementation on the NeuralForestClassifier.""", "tree_ensmeble_model"
+    """Implementation on the NeuralForestClassifier.""", "tree_ensemble_model"
 )
 class NeuralForestClassifier(BaseTreeEnsemble, VotingClassifier):
     def __init__(self, voting_strategy="soft", **kwargs):
@@ -373,6 +377,10 @@ class NeuralForestClassifier(BaseTreeEnsemble, VotingClassifier):
             save_model=save_model,
             save_dir=save_dir,
         )
+
+    @torchensemble_model_doc(item="vectorize")
+    def vectorize(self):
+        return super().vectorize()
 
 
 @torchensemble_model_doc("""Implementation on the VotingRegressor.""", "model")
@@ -559,9 +567,13 @@ class VotingRegressor(BaseRegressor):
     def predict(self, *x):
         return super().predict(*x)
 
+    @torchensemble_model_doc(item="vectorize")
+    def vectorize(self):
+        return super().vectorize()
+
 
 @torchensemble_model_doc(
-    """Implementation on the NeuralForestRegressor.""", "tree_ensmeble_model"
+    """Implementation on the NeuralForestRegressor.""", "tree_ensemble_model"
 )
 class NeuralForestRegressor(BaseTreeEnsemble, VotingRegressor):
     @torchensemble_model_doc(
@@ -620,3 +632,7 @@ class NeuralForestRegressor(BaseTreeEnsemble, VotingRegressor):
             save_model=save_model,
             save_dir=save_dir,
         )
+
+    @torchensemble_model_doc(item="vectorize")
+    def vectorize(self):
+        return super().vectorize()

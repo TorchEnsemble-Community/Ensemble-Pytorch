@@ -29,9 +29,10 @@ def torchensemble_model_doc(header="", item="model"):
         __doc = {
             "model": const.__model_doc,
             "seq_model": const.__seq_model_doc,
-            "tree_ensmeble_model": const.__tree_ensemble_doc,
+            "tree_ensemble_model": const.__tree_ensemble_doc,
             "fit": const.__fit_doc,
             "predict": const.__predict_doc,
+            "vectorize": const.__vectorize_doc,
             "set_optimizer": const.__set_optimizer_doc,
             "set_scheduler": const.__set_scheduler_doc,
             "set_criterion": const.__set_criterion_doc,
@@ -198,6 +199,21 @@ class BaseModule(nn.Module):
         pred = self.forward(*x_device)
         pred = pred.cpu()
         return pred
+
+    def vectorize(self):
+        """Docstrings decorated by downstream ensembles."""
+        try:
+            from functorch import combine_state_for_ensemble
+        except Exception:
+            msg = (
+                "Failed to import functorch utils, please make sure the"
+                " Pytorch version >= 1.13.0."
+            )
+            raise RuntimeError(msg)
+
+        self.eval()
+        fmodel, params, buffers = combine_state_for_ensemble(self.estimators_)
+        return fmodel, params, buffers
 
 
 class BaseTreeEnsemble(BaseModule):
