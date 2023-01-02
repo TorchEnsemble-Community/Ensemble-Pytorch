@@ -212,6 +212,16 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble, BaseClassifier):
     def __init__(self, voting_strategy="soft", **kwargs):
         super().__init__(**kwargs)
 
+        implemented_strategies = {"soft", "hard"}
+        if voting_strategy not in implemented_strategies:
+            msg = (
+                "Voting strategy {} is not implemented, "
+                "please choose from {}."
+            )
+            raise ValueError(
+                msg.format(voting_strategy, implemented_strategies)
+            )
+
         self.voting_strategy = voting_strategy
 
     @torchensemble_model_doc(
@@ -221,13 +231,13 @@ class SnapshotEnsembleClassifier(_BaseSnapshotEnsemble, BaseClassifier):
     def forward(self, *x):
 
         outputs = [
-            F.softmax(estimator(*x), dim=1) for estimator in self.estimators_
+            F.softmax(op.unsqueeze_tensor(estimator(*x)), dim=1)
+            for estimator in self.estimators_
         ]
 
         if self.voting_strategy == "soft":
             proba = op.average(outputs)
-
-        elif self.voting_strategy == "hard":
+        else:
             proba = op.majority_vote(outputs)
 
         return proba

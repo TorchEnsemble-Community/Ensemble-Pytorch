@@ -39,7 +39,7 @@ class FusionClassifier(BaseClassifier):
         "classifier_forward",
     )
     def forward(self, *x):
-        output = self._forward(*x)
+        output = op.unsqueeze_tensor(self._forward(*x))
         proba = F.softmax(output, dim=1)
 
         return proba

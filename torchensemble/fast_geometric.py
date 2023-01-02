@@ -176,7 +176,7 @@ class FastGeometricClassifier(_BaseFastGeometric, BaseClassifier):
         "classifier_forward",
     )
     def forward(self, *x):
-        proba = self._forward(*x)
+        proba = op.unsqueeze_tensor(self._forward(*x))
 
         return F.softmax(proba, dim=1)
 

@@ -114,13 +114,13 @@ class VotingClassifier(BaseClassifier):
     def forward(self, *x):
 
         outputs = [
-            F.softmax(estimator(*x), dim=1) for estimator in self.estimators_
+            F.softmax(op.unsqueeze_tensor(estimator(*x)), dim=1)
+            for estimator in self.estimators_
         ]
 
         if self.voting_strategy == "soft":
             proba = op.average(outputs)
-
-        elif self.voting_strategy == "hard":
+        else:
             proba = op.majority_vote(outputs)
 
         return proba
@@ -309,7 +309,7 @@ class VotingClassifier(BaseClassifier):
 
 
 @torchensemble_model_doc(
-    """Implementation on the NeuralForestClassifier.""", "tree_ensmeble_model"
+    """Implementation on the NeuralForestClassifier.""", "tree_ensemble_model"
 )
 class NeuralForestClassifier(BaseTreeEnsemble, VotingClassifier):
     def __init__(self, voting_strategy="soft", **kwargs):
@@ -324,7 +324,8 @@ class NeuralForestClassifier(BaseTreeEnsemble, VotingClassifier):
     def forward(self, *x):
         # Average over class distributions from all base estimators.
         outputs = [
-            F.softmax(estimator(*x), dim=1) for estimator in self.estimators_
+            F.softmax(op.unsqueeze_tensor(estimator(*x)), dim=1)
+            for estimator in self.estimators_
         ]
         proba = op.average(outputs)
 
@@ -561,7 +562,7 @@ class VotingRegressor(BaseRegressor):
 
 
 @torchensemble_model_doc(
-    """Implementation on the NeuralForestRegressor.""", "tree_ensmeble_model"
+    """Implementation on the NeuralForestRegressor.""", "tree_ensemble_model"
 )
 class NeuralForestRegressor(BaseTreeEnsemble, VotingRegressor):
     @torchensemble_model_doc(

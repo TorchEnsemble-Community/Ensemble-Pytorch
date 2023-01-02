@@ -226,7 +226,8 @@ class AdversarialTrainingClassifier(_BaseAdversarialTraining, BaseClassifier):
     def forward(self, *x):
         # Take the average over class distributions from all base estimators.
         outputs = [
-            F.softmax(estimator(*x), dim=1) for estimator in self.estimators_
+            F.softmax(op.unsqueeze_tensor(estimator(*x)), dim=1)
+            for estimator in self.estimators_
         ]
         proba = op.average(outputs)
 

@@ -49,7 +49,7 @@ class MLP_clf(nn.Module):
         self.linear2 = nn.Linear(2, 2)
 
     def forward(self, X):
-        X = X.view(X.size()[0], -1)
+        X = X.view(X.size(0), -1)
         output = self.linear1(X)
         output = self.linear2(output)
         return output
