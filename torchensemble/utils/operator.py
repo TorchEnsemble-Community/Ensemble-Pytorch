@@ -13,6 +13,7 @@ __all__ = [
     "pseudo_residual_classification",
     "pseudo_residual_regression",
     "majority_vote",
+    "unsqueeze_tensor",
 ]
 
 
@@ -73,3 +74,11 @@ def majority_vote(outputs: List[torch.Tensor]) -> torch.Tensor:
     majority_one_hots = proba.scatter_(1, votes.view(-1, 1), 1)
 
     return majority_one_hots
+
+
+def unsqueeze_tensor(tensor: torch.Tensor, dim=1) -> torch.Tensor:
+    """Reshape 1-D tensor to 2-D for downstream operations."""
+    if tensor.ndim == 1:
+        tensor = torch.unsqueeze(tensor, dim)
+
+    return tensor

@@ -406,7 +406,10 @@ class SoftGradientBoostingClassifier(
         "classifier_forward",
     )
     def forward(self, *x):
-        output = [estimator(*x) for estimator in self.estimators_]
+        output = [
+            op.unsqueeze_tensor(estimator(*x))
+            for estimator in self.estimators_
+        ]
         output = op.sum_with_multiplicative(output, self.shrinkage_rate)
         proba = F.softmax(output, dim=1)
 
