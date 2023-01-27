@@ -253,6 +253,12 @@ class BaggingClassifier(BaseClassifier):
                             self.tb_logger.add_scalar(
                                 "bagging/Validation_Acc", acc, epoch
                             )
+                # No validation
+                else:
+                    self.estimators_ = nn.ModuleList()
+                    self.estimators_.extend(estimators)
+                    if save_model:
+                        io.save(self, save_dir, self.logger)
 
                 # Update the scheduler
                 with warnings.catch_warnings():
@@ -270,11 +276,6 @@ class BaggingClassifier(BaseClassifier):
                                 scheduler_.step(loss)
                         else:
                             scheduler_.step()
-
-        self.estimators_ = nn.ModuleList()
-        self.estimators_.extend(estimators)
-        if save_model and not test_loader:
-            io.save(self, save_dir, self.logger)
 
     @torchensemble_model_doc(item="classifier_evaluate")
     def evaluate(self, test_loader, return_loss=False):
@@ -449,6 +450,12 @@ class BaggingRegressor(BaseRegressor):
                             self.tb_logger.add_scalar(
                                 "bagging/Validation_Loss", val_loss, epoch
                             )
+                # No validation
+                else:
+                    self.estimators_ = nn.ModuleList()
+                    self.estimators_.extend(estimators)
+                    if save_model:
+                        io.save(self, save_dir, self.logger)
 
                 # Update the scheduler
                 with warnings.catch_warnings():
@@ -463,11 +470,6 @@ class BaggingRegressor(BaseRegressor):
                                 scheduler_.step(loss)
                         else:
                             scheduler_.step()
-
-        self.estimators_ = nn.ModuleList()
-        self.estimators_.extend(estimators)
-        if save_model and not test_loader:
-            io.save(self, save_dir, self.logger)
 
     @torchensemble_model_doc(item="regressor_evaluate")
     def evaluate(self, test_loader):
