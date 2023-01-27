@@ -64,8 +64,9 @@ Content
 -------
 
 .. toctree::
-  :maxdepth: 1
   :caption: For Users
+  :maxdepth: 2
+  :hidden:
 
   Quick Start <quick_start>
   Introduction <introduction>
@@ -74,8 +75,9 @@ Content
   API Reference <parameters>
 
 .. toctree::
-  :maxdepth: 1
   :caption: For Developers
+  :maxdepth: 2
+  :hidden:
 
   Changelog <changelog>
   Roadmap <roadmap>
