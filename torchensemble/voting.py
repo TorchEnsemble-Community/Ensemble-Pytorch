@@ -17,6 +17,7 @@ from ._base import torchensemble_model_doc
 from .utils import io
 from .utils import set_module
 from .utils import operator as op
+from .backend import BackendFactory
 
 
 __all__ = [
@@ -92,19 +93,20 @@ def _parallel_fit_per_epoch(
     """Implementation on the VotingClassifier.""", "model"
 )
 class VotingClassifier(BaseClassifier):
-    def __init__(self, voting_strategy="soft", **kwargs):
-        super(VotingClassifier, self).__init__(**kwargs)
 
-        implemented_strategies = {"soft", "hard"}
-        if voting_strategy not in implemented_strategies:
-            msg = (
-                "Voting strategy {} is not implemented, "
-                "please choose from {}."
-            )
-            raise ValueError(
-                msg.format(voting_strategy, implemented_strategies)
-            )
+    def __init__(self, estimator, n_estimators, estimator_args=None, cuda=True,
+                 num_workers=None, parallel_backend="joblib",
+                 voting_strategy="soft"):
+        super(VotingClassifier, self).__init__(
+            estimator=estimator,
+            n_estimators=n_estimators,
+            estimator_args=estimator_args,
+            cuda=cuda
+        )
 
+        self._backend = BackendFactory.create_backend(
+            num_workers, parallel_backend
+        )
         self.voting_strategy = voting_strategy
 
     @torchensemble_model_doc(
