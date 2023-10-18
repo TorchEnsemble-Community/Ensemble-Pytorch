@@ -45,7 +45,7 @@ def save(model, save_dir, logger):
     return
 
 
-def load(model, save_dir="./", logger=None):
+def load(model, save_dir="./", map_location=None, logger=None):
     """Implement model deserialization from the specified directory."""
     if not os.path.exists(save_dir):
         raise FileExistsError("`{}` does not exist".format(save_dir))
@@ -67,7 +67,7 @@ def load(model, save_dir="./", logger=None):
     if logger:
         logger.info("Loading the model from `{}`".format(save_dir))
 
-    state = torch.load(save_dir)
+    state = torch.load(save_dir, map_location=map_location)
     n_estimators = state["n_estimators"]
     model_params = state["model"]
     model._criterion = state["_criterion"]
