@@ -1,3 +1,4 @@
+
 ## Contributors ✨
 
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
@@ -24,9 +25,6 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/cspsampedro"><img src="https://avatars.githubusercontent.com/u/7384605?v=4?s=100" width="100px;" alt="cspsampedro"/><br /><sub><b>cspsampedro</b></sub></a><br /><a href="#ideas-cspsampedro" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/TorchEnsemble-Community/Ensemble-Pytorch/commits?author=cspsampedro" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/kiranchari"><img src="https://avatars.githubusercontent.com/u/1838910?v=4?s=100" width="100px;" alt="kiranchari"/><br /><sub><b>kiranchari</b></sub></a><br /><a href="https://github.com/TorchEnsemble-Community/Ensemble-Pytorch/commits?author=kiranchari" title="Documentation">📖</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/nolaurence"><img src="https://avatars.githubusercontent.com/u/53215736?v=4?s=100" width="100px;" alt="nolaurence"/><br /><sub><b>nolaurence</b></sub></a><br /><a href="https://github.com/TorchEnsemble-Community/Ensemble-Pytorch/commits?author=nolaurence" title="Code">💻</a></td>
-    </tr>
-    <tr>
-     <td align="center" valign="top" width="14.28%"><a href="https://github.com/AtiqurRahmanAni"><img src="https://avatars.githubusercontent.com/u/56642339?v=4" width="100px;" alt="Atiqur Rahman"/><br /><sub><b>Atiqur Rahman</b></sub></a><br /><a href="https://github.com/AtiqurRahmanAni/Ensemble-Pytorch/commit/fac612ff31032848f832f773d59c7585b1b63674" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
