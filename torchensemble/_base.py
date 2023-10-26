@@ -6,6 +6,8 @@ import warnings
 import numpy as np
 import torch.nn as nn
 
+from typing import List, Dict
+
 from . import _constants as const
 from .utils.io import split_data_target
 from .utils.logging import get_tb_logger
@@ -60,11 +62,11 @@ class BaseModule(nn.Module):
 
     def __init__(
         self,
-        estimator,
-        n_estimators,
-        estimator_args=None,
-        cuda=True,
-        n_jobs=None,
+        estimator: nn.Module,
+        n_estimators: int,
+        estimator_args: Dict = None,
+        device: str | List[str] = "cuda",
+        n_jobs: int = None,
     ):
         super(BaseModule, self).__init__()
         self.base_estimator_ = estimator
@@ -78,12 +80,33 @@ class BaseModule(nn.Module):
             )
             warnings.warn(msg, RuntimeWarning)
 
-        self.device = torch.device("cuda" if cuda else "cpu")
+        # Specify running devices for each estimator
+        if isinstance(device, str):
+            self.device = torch.device(device)
+        elif isinstance(device, list):
+            if not len(device) == n_estimators:
+                msg = "The length of `device` list should equal `n_estimators`."
+                self.logger.error(msg)
+                raise ValueError(msg)
+            self.device = device
+        else:
+            msg = "The argument `device` should be a string, or a list of string, got {} instead."
+            self.logger.error(msg.format(type(device)))
+            raise ValueError(msg.format(type(device)))
+
         self.n_jobs = n_jobs
         self.logger = logging.getLogger()
         self.tb_logger = get_tb_logger()
 
         self.estimators_ = nn.ModuleList()
+
+        self._criterion = None
+
+        self.optimizer_name = None
+        self.optimizer_args = None
+
+        self.scheduler_name = None
+        self.scheduler_args = None
         self.use_scheduler_ = False
 
     def __len__(self):
@@ -102,7 +125,7 @@ class BaseModule(nn.Module):
     def _decide_n_outputs(self, train_loader):
         """Decide the number of outputs according to the `train_loader`."""
 
-    def _make_estimator(self):
+    def _make_estimator(self, idx):
         """Make and configure a copy of `self.base_estimator_`."""
 
         # Call `deepcopy` to make a base estimator
@@ -117,7 +140,7 @@ class BaseModule(nn.Module):
             else:
                 estimator = self.base_estimator_(**self.estimator_args)
 
-        return estimator.to(self.device)
+        return estimator.to(self.device[idx])
 
     def _validate_parameters(self, epochs, log_interval):
         """Validate hyper-parameters on training the ensemble."""
@@ -185,9 +208,9 @@ class BaseModule(nn.Module):
         x_device = []
         for data in x:
             if isinstance(data, torch.Tensor):
-                x_device.append(data.to(self.device))
+                x_device.append(data.to("cpu"))
             elif isinstance(data, np.ndarray):
-                x_device.append(torch.Tensor(data).to(self.device))
+                x_device.append(torch.Tensor(data).to("cpu"))
             else:
                 msg = (
                     "The type of input X should be one of {{torch.Tensor,"
@@ -206,22 +229,12 @@ class BaseTreeEnsemble(BaseModule):
         n_estimators=10,
         depth=5,
         lamda=1e-3,
-        cuda=False,
+        device="cuda",
         n_jobs=None,
     ):
-        super(BaseModule, self).__init__()
-        self.base_estimator_ = BaseTree
-        self.n_estimators = n_estimators
+        super(BaseModule, self).__init__(BaseTree, n_estimators, {}, device, n_jobs)
         self.depth = depth
         self.lamda = lamda
-
-        self.device = torch.device("cuda" if cuda else "cpu")
-        self.n_jobs = n_jobs
-        self.logger = logging.getLogger()
-        self.tb_logger = get_tb_logger()
-
-        self.estimators_ = nn.ModuleList()
-        self.use_scheduler_ = False
 
     def _decidce_n_inputs(self, train_loader):
         """Decide the input dimension according to the `train_loader`."""
@@ -231,7 +244,7 @@ class BaseTreeEnsemble(BaseModule):
             data = data.view(n_samples, -1)
             return data.size(1)
 
-    def _make_estimator(self):
+    def _make_estimator(self, idx):
         """Make and configure a soft decision tree."""
         estimator = BaseTree(
             input_dim=self.n_inputs,
@@ -241,7 +254,7 @@ class BaseTreeEnsemble(BaseModule):
             cuda=self.device == torch.device("cuda"),
         )
 
-        return estimator.to(self.device)
+        return estimator.to(self.device[idx])
 
 
 class BaseClassifier(BaseModule):
@@ -263,7 +276,7 @@ class BaseClassifier(BaseModule):
         else:
             labels = []
             for _, elem in enumerate(train_loader):
-                _, target = split_data_target(elem, self.device)
+                _, target = split_data_target(elem, "cpu")
                 labels.append(target)
             labels = torch.unique(torch.cat(labels))
             n_outputs = labels.size(0)
@@ -279,7 +292,7 @@ class BaseClassifier(BaseModule):
         loss = 0.0
 
         for _, elem in enumerate(test_loader):
-            data, target = split_data_target(elem, self.device)
+            data, target = split_data_target(elem, "cpu")
 
             output = self.forward(*data)
 
@@ -371,28 +384,28 @@ class BaseTree(nn.Module):
             self.leaf_node_num_, self.output_dim, bias=False
         )
 
-    def forward(self, X, is_training_data=False):
-        _mu, _penalty = self._forward(X)
+    def forward(self, x, is_training_data=False):
+        _mu, _penalty = self._forward(x)
         y_pred = self.leaf_nodes(_mu)
 
-        # When `X` is the training data, the model also returns the penalty
+        # When `x` is the training data, the model also returns the penalty
         # to compute the training loss.
         if is_training_data:
             return y_pred, _penalty
         else:
             return y_pred
 
-    def _forward(self, X):
+    def _forward(self, x):
         """Implementation on the data forwarding process."""
 
-        batch_size = X.size()[0]
-        X = self._data_augment(X)
+        batch_size = x.size(0)
+        x = self._data_augment(x)
 
-        path_prob = self.inner_nodes(X)
+        path_prob = self.inner_nodes(x)
         path_prob = torch.unsqueeze(path_prob, dim=2)
         path_prob = torch.cat((path_prob, 1 - path_prob), dim=2)
 
-        _mu = X.data.new(batch_size, 1, 1).fill_(1.0)
+        _mu = x.data.new(batch_size, 1, 1).fill_(1.0)
         _penalty = torch.tensor(0.0).to(self.device)
 
         # Iterate through internal odes in each layer to compute the final path
@@ -437,14 +450,14 @@ class BaseTree(nn.Module):
 
         return penalty
 
-    def _data_augment(self, X):
+    def _data_augment(self, x):
         """Add a constant input `1` onto the front of each sample."""
-        batch_size = X.size()[0]
-        X = X.view(batch_size, -1)
+        batch_size = x.size(0)
+        x = x.view(batch_size, -1)
         bias = torch.ones(batch_size, 1).to(self.device)
-        X = torch.cat((bias, X), 1)
+        x = torch.cat((bias, x), 1)
 
-        return X
+        return x
 
     def _validate_parameters(self):
 
