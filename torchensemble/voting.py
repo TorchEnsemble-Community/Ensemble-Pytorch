@@ -5,6 +5,7 @@
 """
 
 
+import copy
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -98,7 +99,7 @@ class VotingClassifier(BaseClassifier):
         implemented_strategies = {"soft", "hard"}
         if voting_strategy not in implemented_strategies:
             msg = (
-                "Voting strategy {} is not implemented, "
+                "Voting strategy `{}` is not implemented, "
                 "please choose from {}."
             )
             raise ValueError(
@@ -112,11 +113,10 @@ class VotingClassifier(BaseClassifier):
         "classifier_forward",
     )
     def forward(self, *x):
-
-        outputs = [
-            F.softmax(op.unsqueeze_tensor(estimator(*x)), dim=1)
-            for estimator in self.estimators_
-        ]
+        outputs = []
+        for (estimator, device) in zip(self.estimators_, self.device):
+            per_estimator_x = tuple(map(lambda x: x.to(device), copy.deepcopy(x)))
+            outputs.append(F.softmax(op.unsqueeze_tensor(estimator(*per_estimator_x)), dim=1).to("cpu"))
 
         if self.voting_strategy == "soft":
             proba = op.average(outputs)
@@ -164,8 +164,8 @@ class VotingClassifier(BaseClassifier):
 
         # Instantiate a pool of base estimators, optimizers, and schedulers.
         estimators = []
-        for _ in range(self.n_estimators):
-            estimators.append(self._make_estimator())
+        for idx in range(self.n_estimators):
+            estimators.append(self._make_estimator(idx))
 
         optimizers = []
         for i in range(self.n_estimators):
@@ -180,18 +180,19 @@ class VotingClassifier(BaseClassifier):
                 optimizers[0], self.scheduler_name, **self.scheduler_args
             )
 
-        # Check the training criterion
-        if not hasattr(self, "_criterion"):
+        # Check the training criterion, use the cross-entropy loss by default
+        if not hasattr(self, "_criterion") or self._criterion is None:
             self._criterion = nn.CrossEntropyLoss()
 
         # Utils
         best_acc = 0.0
 
         # Internal helper function on pseudo forward
-        def _forward(estimators, *x):
-            outputs = [
-                F.softmax(estimator(*x), dim=1) for estimator in estimators
-            ]
+        def _forward(estimators, devices, *data):
+            outputs = []
+            for (estimator, device) in zip(estimators, devices):
+                per_estimator_x = tuple(map(lambda x: x.to(device), copy.deepcopy(data)))
+                outputs.append(F.softmax(estimator(*per_estimator_x), dim=1).to("cpu"))
 
             if self.voting_strategy == "soft":
                 proba = op.average(outputs)
@@ -230,7 +231,7 @@ class VotingClassifier(BaseClassifier):
                         idx,
                         epoch,
                         log_interval,
-                        self.device,
+                        self.device[idx],
                         True,
                     )
                     for idx, (estimator, optimizer) in enumerate(
@@ -251,10 +252,8 @@ class VotingClassifier(BaseClassifier):
                         correct = 0
                         total = 0
                         for _, elem in enumerate(test_loader):
-                            data, target = io.split_data_target(
-                                elem, self.device
-                            )
-                            output = _forward(estimators, *data)
+                            data, target = io.split_data_target(elem, "cpu")
+                            output = _forward(estimators, self.device, *data)
                             _, predicted = torch.max(output.data, 1)
                             correct += (predicted == target).sum().item()
                             total += target.size(0)

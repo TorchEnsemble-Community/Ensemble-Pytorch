@@ -13,10 +13,10 @@ __model_doc = """
         The dictionary of hyper-parameters used to instantiate base
         estimators. This parameter will have no effect if ``estimator`` is a
         base estimator object after instantiation.
-    cuda : bool, default=True
+    device : string or List, default='cuda'
 
-        - If ``True``, use GPU to train and evaluate the ensemble.
-        - If ``False``, use CPU to train and evaluate the ensemble.
+        - If :obj:`string`, all base estimators will be running on the device the string specified.
+        - If :obj:`List`, each base estimator will be running on the device ``device[base_estimator_index]``.
     n_jobs : int, default=None
         The number of workers for training the ensemble. This input
         argument is used for parallel ensemble methods such as
@@ -46,10 +46,10 @@ __seq_model_doc = """
         The dictionary of hyper-parameters used to instantiate base
         estimators. This parameter will have no effect if ``estimator`` is a
         base estimator object after instantiation.
-    cuda : bool, default=True
+    device : string or List, default='cuda'
 
-        - If ``True``, use GPU to train and evaluate the ensemble.
-        - If ``False``, use CPU to train and evaluate the ensemble.
+        - If :obj:`string`, all base estimators will be running on the device the string specified.
+        - If :obj:`List`, each base estimator will be running on the device ``device[base_estimator_index]``.
 
     Attributes
     ----------
@@ -70,10 +70,10 @@ __tree_ensemble_doc = """
         The coefficient of the regularization term when training neural
         trees, proposed in the paper: `Distilling a neural network into a
         soft decision tree <https://arxiv.org/abs/1711.09784>`_.
-    cuda : bool, default=True
+    device : string or List, default='cuda'
 
-        - If ``True``, use GPU to train and evaluate the ensemble.
-        - If ``False``, use CPU to train and evaluate the ensemble.
+        - If :obj:`string`, all base estimators will be running on the device the string specified.
+        - If :obj:`List`, each base estimator will be running on the device ``device[base_estimator_index]``.
     n_jobs : int, default=None
         The number of workers for training the ensemble. This input
         argument is used for parallel ensemble methods such as

@@ -76,12 +76,12 @@ def load(model, save_dir="./", map_location=None, logger=None):
         model.n_inputs = state["n_inputs"]
 
     # Pre-allocate and load all base estimators
-    for _ in range(n_estimators):
-        model.estimators_.append(model._make_estimator())
+    for idx in range(n_estimators):
+        model.estimators_.append(model._make_estimator(idx))
     model.load_state_dict(model_params)
 
 
-def split_data_target(element, device, logger=None):
+def split_data_target(element, device="cpu", logger=None):
     """Split elements in dataloader according to pre-defined rules."""
     if not (isinstance(element, list) or isinstance(element, tuple)):
         msg = (
@@ -98,8 +98,8 @@ def split_data_target(element, device, logger=None):
     elif len(element) > 2:
         # Dataloader with multiple inputs and one target
         data, target = element[:-1], element[-1]
-        data_device = [tensor.to(device) for tensor in data]
-        return data_device, target.to(device)
+        data = [tensor.to(device) for tensor in data]
+        return data, target.to(device)
     else:
         # Dataloader with invalid input
         msg = (

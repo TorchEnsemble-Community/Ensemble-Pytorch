@@ -208,9 +208,9 @@ class BaseModule(nn.Module):
         x_device = []
         for data in x:
             if isinstance(data, torch.Tensor):
-                x_device.append(data.to(self.device))
+                x_device.append(data.to("cpu"))
             elif isinstance(data, np.ndarray):
-                x_device.append(torch.Tensor(data).to(self.device))
+                x_device.append(torch.Tensor(data).to("cpu"))
             else:
                 msg = (
                     "The type of input X should be one of {{torch.Tensor,"
@@ -276,7 +276,7 @@ class BaseClassifier(BaseModule):
         else:
             labels = []
             for _, elem in enumerate(train_loader):
-                _, target = split_data_target(elem, self.device)
+                _, target = split_data_target(elem, "cpu")
                 labels.append(target)
             labels = torch.unique(torch.cat(labels))
             n_outputs = labels.size(0)
@@ -292,7 +292,7 @@ class BaseClassifier(BaseModule):
         loss = 0.0
 
         for _, elem in enumerate(test_loader):
-            data, target = split_data_target(elem, self.device)
+            data, target = split_data_target(elem, "cpu")
 
             output = self.forward(*data)
 
