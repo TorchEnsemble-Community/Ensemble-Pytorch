@@ -1,6 +1,6 @@
-sphinx==3.2.*
-sphinx-panels==0.5.*
-sphinxemoji==0.1.8
+sphinx>=5.0
+sphinx-panels==<version_compatible_with_Sphinx_5>
+sphinxemoji==<version_compatible_with_Sphinx_5>
 sphinx-copybutton
 m2r2==0.2.7
 mistune==0.8.4
