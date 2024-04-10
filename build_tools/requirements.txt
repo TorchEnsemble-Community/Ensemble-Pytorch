@@ -3,5 +3,5 @@ numpy==1.22.4
 flake8
 pytest-cov
 click==8.0.3
-black==20.8b1
+black==24.3.0
 tensorboard==2.*
