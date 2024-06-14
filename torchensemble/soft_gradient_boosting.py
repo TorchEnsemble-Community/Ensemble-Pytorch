@@ -212,8 +212,10 @@ class _BaseSoftGradientBoosting(BaseModule):
     ):
 
         # Instantiate base estimators and set attributes
-        for _ in range(self.n_estimators):
-            self.estimators_.append(self._make_estimator())
+        # dont instantiate if estimators loaded from save_dir
+        if len(self.estimators_) != self.n_estimators:
+            for _ in range(self.n_estimators):
+                self.estimators_.append(self._make_estimator())
         self._validate_parameters(epochs, log_interval)
         self.n_outputs = self._decide_n_outputs(train_loader)
 
